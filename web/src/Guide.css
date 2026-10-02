@@ -35,6 +35,13 @@
   color: var(--nes-lcd);
 }
 
+.guide-pad-hint {
+  font-family: var(--font-pixel) !important;
+  font-size: 0.42rem !important;
+  letter-spacing: 0.06em;
+  color: var(--nes-lcd-dim) !important;
+}
+
 .back-link {
   display: inline-block;
   font-family: var(--font-pixel);

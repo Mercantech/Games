@@ -140,31 +140,8 @@
 }
 
 .console-deck {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.85rem 1.15rem 1.15rem;
+  padding: 0.65rem 1rem 1.1rem;
   background: linear-gradient(180deg, #333, #252525);
-}
-
-.deck-vent {
-  flex: 1;
-  height: 14px;
-  background: repeating-linear-gradient(
-    90deg,
-    #111 0 3px,
-    #3a3a3a 3px 6px
-  );
-  border: 1px solid #0a0a0a;
-}
-
-.deck-text {
-  margin: 0;
-  font-family: var(--font-pixel);
-  font-size: 0.42rem;
-  color: #999;
-  letter-spacing: 0.06em;
-  white-space: nowrap;
 }
 
 @keyframes pulse-led {
@@ -178,10 +155,6 @@
 }
 
 @media (max-width: 640px) {
-  .deck-text {
-    display: none;
-  }
-
   .brand-mark {
     font-size: 0.58rem;
   }

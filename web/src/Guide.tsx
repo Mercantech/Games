@@ -1,5 +1,7 @@
-import { Link } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { InoCode } from './InoCode'
+import { usePad, type PadButton } from './PadContext'
 import './Guide.css'
 
 const CARRIER_DOC =
@@ -105,7 +107,44 @@ void castSpell(const char* spellKey, int targetId = -1) {
   // http.post(path) med body...
 }`
 
+const TOC_IDS = [
+  'flow',
+  'hardware',
+  'setup',
+  'api',
+  'pads',
+  'bomberman',
+  'wizard',
+  'checklist',
+]
+
 export default function Guide() {
+  const navigate = useNavigate()
+  const { subscribe, blip } = usePad()
+
+  useEffect(() => {
+    let section = 0
+    const onPad = (button: PadButton) => {
+      if (button === 'b' || button === 'select') {
+        blip('back')
+        navigate('/')
+        return
+      }
+      if (button === 'down' || button === 'right') {
+        section = Math.min(TOC_IDS.length - 1, section + 1)
+        document.getElementById(TOC_IDS[section])?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        blip('move')
+        return
+      }
+      if (button === 'up' || button === 'left') {
+        section = Math.max(0, section - 1)
+        document.getElementById(TOC_IDS[section])?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        blip('move')
+      }
+    }
+    return subscribe(onPad)
+  }, [subscribe, blip, navigate])
+
   return (
     <article className="guide">
       <header className="guide-hero">
@@ -115,6 +154,7 @@ export default function Guide() {
           1:1 walkthrough: fra WiFi til dig spiller Bomberman eller Wizard Duel på{' '}
           <code>games.mercantec.tech</code> med MKR WiFi 1010 + MKR IoT Carrier.
         </p>
+        <p className="guide-pad-hint">B / SELECT = tilbage · ↑↓ = hop mellem afsnit</p>
         <Link className="back-link" to="/">
           ◄ TILBAGE TIL SELECT
         </Link>

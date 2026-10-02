@@ -1,0 +1,177 @@
+.nes-pad {
+  width: 100%;
+  padding: 0.35rem 0 0.15rem;
+}
+
+.pad-shell {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 0.85rem 1rem;
+  background: linear-gradient(180deg, #d8d8d8, #a8a8a8 55%, #8f8f8f);
+  border: 3px solid #111;
+  border-radius: 18px 18px 28px 28px;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -3px 0 rgba(0, 0, 0, 0.18),
+    0 6px 0 #222;
+}
+
+.dpad {
+  position: relative;
+  width: 92px;
+  height: 92px;
+}
+
+.dpad-btn,
+.dpad-center {
+  position: absolute;
+  background: #222;
+  border: 2px solid #000;
+  box-shadow: inset 1px 1px 0 #555;
+  padding: 0;
+  cursor: pointer;
+}
+
+.dpad-btn.lit,
+.dpad-center.lit {
+  background: #444;
+  box-shadow: inset 0 0 0 1px #777;
+}
+
+.dpad-btn.up {
+  top: 0;
+  left: 30px;
+  width: 32px;
+  height: 34px;
+  border-radius: 4px 4px 0 0;
+}
+
+.dpad-btn.down {
+  bottom: 0;
+  left: 30px;
+  width: 32px;
+  height: 34px;
+  border-radius: 0 0 4px 4px;
+}
+
+.dpad-btn.left {
+  top: 30px;
+  left: 0;
+  width: 34px;
+  height: 32px;
+  border-radius: 4px 0 0 4px;
+}
+
+.dpad-btn.right {
+  top: 30px;
+  right: 0;
+  width: 34px;
+  height: 32px;
+  border-radius: 0 4px 4px 0;
+}
+
+.dpad-center {
+  top: 30px;
+  left: 30px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.pad-mid {
+  display: flex;
+  justify-content: center;
+  gap: 0.65rem;
+  transform: translateY(8px);
+}
+
+.pill {
+  font-family: var(--font-pixel);
+  font-size: 0.38rem;
+  letter-spacing: 0.04em;
+  color: #eee;
+  background: #333;
+  border: 2px solid #111;
+  border-radius: 999px;
+  padding: 0.45rem 0.7rem;
+  box-shadow: inset 0 -2px 0 #111;
+  cursor: pointer;
+}
+
+.pill.lit {
+  background: #555;
+  transform: translateY(1px);
+}
+
+.face-btns {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-end;
+  transform: rotate(-12deg);
+}
+
+.face {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 3px solid #111;
+  font-family: var(--font-pixel);
+  font-size: 0.55rem;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #111;
+}
+
+.face.a {
+  background: var(--nes-red);
+  margin-bottom: 10px;
+}
+
+.face.b {
+  background: #c45c1a;
+}
+
+.face.lit {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #111;
+  filter: brightness(1.15);
+}
+
+.pad-hint {
+  margin: 0.65rem 0 0;
+  text-align: center;
+  font-family: var(--font-pixel);
+  font-size: 0.38rem;
+  line-height: 1.6;
+  letter-spacing: 0.04em;
+  color: #999;
+}
+
+@media (max-width: 560px) {
+  .pad-shell {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    border-radius: 16px;
+  }
+
+  .face-btns {
+    transform: none;
+  }
+
+  .pad-hint {
+    font-size: 0.34rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .face.lit,
+  .pill.lit {
+    transform: none;
+  }
+}
