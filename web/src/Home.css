@@ -82,25 +82,14 @@
   object-position: center;
   border: 3px solid #000;
   box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.25);
-  image-rendering: pixelated;
-  background: #1a3d1a;
+  image-rendering: auto;
+  background: #111;
   margin: 0.15rem 0 0.25rem;
 }
 
-.cart-art-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
-  font-family: var(--font-pixel);
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
-  color: #fff;
-  text-shadow: 2px 2px 0 #000;
-  background:
-    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), transparent 45%),
-    linear-gradient(145deg, #2a1a5e, #0a0820 55%, #1a0a3a);
+.cart-red .cart-art {
+  image-rendering: pixelated;
+  background: #1a3d1a;
 }
 
 .cart-label {

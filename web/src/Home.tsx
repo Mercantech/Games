@@ -31,10 +31,14 @@ export default function Home() {
         </a>
         <a className="cart cart-blue" href="/Wizard/">
           <span className="cart-label">SLOT B</span>
-          <div className="cart-art cart-art-placeholder" aria-hidden="true">
-            <span>WIZARD</span>
-            <span>DUEL</span>
-          </div>
+          <img
+            className="cart-art"
+            src="/wizard-duel.jpg"
+            alt="Wizard Duel Arena — troldmand, spells og arena"
+            width={640}
+            height={360}
+            loading="eager"
+          />
           <strong>WIZARD DUEL</strong>
           <span className="cart-meta">SPELLS · MANA · LAST STANDING</span>
           <span className="cart-go">► PLAY</span>
