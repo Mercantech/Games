@@ -1,5 +1,4 @@
 import './App.css'
-import carrierButtons from './assets/mkr-iot-carrier-pads.png'
 import { InoCode } from './InoCode'
 import {
   ArrowRight,
@@ -13,6 +12,9 @@ import {
 
 const CARRIER_DOC =
   'https://docs.arduino.cc/tutorials/mkr-iot-carrier/mkr-iot-carrier-01-technical-reference/'
+
+// Served from web/public (stable URL — undgår CDN-gift fra SPA-fallback på hashed assets)
+const CARRIER_IMG = '/mkr-iot-carrier-pads.png'
 
 const TOUCH_SNIPPET = `void loop() {
   carrier.Buttons.update();  // altid først
@@ -108,7 +110,7 @@ export default function App() {
           <figure className="carrier-figure">
             <img
               className="carrier-img"
-              src={carrierButtons}
+              src={CARRIER_IMG}
               alt="Arduino MKR IoT Carrier set oppefra med BUTTON 00–04 markeret rundt om displayet"
               width={640}
               height={640}
