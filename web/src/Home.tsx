@@ -76,17 +76,21 @@ export default function Home() {
           onFocus={() => setCursor(0)}
         >
           <span className="cart-label">SLOT A</span>
-          <img
-            className="cart-art"
-            src="/bomberman-nes.jpg"
-            alt="Klassisk NES Bomberman — grøn maze, bomber og Valcoms"
-            width={640}
-            height={360}
-            loading="eager"
-          />
-          <strong>BOMBERMAN</strong>
-          <span className="cart-meta">PIN · BOMBS · MULTIPLAYER</span>
-          <span className="cart-go">{cursor === 0 ? '► START' : '► PLAY'}</span>
+          <div className="cart-art-frame">
+            <img
+              className="cart-art"
+              src="/bomberman-nes.jpg"
+              alt="Klassisk NES Bomberman — grøn maze, bomber og Valcoms"
+              width={1024}
+              height={576}
+              loading="eager"
+            />
+          </div>
+          <div className="cart-foot">
+            <strong>BOMBERMAN</strong>
+            <span className="cart-go">{cursor === 0 ? '► START' : '► PLAY'}</span>
+            <span className="cart-meta">PIN · BOMBS · MULTIPLAYER</span>
+          </div>
         </a>
         <a
           className={`cart cart-blue ${cursor === 1 ? 'selected' : ''}`}
@@ -97,17 +101,21 @@ export default function Home() {
           onFocus={() => setCursor(1)}
         >
           <span className="cart-label">SLOT B</span>
-          <img
-            className="cart-art"
-            src="/wizard-duel.jpg"
-            alt="Wizard Duel Arena — troldmand, spells og arena"
-            width={640}
-            height={360}
-            loading="eager"
-          />
-          <strong>WIZARD DUEL</strong>
-          <span className="cart-meta">SPELLS · MANA · LAST STANDING</span>
-          <span className="cart-go">{cursor === 1 ? '► START' : '► PLAY'}</span>
+          <div className="cart-art-frame">
+            <img
+              className="cart-art"
+              src="/wizard-duel.jpg"
+              alt="Wizard Duel Arena — troldmand, spells og arena"
+              width={1024}
+              height={576}
+              loading="eager"
+            />
+          </div>
+          <div className="cart-foot">
+            <strong>WIZARD DUEL</strong>
+            <span className="cart-go">{cursor === 1 ? '► START' : '► PLAY'}</span>
+            <span className="cart-meta">SPELLS · MANA · LAST STANDING</span>
+          </div>
         </a>
       </div>
 
