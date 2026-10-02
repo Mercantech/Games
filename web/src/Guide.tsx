@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { InoCode } from './InoCode'
 import { usePad, type PadButton } from './PadContext'
@@ -107,292 +107,433 @@ void castSpell(const char* spellKey, int targetId = -1) {
   // http.post(path) med body...
 }`
 
-const TOC_IDS = [
-  'flow',
-  'hardware',
-  'setup',
-  'api',
-  'pads',
-  'bomberman',
-  'wizard',
-  'checklist',
+const STAGES = [
+  { id: 'flow', label: 'FLOW', title: 'Spil-flow' },
+  { id: 'hardware', label: 'HW', title: 'Hardware' },
+  { id: 'setup', label: 'CFG', title: 'Sketch-setup' },
+  { id: 'api', label: 'API', title: 'API-kontrakt' },
+  { id: 'pads', label: 'PAD', title: 'Pad-mapping' },
+  { id: 'bomberman', label: 'BM', title: 'Bomberman' },
+  { id: 'wizard', label: 'WZ', title: 'Wizard Duel' },
+  { id: 'checklist', label: 'OK', title: 'Checklist' },
+] as const
+
+const CHECK_ITEMS = [
+  'WIFI_SSID / WIFI_PASS sat',
+  'SERVER_HOST = games.mercantec.tech, USE_HTTPS = 1',
+  'GAME_BASE_PATH matcher spillet',
+  'Bomberman: gyldig GAME_PIN fra admin',
+  'Root-cert uploadet til MKR WiFi 1010',
+  'Biblioteker: Carrier, WiFiNINA, HttpClient',
+  'Serial Monitor 115200 — join OK + playerId',
 ]
 
 export default function Guide() {
   const navigate = useNavigate()
   const { subscribe, blip } = usePad()
+  const [stage, setStage] = useState(0)
+  const stageRef = useRef(0)
+  const [checks, setChecks] = useState<boolean[]>(() => CHECK_ITEMS.map(() => false))
+
+  const goStage = (index: number) => {
+    const next = Math.max(0, Math.min(STAGES.length - 1, index))
+    stageRef.current = next
+    setStage(next)
+    document.getElementById(STAGES[next].id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 
   useEffect(() => {
-    let section = 0
     const onPad = (button: PadButton) => {
-      if (button === 'b' || button === 'select') {
+      if (button === 'b') {
         blip('back')
         navigate('/')
         return
       }
+      if (button === 'select') {
+        blip('move')
+        goStage(0)
+        return
+      }
       if (button === 'down' || button === 'right') {
-        section = Math.min(TOC_IDS.length - 1, section + 1)
-        document.getElementById(TOC_IDS[section])?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        goStage(stageRef.current + 1)
         blip('move')
         return
       }
       if (button === 'up' || button === 'left') {
-        section = Math.max(0, section - 1)
-        document.getElementById(TOC_IDS[section])?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        goStage(stageRef.current - 1)
         blip('move')
       }
     }
     return subscribe(onPad)
   }, [subscribe, blip, navigate])
 
+  useEffect(() => {
+    const nodes = STAGES.map((s) => document.getElementById(s.id)).filter(Boolean) as HTMLElement[]
+    if (!nodes.length) return
+    const io = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
+        if (!visible?.target?.id) return
+        const idx = STAGES.findIndex((s) => s.id === visible.target.id)
+        if (idx >= 0) {
+          stageRef.current = idx
+          setStage(idx)
+        }
+      },
+      { root: null, rootMargin: '-20% 0px -55% 0px', threshold: [0.15, 0.4, 0.7] },
+    )
+    nodes.forEach((n) => io.observe(n))
+    return () => io.disconnect()
+  }, [])
+
+  const toggleCheck = (i: number) => {
+    setChecks((prev) => {
+      const next = [...prev]
+      next[i] = !next[i]
+      return next
+    })
+    blip('ok')
+  }
+
+  const done = checks.filter(Boolean).length
+
   return (
-    <article className="guide">
-      <header className="guide-hero">
-        <p className="guide-kicker">MANUAL · LEVEL 1</p>
-        <h1>Arduino Oplà Controller Guide</h1>
-        <p>
-          1:1 walkthrough: fra WiFi til dig spiller Bomberman eller Wizard Duel på{' '}
-          <code>games.mercantec.tech</code> med MKR WiFi 1010 + MKR IoT Carrier.
+    <div className="guide-layout">
+      <aside className="guide-rail" aria-label="Stages">
+        <p className="rail-title">STAGES</p>
+        <p className="rail-progress">
+          {String(stage + 1).padStart(2, '0')}/{String(STAGES.length).padStart(2, '0')}
         </p>
-        <p className="guide-pad-hint">B / SELECT = tilbage · ↑↓ = hop mellem afsnit</p>
-        <Link className="back-link" to="/">
-          ◄ TILBAGE TIL SELECT
+        <nav className="rail-nav">
+          {STAGES.map((s, i) => (
+            <button
+              key={s.id}
+              type="button"
+              className={`rail-item ${stage === i ? 'active' : ''}`}
+              onClick={() => {
+                goStage(i)
+                blip('move')
+              }}
+            >
+              <span className="rail-num">{String(i + 1).padStart(2, '0')}</span>
+              <span className="rail-label">{s.label}</span>
+              <span className="rail-name">{s.title}</span>
+            </button>
+          ))}
+        </nav>
+        <Link className="rail-back" to="/">
+          ◄ SELECT
         </Link>
-      </header>
+      </aside>
 
-      <nav className="toc">
-        <a href="#flow">1. Spil-flow</a>
-        <a href="#hardware">2. Hardware</a>
-        <a href="#setup">3. Sketch-setup</a>
-        <a href="#api">4. API-kontrakt</a>
-        <a href="#pads">5. Pad-mapping</a>
-        <a href="#bomberman">6. Bomberman</a>
-        <a href="#wizard">7. Wizard Duel</a>
-        <a href="#checklist">8. Checklist</a>
-      </nav>
-
-      <section id="flow" className="guide-section">
-        <h2>1. Spil-flow (begge spil)</h2>
-        <p>
-          Arduino taler HTTP til spil-serveren. Browseren viser arenaen. Samme fire skridt — kun
-          path og actions ændrer sig.
-        </p>
-        <ol className="steps">
-          <li>
-            <strong>BOOT</strong>
-            <span>WiFi + <code>carrier.begin()</code></span>
-          </li>
-          <li>
-            <strong>JOIN</strong>
-            <span>
-              <code>POST …/api/controller/join</code> → få <code>playerId</code>
-            </span>
-          </li>
-          <li>
-            <strong>KEEPALIVE</strong>
-            <span>
-              <code>POST …/api/controller/heartbeat</code> hvert 2–5 sek
-            </span>
-          </li>
-          <li>
-            <strong>PLAY</strong>
-            <span>
-              Pads → <code>POST …/api/controller/action</code>
-            </span>
-          </li>
-        </ol>
-
-        <div className="flow-compare">
-          <div>
-            <h3>Bomberman-flow</h3>
-            <ol>
-              <li>Admin opretter lobby på <code>/Bomberman/admin.html</code> (PIN)</li>
-              <li>Spillere / Arduino joiner med samme PIN</li>
-              <li>Nogen trykker “Start spil” i browseren</li>
-              <li>Bevæg dig + læg bomber — sidste overlevende vinder</li>
-            </ol>
+      <article className="guide">
+        <header className="guide-hero">
+          <div className="hero-top">
+            <p className="guide-kicker">INSTRUCTION BOOKLET</p>
+            <span className="hero-chip">LEVEL 1</span>
           </div>
-          <div>
-            <h3>Wizard-flow</h3>
-            <ol>
-              <li>Arduino joiner køen (PIN valgfri)</li>
-              <li>Mindst 2 i kø → “Start Kamp” i browseren</li>
-              <li>Cast spells (mana regenererer)</li>
-              <li>Sidste wizard med HP &gt; 0 vinder</li>
-            </ol>
+          <h1>OPLÀ CONTROLLER MANUAL</h1>
+          <p className="hero-lede">
+            Fra WiFi til live arena på <code>games.mercantec.tech</code> — MKR WiFi 1010 + MKR IoT
+            Carrier.
+          </p>
+          <div className="hero-controls">
+            <span>↑↓ STAGE</span>
+            <span>B EXIT</span>
+            <span>SELECT TOP</span>
           </div>
-        </div>
-      </section>
+        </header>
 
-      <section id="hardware" className="guide-section">
-        <h2>2. Hardware</h2>
-        <p>
-          Du skal bruge <strong>Arduino MKR WiFi 1010</strong> monteret på{' '}
-          <strong>MKR IoT Carrier</strong> (Oplà-kit). Fem kapacitive pads ={' '}
-          <code>TOUCH0</code>–<code>TOUCH4</code> (BUTTON 00–04), plus rund TFT 240×240.
-        </p>
-        <figure className="guide-figure">
-          <img
-            src={CARRIER_IMG}
-            alt="Arduino MKR IoT Carrier set oppefra med BUTTON 00–04 markeret"
-            width={640}
-            height={640}
-          />
-          <figcaption>
-            BUTTON 00 nederst venstre → 01 → 02 (top) → 03 → 04 nederst højre.{' '}
-            <a href={CARRIER_DOC} target="_blank" rel="noreferrer">
-              Technical reference ↗
-            </a>
-          </figcaption>
-        </figure>
-        <ul className="bullet-list">
-          <li>
-            Bibliotek: <code>Arduino_MKRIoTCarrier</code>, <code>WiFiNINA</code>,{' '}
-            <code>ArduinoHttpClient</code>
-          </li>
-          <li>
-            Init: <code>carrier.noCase()</code> eller <code>withCase()</code>, derefter{' '}
-            <code>carrier.begin()</code>
-          </li>
-          <li>
-            HTTPS: upload root-cert til boardet én gang (domæne{' '}
-            <code>games.mercantec.tech:443</code>)
-          </li>
-        </ul>
-      </section>
+        <section id="flow" className={`guide-section ${stage === 0 ? 'on' : ''}`}>
+          <div className="section-head">
+            <span className="stage-badge">STAGE 01</span>
+            <h2>Spil-flow</h2>
+          </div>
+          <p>
+            Arduino taler HTTP. Browseren viser arenaen. Samme fire skridt — kun path og actions
+            ændrer sig.
+          </p>
+          <ol className="steps">
+            <li>
+              <span className="step-n">1</span>
+              <div>
+                <strong>BOOT</strong>
+                <span>
+                  WiFi + <code>carrier.begin()</code>
+                </span>
+              </div>
+            </li>
+            <li>
+              <span className="step-n">2</span>
+              <div>
+                <strong>JOIN</strong>
+                <span>
+                  <code>POST …/join</code> → <code>playerId</code>
+                </span>
+              </div>
+            </li>
+            <li>
+              <span className="step-n">3</span>
+              <div>
+                <strong>KEEPALIVE</strong>
+                <span>
+                  <code>POST …/heartbeat</code> hvert 2–5 sek
+                </span>
+              </div>
+            </li>
+            <li>
+              <span className="step-n">4</span>
+              <div>
+                <strong>PLAY</strong>
+                <span>
+                  Pads → <code>POST …/action</code>
+                </span>
+              </div>
+            </li>
+          </ol>
 
-      <section id="setup" className="guide-section">
-        <h2>3. Sketch-setup (fælles)</h2>
-        <p>
-          Samme config-blok til begge spil. Skift kun <code>GAME_BASE_PATH</code> (og PIN til
-          Bomberman).
-        </p>
-        <InoCode code={SETUP_SNIPPET} filename="config.ino" />
-      </section>
+          <div className="flow-compare">
+            <div className="flow-card flow-red">
+              <div className="flow-card-top">
+                <img src="/bomberman-nes.jpg" alt="" />
+                <h3>BOMBERMAN</h3>
+              </div>
+              <ol>
+                <li>Admin opretter lobby (PIN)</li>
+                <li>Arduino joiner med samme PIN</li>
+                <li>Start spil i browseren</li>
+                <li>Bomber — sidste overlevende vinder</li>
+              </ol>
+            </div>
+            <div className="flow-card flow-blue">
+              <div className="flow-card-top">
+                <img src="/wizard-duel.jpg" alt="" />
+                <h3>WIZARD DUEL</h3>
+              </div>
+              <ol>
+                <li>Arduino joiner køen</li>
+                <li>Mindst 2 spillere → Start Kamp</li>
+                <li>Cast spells (mana regenererer)</li>
+                <li>Sidste wizard med HP &gt; 0 vinder</li>
+              </ol>
+            </div>
+          </div>
+        </section>
 
-      <section id="api" className="guide-section">
-        <h2>4. API-kontrakt</h2>
-        <p>
-          Alle paths er relative til <code>GAME_BASE_PATH</code>. Traefik stripper prefix, så
-          serveren ser <code>/api/...</code>.
-        </p>
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Endpoint</th>
-                <th>Body (JSON)</th>
-                <th>Svar</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>
-                  <code>POST …/join</code>
-                </td>
-                <td>
-                  <code>pin</code>, <code>name</code>, <code>deviceId</code>
-                </td>
-                <td>
-                  <code>ok</code>, <code>playerId</code>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <code>POST …/heartbeat</code>
-                </td>
-                <td>
-                  <code>pin?</code>, <code>playerId</code>, <code>deviceId</code>
-                </td>
-                <td>
-                  <code>ok</code> (+ Wizard: hp/mana)
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <code>POST …/action</code>
-                </td>
-                <td>
-                  <code>action</code> + <code>params</code>
-                </td>
-                <td>
-                  <code>ok</code> / fejl
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <InoCode code={JOIN_SNIPPET} filename="join.ino" />
-        <InoCode code={ACTION_SNIPPET} filename="action.ino" />
-      </section>
+        <section id="hardware" className={`guide-section ${stage === 1 ? 'on' : ''}`}>
+          <div className="section-head">
+            <span className="stage-badge">STAGE 02</span>
+            <h2>Hardware</h2>
+          </div>
+          <div className="hw-grid">
+            <figure className="guide-figure">
+              <img
+                src={CARRIER_IMG}
+                alt="Arduino MKR IoT Carrier med BUTTON 00–04"
+                width={640}
+                height={640}
+              />
+              <figcaption>
+                BUTTON 00→04 rundt om TFT.{' '}
+                <a href={CARRIER_DOC} target="_blank" rel="noreferrer">
+                  Docs ↗
+                </a>
+              </figcaption>
+            </figure>
+            <div className="hw-facts">
+              <p>
+                <strong>MKR WiFi 1010</strong> på <strong>MKR IoT Carrier</strong> (Oplà). Fem pads ={' '}
+                <code>TOUCH0</code>–<code>TOUCH4</code> + rund TFT 240×240.
+              </p>
+              <ul className="bullet-list">
+                <li>
+                  Libs: <code>Arduino_MKRIoTCarrier</code>, <code>WiFiNINA</code>,{' '}
+                  <code>ArduinoHttpClient</code>
+                </li>
+                <li>
+                  Init: <code>carrier.noCase()</code> / <code>withCase()</code> →{' '}
+                  <code>begin()</code>
+                </li>
+                <li>
+                  HTTPS: root-cert én gang til <code>games.mercantec.tech:443</code>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
 
-      <section id="pads" className="guide-section">
-        <h2>5. Læs pads</h2>
-        <p>
-          Kald altid <code>carrier.Buttons.update()</code> først i <code>loop()</code>. Brug{' '}
-          <code>getTouch</code> til hold-to-repeat (bevægelse) og <code>onTouchDown</code> til
-          engangs-tryk (bombe / spell).
-        </p>
-        <InoCode code={LOOP_SNIPPET} filename="loop.ino" />
-      </section>
+        <section id="setup" className={`guide-section ${stage === 2 ? 'on' : ''}`}>
+          <div className="section-head">
+            <span className="stage-badge">STAGE 03</span>
+            <h2>Sketch-setup</h2>
+          </div>
+          <p>
+            Samme config til begge spil. Skift kun <code>GAME_BASE_PATH</code> (og PIN til Bomberman).
+          </p>
+          <InoCode code={SETUP_SNIPPET} filename="config.ino" />
+        </section>
 
-      <section id="bomberman" className="guide-section">
-        <h2>6. Bomberman — konkret</h2>
-        <ul className="bullet-list">
-          <li>
-            <code>GAME_BASE_PATH=/Bomberman</code>
-          </li>
-          <li>Admin: opret lobby → kopiér PIN til <code>GAME_PIN</code></li>
-          <li>
-            Actions: <code>move</code> (+ <code>direction</code>: UP/DOWN/LEFT/RIGHT) eller{' '}
-            <code>bomb</code>
-          </li>
-          <li>
-            Mapping: TOUCH2↑ TOUCH0↓ TOUCH1← TOUCH3→ TOUCH4 bombe
-          </li>
-          <li>
-            Åbn arena: <a href="/Bomberman/">/Bomberman/</a>
-          </li>
-        </ul>
-      </section>
+        <section id="api" className={`guide-section ${stage === 3 ? 'on' : ''}`}>
+          <div className="section-head">
+            <span className="stage-badge">STAGE 04</span>
+            <h2>API-kontrakt</h2>
+          </div>
+          <p>
+            Paths relative til <code>GAME_BASE_PATH</code>. Traefik stripper prefix → server ser{' '}
+            <code>/api/…</code>.
+          </p>
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Endpoint</th>
+                  <th>Body</th>
+                  <th>Svar</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <code>POST …/join</code>
+                  </td>
+                  <td>
+                    pin, name, deviceId
+                  </td>
+                  <td>ok, playerId</td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>POST …/heartbeat</code>
+                  </td>
+                  <td>pin?, playerId, deviceId</td>
+                  <td>ok (+ hp/mana)</td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>POST …/action</code>
+                  </td>
+                  <td>action + params</td>
+                  <td>ok / fejl</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <InoCode code={JOIN_SNIPPET} filename="join.ino" />
+          <InoCode code={ACTION_SNIPPET} filename="action.ino" />
+        </section>
 
-      <section id="wizard" className="guide-section">
-        <h2>7. Wizard Duel — konkret</h2>
-        <ul className="bullet-list">
-          <li>
-            <code>GAME_BASE_PATH=/Wizard</code>
-          </li>
-          <li>
-            Action: <code>cast</code> med <code>params.spellKey</code> (FIREBALL, LIGHTNING,
-            SHIELD, HEAL, POWER_BOOST, DEATH_RAY) og evt. <code>targetId</code>
-          </li>
-          <li>Heartbeat giver hp/mana — tegn bars på TFT</li>
-          <li>Mindst 2 i kø, start kamp fra browseren</li>
-          <li>
-            Åbn arena: <a href="/Wizard/">/Wizard/</a>
-          </li>
-        </ul>
-      </section>
+        <section id="pads" className={`guide-section ${stage === 4 ? 'on' : ''}`}>
+          <div className="section-head">
+            <span className="stage-badge">STAGE 05</span>
+            <h2>Pad-mapping</h2>
+          </div>
+          <p>
+            Altid <code>carrier.Buttons.update()</code> først. <code>getTouch</code> = hold,{' '}
+            <code>onTouchDown</code> = engangstryk.
+          </p>
+          <div className="pad-map">
+            <div className="pad-map-ring" aria-hidden="true">
+              <span className="pad p2">02 ↑</span>
+              <span className="pad p1">01 ←</span>
+              <span className="pad tft">TFT</span>
+              <span className="pad p3">03 →</span>
+              <span className="pad p0">00 ↓</span>
+              <span className="pad p4">04 ★</span>
+            </div>
+            <ul className="bullet-list">
+              <li>
+                Bomberman: 02↑ 00↓ 01← 03→ · 04 bombe
+              </li>
+              <li>Wizard: pads = spells (fx 00 FIREBALL)</li>
+            </ul>
+          </div>
+          <InoCode code={LOOP_SNIPPET} filename="loop.ino" />
+        </section>
 
-      <section id="checklist" className="guide-section">
-        <h2>8. Checklist før upload</h2>
-        <ul className="check-list">
-          <li>□ WIFI_SSID / WIFI_PASS sat</li>
-          <li>□ SERVER_HOST = games.mercantec.tech, USE_HTTPS = 1</li>
-          <li>□ GAME_BASE_PATH matcher spillet</li>
-          <li>□ Bomberman: gyldig GAME_PIN fra admin</li>
-          <li>□ Root-cert uploadet til MKR WiFi 1010</li>
-          <li>□ Biblioteker installeret (Carrier, WiFiNINA, HttpClient)</li>
-          <li>□ Serial Monitor 115200 — se join OK + playerId</li>
-        </ul>
-        <p className="guide-outro">
-          Starter-sketches: Bomberman-repo <code>iot/</code> · Wizard-repo{' '}
-          <code>ArduinoKode/</code>.
-        </p>
-        <Link className="back-link" to="/">
-          ◄ TILBAGE TIL SELECT
-        </Link>
-      </section>
-    </article>
+        <section id="bomberman" className={`guide-section ${stage === 5 ? 'on' : ''}`}>
+          <div className="section-head">
+            <span className="stage-badge">STAGE 06</span>
+            <h2>Bomberman</h2>
+          </div>
+          <div className="game-panel">
+            <img className="game-panel-art" src="/bomberman-nes.jpg" alt="Bomberman NES" />
+            <ul className="bullet-list">
+              <li>
+                <code>GAME_BASE_PATH=/Bomberman</code>
+              </li>
+              <li>
+                Admin → PIN → <code>GAME_PIN</code>
+              </li>
+              <li>
+                Actions: <code>move</code> + direction, eller <code>bomb</code>
+              </li>
+              <li>
+                Arena: <a href="/Bomberman/">/Bomberman/</a>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <section id="wizard" className={`guide-section ${stage === 6 ? 'on' : ''}`}>
+          <div className="section-head">
+            <span className="stage-badge">STAGE 07</span>
+            <h2>Wizard Duel</h2>
+          </div>
+          <div className="game-panel">
+            <img className="game-panel-art" src="/wizard-duel.jpg" alt="Wizard Duel" />
+            <ul className="bullet-list">
+              <li>
+                <code>GAME_BASE_PATH=/Wizard</code>
+              </li>
+              <li>
+                <code>cast</code> + spellKey: FIREBALL, LIGHTNING, SHIELD, HEAL, POWER_BOOST,
+                DEATH_RAY
+              </li>
+              <li>Heartbeat → hp/mana på TFT</li>
+              <li>
+                Arena: <a href="/Wizard/">/Wizard/</a>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <section id="checklist" className={`guide-section ${stage === 7 ? 'on' : ''}`}>
+          <div className="section-head">
+            <span className="stage-badge">STAGE 08</span>
+            <h2>Checklist</h2>
+          </div>
+          <p className="check-progress">
+            CLEAR {done}/{CHECK_ITEMS.length}
+          </p>
+          <ul className="check-list">
+            {CHECK_ITEMS.map((label, i) => (
+              <li key={label}>
+                <button
+                  type="button"
+                  className={`check-btn ${checks[i] ? 'done' : ''}`}
+                  onClick={() => toggleCheck(i)}
+                >
+                  <span className="check-box">{checks[i] ? '■' : '□'}</span>
+                  <span>{label}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          <p className="guide-outro">
+            Starter-sketches: Bomberman <code>iot/</code> · Wizard <code>ArduinoKode/</code>
+          </p>
+          <div className="guide-end">
+            <Link className="end-btn" to="/">
+              ◄ TILBAGE TIL SELECT
+            </Link>
+            {done === CHECK_ITEMS.length && (
+              <span className="end-clear">STAGE CLEAR!</span>
+            )}
+          </div>
+        </section>
+      </article>
+    </div>
   )
 }
