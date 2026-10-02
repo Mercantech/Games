@@ -17,12 +17,24 @@ export default function Home() {
       <div className="cartridge-row">
         <a className="cart cart-red" href="/Bomberman/">
           <span className="cart-label">SLOT A</span>
+          <img
+            className="cart-art"
+            src="/bomberman-nes.jpg"
+            alt="Klassisk NES Bomberman — grøn maze, bomber og Valcoms"
+            width={640}
+            height={360}
+            loading="eager"
+          />
           <strong>BOMBERMAN</strong>
           <span className="cart-meta">PIN · BOMBS · MULTIPLAYER</span>
           <span className="cart-go">► PLAY</span>
         </a>
         <a className="cart cart-blue" href="/Wizard/">
           <span className="cart-label">SLOT B</span>
+          <div className="cart-art cart-art-placeholder" aria-hidden="true">
+            <span>WIZARD</span>
+            <span>DUEL</span>
+          </div>
           <strong>WIZARD DUEL</strong>
           <span className="cart-meta">SPELLS · MANA · LAST STANDING</span>
           <span className="cart-go">► PLAY</span>

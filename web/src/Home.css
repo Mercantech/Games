@@ -52,10 +52,11 @@
   align-items: flex-start;
   gap: 0.35rem;
   text-align: left;
-  padding: 1rem 0.9rem 0.9rem;
+  padding: 0.75rem 0.75rem 0.9rem;
   border: 3px solid #000;
   box-shadow: 4px 4px 0 #000;
   transition: transform 0.12s steps(2, end), filter 0.12s ease;
+  overflow: hidden;
 }
 
 .cart:hover {
@@ -71,6 +72,35 @@
 .cart-blue {
   background: linear-gradient(180deg, #5eb8ff, #1a7fd4 45%, #0d4f8a);
   color: #fff;
+}
+
+.cart-art {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  object-position: center;
+  border: 3px solid #000;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.25);
+  image-rendering: pixelated;
+  background: #1a3d1a;
+  margin: 0.15rem 0 0.25rem;
+}
+
+.cart-art-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  font-family: var(--font-pixel);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: #fff;
+  text-shadow: 2px 2px 0 #000;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), transparent 45%),
+    linear-gradient(145deg, #2a1a5e, #0a0820 55%, #1a0a3a);
 }
 
 .cart-label {
