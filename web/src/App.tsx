@@ -1,4 +1,6 @@
 import './App.css'
+import carrierButtons from './assets/mkr-iot-carrier-buttons.png'
+import { InoCode } from './InoCode'
 import {
   ArrowRight,
   ArrowUpRight,
@@ -11,6 +13,20 @@ import {
 
 const CARRIER_DOC =
   'https://docs.arduino.cc/tutorials/mkr-iot-carrier/mkr-iot-carrier-01-technical-reference/'
+
+const TOUCH_SNIPPET = `void loop() {
+  carrier.Buttons.update();  // altid først
+
+  // BUTTON 02 (top) – hold = gentag
+  if (carrier.Buttons.getTouch(TOUCH2)) {
+    // fx move UP
+  }
+
+  // BUTTON 04 (nederst højre) – engangs-tryk
+  if (carrier.Buttons.onTouchDown(TOUCH4)) {
+    // fx bomb / cast spell
+  }
+}`
 
 export default function App() {
   return (
@@ -79,8 +95,9 @@ export default function App() {
           <h2>Byg controlleren på MKR IoT Carrier</h2>
           <p>
             <strong>MKR WiFi 1010</strong> + <strong>MKR IoT Carrier</strong> (Oplà): fem
-            kapacitive pads, rund 1,3″ TFT (240×240) og WiFi til spil-serveren. Samme sketch-flow
-            til begge spil — skift kun <code>GAME_BASE_PATH</code> og pad-mapping.
+            kapacitive pads (BUTTON 00–04 = <code>TOUCH0</code>–<code>TOUCH4</code>), rund TFT og
+            WiFi til spil-serveren. Samme sketch-flow til begge spil — skift kun{' '}
+            <code>GAME_BASE_PATH</code> og pad-mapping.
           </p>
           <a className="doc-link" href={CARRIER_DOC} target="_blank" rel="noreferrer">
             Arduino technical reference <ExternalLink size={16} />
@@ -88,31 +105,22 @@ export default function App() {
         </div>
 
         <div className="hw-row">
-          <div className="pad-diagram" aria-hidden="true">
-            <div className="pad-ring">
-              <span className="pad pad-4">04</span>
-              <span className="pad pad-0">00</span>
-              <span className="pad pad-3">03</span>
-              <span className="pad pad-2">02</span>
-              <span className="pad pad-1">01</span>
-              <span className="pad-screen">
-                TFT
-                <br />
-                240×240
-              </span>
-            </div>
-            <p className="pad-caption">TOUCH0–TOUCH4 set oppefra</p>
-          </div>
+          <figure className="carrier-figure">
+            <img
+              className="carrier-img"
+              src={carrierButtons}
+              alt="Arduino MKR IoT Carrier set oppefra med BUTTON 00–04 markeret rundt om displayet"
+              width={640}
+              height={640}
+            />
+            <figcaption>
+              Officiel pad-layout: BUTTON 00 (nederst venstre) → 01 → 02 (top) → 03 → 04 (nederst
+              højre)
+            </figcaption>
+          </figure>
 
           <div className="code-stack">
-            <pre className="code-panel">{`carrier.Buttons.update();
-
-if (carrier.Buttons.getTouch(TOUCH0)) {
-  // hold = gentag (bevægelse)
-}
-if (carrier.Buttons.onTouchDown(TOUCH4)) {
-  // engangs-tryk (bombe / spell)
-}`}</pre>
+            <InoCode code={TOUCH_SNIPPET} filename="touch_pads.ino" />
             <ol className="flow">
               <li>
                 <Wifi size={20} />
@@ -147,10 +155,13 @@ if (carrier.Buttons.onTouchDown(TOUCH4)) {
             <h3>Nav-profil · Bomberman</h3>
             <ul>
               <li>
-                <code>TOUCH0–3</code> retning · <code>getTouch</code>
+                <code>TOUCH2</code> (top) → UP · <code>getTouch</code>
               </li>
               <li>
-                <code>TOUCH4</code> bombe · <code>onTouchDown</code>
+                <code>TOUCH1</code> / <code>TOUCH3</code> → LEFT / RIGHT
+              </li>
+              <li>
+                <code>TOUCH0</code> → DOWN · <code>TOUCH4</code> → bomb
               </li>
               <li>
                 <code>GAME_BASE_PATH=/Bomberman</code> + lobby-PIN
@@ -161,7 +172,7 @@ if (carrier.Buttons.onTouchDown(TOUCH4)) {
             <h3>Ability-profil · Wizard</h3>
             <ul>
               <li>
-                <code>TOUCH0–4</code> spells · <code>onTouchDown</code>
+                <code>TOUCH0–4</code> = spells · <code>onTouchDown</code>
               </li>
               <li>
                 Action <code>cast</code> + <code>spellKey</code>
