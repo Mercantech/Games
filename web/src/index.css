@@ -1,15 +1,16 @@
 :root {
-  --bg-deep: #0c1210;
-  --bg-mid: #152018;
-  --ink: #e8f0ea;
-  --muted: #9bb0a1;
-  --accent: #3dd68c;
-  --accent-dim: #1f8a56;
-  --bomb: #e85d4c;
-  --wizard: #5b8def;
-  --line: rgba(232, 240, 234, 0.12);
-  --font-display: "Bebas Neue", Impact, sans-serif;
-  --font-body: "Source Sans 3", system-ui, sans-serif;
+  --ink: #1a1410;
+  --ink-soft: #4a4038;
+  --paper: #f3ece2;
+  --paper-2: #e8dfd2;
+  --ember: #e4572e;
+  --ember-deep: #b83a1a;
+  --arc: #0f766e;
+  --arc-bright: #14b8a6;
+  --line: rgba(26, 20, 16, 0.12);
+  --line-strong: rgba(26, 20, 16, 0.22);
+  --font-display: "Syne", system-ui, sans-serif;
+  --font-body: "Figtree", system-ui, sans-serif;
 }
 
 * {
@@ -25,10 +26,11 @@ body {
   min-height: 100vh;
   font-family: var(--font-body);
   color: var(--ink);
-  background:
-    radial-gradient(ellipse 80% 50% at 20% 0%, rgba(61, 214, 140, 0.18), transparent 55%),
-    radial-gradient(ellipse 70% 45% at 90% 10%, rgba(91, 141, 239, 0.16), transparent 50%),
-    linear-gradient(165deg, var(--bg-deep) 0%, var(--bg-mid) 45%, #0a0f0c 100%);
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(ellipse 90% 60% at 0% 0%, rgba(228, 87, 46, 0.14), transparent 55%),
+    radial-gradient(ellipse 80% 50% at 100% 10%, rgba(20, 184, 166, 0.12), transparent 50%),
+    linear-gradient(180deg, #f7f1e8 0%, var(--paper) 40%, #ebe2d4 100%);
   background-attachment: fixed;
 }
 
@@ -43,8 +45,8 @@ a {
 
 code {
   font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
-  font-size: 0.92em;
-  background: rgba(0, 0, 0, 0.35);
+  font-size: 0.9em;
+  background: rgba(26, 20, 16, 0.06);
   padding: 0.12em 0.4em;
-  border-radius: 4px;
+  border-radius: 3px;
 }
