@@ -1,16 +1,18 @@
 :root {
-  --ink: #1a1410;
-  --ink-soft: #4a4038;
-  --paper: #f3ece2;
-  --paper-2: #e8dfd2;
-  --ember: #e4572e;
-  --ember-deep: #b83a1a;
-  --arc: #0f766e;
-  --arc-bright: #14b8a6;
-  --line: rgba(26, 20, 16, 0.12);
-  --line-strong: rgba(26, 20, 16, 0.22);
-  --font-display: "Syne", system-ui, sans-serif;
-  --font-body: "Figtree", system-ui, sans-serif;
+  --nes-red: #e71e28;
+  --nes-red-dark: #9b1218;
+  --nes-body: #2d2d2d;
+  --nes-body-light: #3d3d3d;
+  --nes-bevel: #1a1a1a;
+  --nes-plastic: #c4c4c4;
+  --nes-plastic-dark: #8e8e8e;
+  --nes-cream: #f0ece0;
+  --nes-screen: #0f380f;
+  --nes-lcd: #9bbc0f;
+  --nes-lcd-dim: #306230;
+  --nes-blue: #209cee;
+  --font-pixel: "Press Start 2P", monospace;
+  --font-lcd: "VT323", monospace;
 }
 
 * {
@@ -24,14 +26,13 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: var(--font-body);
-  color: var(--ink);
-  background-color: var(--paper);
+  font-family: var(--font-lcd);
+  font-size: 1.35rem;
+  color: var(--nes-cream);
+  background: #111;
   background-image:
-    radial-gradient(ellipse 90% 60% at 0% 0%, rgba(228, 87, 46, 0.14), transparent 55%),
-    radial-gradient(ellipse 80% 50% at 100% 10%, rgba(20, 184, 166, 0.12), transparent 50%),
-    linear-gradient(180deg, #f7f1e8 0%, var(--paper) 40%, #ebe2d4 100%);
-  background-attachment: fixed;
+    radial-gradient(ellipse 100% 80% at 50% -20%, rgba(231, 30, 40, 0.18), transparent 50%),
+    linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
 }
 
 #root {
@@ -44,9 +45,10 @@ a {
 }
 
 code {
-  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
-  font-size: 0.9em;
-  background: rgba(26, 20, 16, 0.06);
-  padding: 0.12em 0.4em;
-  border-radius: 3px;
+  font-family: var(--font-lcd);
+  font-size: 1.05em;
+  background: rgba(155, 188, 15, 0.12);
+  color: var(--nes-lcd);
+  padding: 0.05em 0.35em;
+  border: 1px solid rgba(155, 188, 15, 0.25);
 }

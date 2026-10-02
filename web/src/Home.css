@@ -1,0 +1,151 @@
+.home {
+  text-align: center;
+  padding: 0.5rem 0.25rem 1rem;
+}
+
+.blink-line {
+  margin: 0 0 1.25rem;
+  font-family: var(--font-pixel);
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  color: var(--nes-lcd);
+  animation: blink 1.1s steps(2, end) infinite;
+}
+
+.title-pixel {
+  margin: 0 0 1rem;
+  font-family: var(--font-pixel);
+  font-size: clamp(1.1rem, 4.5vw, 1.85rem);
+  line-height: 1.45;
+  letter-spacing: 0.04em;
+  color: #fff;
+  text-shadow:
+    3px 3px 0 #000,
+    -1px 0 0 var(--nes-red),
+    1px 0 0 var(--nes-blue);
+  animation: title-in 0.7s steps(8, end) both;
+}
+
+.home-lede {
+  margin: 0 auto 1.75rem;
+  max-width: 34ch;
+  font-size: 1.35rem;
+  line-height: 1.25;
+  color: var(--nes-lcd-dim);
+}
+
+.cartridge-row {
+  display: grid;
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .cartridge-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.cart {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  text-align: left;
+  padding: 1rem 0.9rem 0.9rem;
+  border: 3px solid #000;
+  box-shadow: 4px 4px 0 #000;
+  transition: transform 0.12s steps(2, end), filter 0.12s ease;
+}
+
+.cart:hover {
+  transform: translate(-2px, -2px);
+  filter: brightness(1.08);
+}
+
+.cart-red {
+  background: linear-gradient(180deg, #ff5a5a, var(--nes-red) 40%, var(--nes-red-dark));
+  color: #fff;
+}
+
+.cart-blue {
+  background: linear-gradient(180deg, #5eb8ff, #1a7fd4 45%, #0d4f8a);
+  color: #fff;
+}
+
+.cart-label {
+  font-family: var(--font-pixel);
+  font-size: 0.45rem;
+  opacity: 0.85;
+  letter-spacing: 0.08em;
+}
+
+.cart strong {
+  font-family: var(--font-pixel);
+  font-size: 0.78rem;
+  line-height: 1.4;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.45);
+}
+
+.cart-meta {
+  font-family: var(--font-lcd);
+  font-size: 1.05rem;
+  opacity: 0.9;
+}
+
+.cart-go {
+  margin-top: 0.5rem;
+  font-family: var(--font-pixel);
+  font-size: 0.55rem;
+  letter-spacing: 0.06em;
+}
+
+.guide-btn {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  padding: 0.85rem 1rem;
+  font-family: var(--font-pixel);
+  font-size: 0.58rem;
+  line-height: 1.5;
+  color: #111;
+  background: var(--nes-lcd);
+  border: 3px solid #000;
+  box-shadow: 4px 4px 0 #000;
+  transition: transform 0.12s steps(2, end);
+}
+
+.guide-btn:hover {
+  transform: translate(-2px, -2px);
+}
+
+.hint-pixel {
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-size: 0.42rem;
+  letter-spacing: 0.08em;
+  color: var(--nes-lcd-dim);
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes title-in {
+  from {
+    opacity: 0;
+    letter-spacing: 0.3em;
+  }
+  to {
+    opacity: 1;
+    letter-spacing: 0.04em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blink-line,
+  .title-pixel {
+    animation: none;
+  }
+}

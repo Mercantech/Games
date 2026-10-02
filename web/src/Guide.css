@@ -1,0 +1,295 @@
+.guide {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 0.25rem 0.15rem 1.5rem;
+  color: var(--nes-lcd);
+}
+
+.guide-hero {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px dashed var(--nes-lcd-dim);
+}
+
+.guide-kicker {
+  margin: 0 0 0.65rem;
+  font-family: var(--font-pixel);
+  font-size: 0.5rem;
+  letter-spacing: 0.12em;
+  color: var(--nes-lcd-dim);
+}
+
+.guide h1 {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-pixel);
+  font-size: clamp(0.85rem, 3.2vw, 1.15rem);
+  line-height: 1.55;
+  color: #e8f8c0;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.guide-hero p {
+  margin: 0 0 1rem;
+  font-size: 1.3rem;
+  line-height: 1.3;
+  color: var(--nes-lcd);
+}
+
+.back-link {
+  display: inline-block;
+  font-family: var(--font-pixel);
+  font-size: 0.5rem;
+  color: var(--nes-lcd);
+  border-bottom: 2px solid var(--nes-lcd-dim);
+  padding-bottom: 2px;
+}
+
+.back-link:hover {
+  color: #fff;
+  border-color: #fff;
+}
+
+.toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1.75rem;
+}
+
+.toc a {
+  font-family: var(--font-pixel);
+  font-size: 0.42rem;
+  padding: 0.45rem 0.5rem;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--nes-lcd-dim);
+  color: var(--nes-lcd);
+}
+
+.toc a:hover {
+  background: var(--nes-lcd);
+  color: #0f380f;
+}
+
+.guide-section {
+  margin-bottom: 2rem;
+  scroll-margin-top: 1rem;
+}
+
+.guide-section h2 {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-pixel);
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: #fff;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.guide-section h3 {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-pixel);
+  font-size: 0.55rem;
+  line-height: 1.45;
+  color: var(--nes-lcd);
+}
+
+.guide-section > p,
+.guide-outro {
+  margin: 0 0 1rem;
+  font-size: 1.28rem;
+  line-height: 1.3;
+  color: var(--nes-lcd);
+}
+
+.steps {
+  list-style: none;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .steps {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.steps li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.7rem 0.75rem;
+  background: rgba(0, 0, 0, 0.35);
+  border: 2px solid var(--nes-lcd-dim);
+}
+
+.steps strong {
+  font-family: var(--font-pixel);
+  font-size: 0.5rem;
+  color: #e8f8c0;
+}
+
+.steps span {
+  font-size: 1.15rem;
+  line-height: 1.25;
+  color: var(--nes-lcd);
+}
+
+.flow-compare {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .flow-compare {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.flow-compare > div {
+  padding: 0.85rem;
+  background: rgba(0, 0, 0, 0.28);
+  border: 2px solid var(--nes-lcd-dim);
+}
+
+.flow-compare ol {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 1.15rem;
+  line-height: 1.35;
+}
+
+.flow-compare li + li {
+  margin-top: 0.35rem;
+}
+
+.guide-figure {
+  margin: 0 0 1rem;
+}
+
+.guide-figure img {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+  border: 3px solid #000;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5);
+  background: #c8c8c8;
+}
+
+.guide-figure figcaption {
+  margin-top: 0.55rem;
+  font-size: 1.1rem;
+  line-height: 1.3;
+  color: var(--nes-lcd-dim);
+}
+
+.guide-figure a {
+  color: var(--nes-lcd);
+  text-decoration: underline;
+}
+
+.bullet-list,
+.check-list {
+  margin: 0 0 1rem;
+  padding-left: 1.15rem;
+  font-size: 1.2rem;
+  line-height: 1.4;
+}
+
+.bullet-list li + li,
+.check-list li + li {
+  margin-top: 0.4rem;
+}
+
+.check-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.check-list li {
+  font-family: var(--font-lcd);
+  padding: 0.35rem 0;
+  border-bottom: 1px dashed rgba(155, 188, 15, 0.25);
+}
+
+.table-wrap {
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+.guide table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1.1rem;
+}
+
+.guide th,
+.guide td {
+  text-align: left;
+  padding: 0.5rem 0.55rem;
+  border: 1px solid var(--nes-lcd-dim);
+  vertical-align: top;
+}
+
+.guide th {
+  font-family: var(--font-pixel);
+  font-size: 0.42rem;
+  letter-spacing: 0.06em;
+  background: rgba(0, 0, 0, 0.35);
+  color: #e8f8c0;
+}
+
+.guide .ino-block {
+  margin-bottom: 1rem;
+}
+
+/* LCD-tinted code on Game Boy green screen */
+.guide .ino-block {
+  background: #0a1a0a;
+  border: 2px solid #000;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.45);
+}
+
+.guide .ino-filename {
+  color: rgba(155, 188, 15, 0.7);
+  background: rgba(0, 0, 0, 0.4);
+  border-bottom-color: rgba(155, 188, 15, 0.2);
+}
+
+.guide .ino-filename::before {
+  background: var(--nes-red);
+  box-shadow: 1rem 0 0 #e8b84a, 2rem 0 0 var(--nes-lcd);
+}
+
+.guide .ino-pre {
+  color: var(--nes-lcd);
+}
+
+.guide .ino-comment {
+  color: #5a7a3a;
+}
+
+.guide .ino-string {
+  color: #c4e66d;
+}
+
+.guide .ino-number {
+  color: #f0c060;
+}
+
+.guide .ino-keyword {
+  color: #ff6b6b;
+}
+
+.guide .ino-type {
+  color: #7ec8ff;
+}
+
+.guide .ino-macro {
+  color: #d7a6ff;
+}
+
+.guide .ino-fn {
+  color: #9bbc0f;
+}
