@@ -1,5 +1,5 @@
 import './App.css'
-import carrierButtons from './assets/mkr-iot-carrier-buttons.png'
+import carrierButtons from './assets/mkr-iot-carrier-pads.png'
 import { InoCode } from './InoCode'
 import {
   ArrowRight,
