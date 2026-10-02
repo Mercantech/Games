@@ -15,13 +15,13 @@ export default function Home() {
       </p>
 
       <div className="cartridge-row">
-        <a className="cart cart-red" href="/Bomberman">
+        <a className="cart cart-red" href="/Bomberman/">
           <span className="cart-label">SLOT A</span>
           <strong>BOMBERMAN</strong>
           <span className="cart-meta">PIN · BOMBS · MULTIPLAYER</span>
           <span className="cart-go">► PLAY</span>
         </a>
-        <a className="cart cart-blue" href="/Wizard">
+        <a className="cart cart-blue" href="/Wizard/">
           <span className="cart-label">SLOT B</span>
           <strong>WIZARD DUEL</strong>
           <span className="cart-meta">SPELLS · MANA · LAST STANDING</span>

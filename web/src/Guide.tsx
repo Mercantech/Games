@@ -311,7 +311,7 @@ export default function Guide() {
             Mapping: TOUCH2↑ TOUCH0↓ TOUCH1← TOUCH3→ TOUCH4 bombe
           </li>
           <li>
-            Åbn arena: <a href="/Bomberman">/Bomberman</a>
+            Åbn arena: <a href="/Bomberman/">/Bomberman/</a>
           </li>
         </ul>
       </section>
@@ -329,7 +329,7 @@ export default function Guide() {
           <li>Heartbeat giver hp/mana — tegn bars på TFT</li>
           <li>Mindst 2 i kø, start kamp fra browseren</li>
           <li>
-            Åbn arena: <a href="/Wizard">/Wizard</a>
+            Åbn arena: <a href="/Wizard/">/Wizard/</a>
           </li>
         </ul>
       </section>

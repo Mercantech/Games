@@ -14,8 +14,8 @@ export default function App() {
           <nav className="console-nav">
             <Link to="/">SELECT</Link>
             <Link to="/guide">GUIDE</Link>
-            <a href="/Bomberman">BOMBER</a>
-            <a href="/Wizard">WIZARD</a>
+            <a href="/Bomberman/">BOMBER</a>
+            <a href="/Wizard/">WIZARD</a>
           </nav>
         </div>
 
