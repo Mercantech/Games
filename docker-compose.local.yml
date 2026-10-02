@@ -1,0 +1,8 @@
+services:
+  web:
+    ports:
+      - "3000:3000"
+
+networks:
+  dokploy-network:
+    external: false
