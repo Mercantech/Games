@@ -88,6 +88,12 @@
   transform: translateY(-1px);
 }
 
+.console-nav a.active {
+  background: var(--nes-red);
+  color: #fff;
+  box-shadow: inset -2px -2px 0 var(--nes-red-dark), inset 2px 2px 0 #ff6b6b;
+}
+
 .screen-bezel {
   margin: 0.65rem 0.85rem 0.4rem;
   padding: 0.65rem;

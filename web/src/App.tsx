@@ -1,9 +1,12 @@
-import { Link, Outlet } from 'react-router-dom'
+import { Link, Outlet, useLocation } from 'react-router-dom'
 import NesController from './NesController'
 import { PadProvider } from './PadContext'
 import './App.css'
 
 export default function App() {
+  const { pathname } = useLocation()
+  const onGuide = pathname.startsWith('/guide')
+
   return (
     <PadProvider>
       <div className="console">
@@ -15,8 +18,12 @@ export default function App() {
               <span className="brand-sub">GAMES · EST. ARENA</span>
             </div>
             <nav className="console-nav">
-              <Link to="/">SELECT</Link>
-              <Link to="/guide">GUIDE</Link>
+              <Link to="/" className={!onGuide ? 'active' : undefined}>
+                SELECT
+              </Link>
+              <Link to="/guide" className={onGuide ? 'active' : undefined}>
+                GUIDE
+              </Link>
               <a href="/Bomberman/">BOMBER</a>
               <a href="/Wizard/">WIZARD</a>
             </nav>
