@@ -4,13 +4,6 @@ services:
     restart: unless-stopped
     networks:
       - dokploy-network
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=dokploy-network
-      - traefik.http.routers.games-portal.rule=Host(`games.mercantec.tech`)
-      - traefik.http.routers.games-portal.entrypoints=web
-      - traefik.http.routers.games-portal.priority=1
-      - traefik.http.services.games-portal.loadbalancer.server.port=3000
 
 networks:
   dokploy-network:
