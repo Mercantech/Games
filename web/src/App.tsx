@@ -1,5 +1,15 @@
 import './App.css'
-import { Bomb, Sparkles, Cpu, Wifi, HeartPulse, Gamepad2, ArrowRight } from 'lucide-react'
+import {
+  Bomb,
+  Sparkles,
+  Cpu,
+  Wifi,
+  HeartPulse,
+  Gamepad2,
+  ArrowRight,
+  Monitor,
+  ExternalLink,
+} from 'lucide-react'
 
 const GAMES = [
   {
@@ -22,6 +32,9 @@ const GAMES = [
   },
 ]
 
+const CARRIER_DOC =
+  'https://docs.arduino.cc/tutorials/mkr-iot-carrier/mkr-iot-carrier-01-technical-reference/'
+
 export default function App() {
   return (
     <div className="page">
@@ -29,7 +42,8 @@ export default function App() {
         <p className="brand">Mercantec Games</p>
         <h1 className="headline">Spil. Controllers. Samme host.</h1>
         <p className="lede">
-          Vælg et spil herunder — eller byg en Arduino Oplà-controller med den fælles API.
+          Vælg et spil — eller byg en trådløs controller med Arduino MKR WiFi 1010 + MKR IoT
+          Carrier (Oplà).
         </p>
         <div className="hero-ctas">
           <a className="cta primary" href="/Bomberman">
@@ -66,18 +80,86 @@ export default function App() {
       </section>
 
       <section className="section controller" id="arduino">
-        <h2>Arduino Oplà controller</h2>
+        <h2>Byg en Oplà-controller</h2>
         <p className="section-lede">
-          Begge spil bruger samme HTTP-kontrakt. Skift kun <code>GAME_BASE_PATH</code> og
-          action-typen — resten af sketch-strukturen er ens.
+          Hardware er <strong>Arduino MKR WiFi 1010</strong> monteret på{' '}
+          <strong>MKR IoT Carrier</strong>. Carrieren har fem kapacitive touch-pads, en rund
+          1,3″ TFT (240×240) og sensorer — dokumenteret i Arduinos{' '}
+          <a className="inline-link" href={CARRIER_DOC} target="_blank" rel="noreferrer">
+            technical reference <ExternalLink size={14} />
+          </a>
+          . Du mappe pads til spil-actions og sender dem over WiFi til vores fælles API.
         </p>
 
+        <div className="hw-grid">
+          <div className="pad-diagram" aria-hidden="true">
+            <div className="pad-ring">
+              <span className="pad pad-4">04</span>
+              <span className="pad pad-0">00</span>
+              <span className="pad pad-3">03</span>
+              <span className="pad pad-2">02</span>
+              <span className="pad pad-1">01</span>
+              <span className="pad-screen">TFT<br />240×240</span>
+            </div>
+            <p className="pad-caption">Kapacitive pads set oppefra (TOUCH0–TOUCH4)</p>
+          </div>
+
+          <div className="hw-facts">
+            <h3>Det du bruger fra Carrieren</h3>
+            <ul>
+              <li>
+                <strong>5× capacitive touch</strong> — <code>TOUCH0</code>…<code>TOUCH4</code>{' '}
+                (også kaldet pad 00–04)
+              </li>
+              <li>
+                <strong>Rund TFT</strong> — status (WiFi, join, HP/mana) via{' '}
+                <code>carrier.display</code>
+              </li>
+              <li>
+                <strong>MKR WiFi 1010</strong> — HTTPS til <code>games.mercantec.tech</code>
+              </li>
+              <li>
+                Valgfrit: RGB-LEDs, buzzer, gesture (APDS) som ekstra feedback
+              </li>
+            </ul>
+            <p className="hw-note">
+              Init: <code>carrier.noCase()</code> eller <code>carrier.withCase()</code>, derefter{' '}
+              <code>carrier.begin()</code>. Bibliotek:{' '}
+              <code>Arduino_MKRIoTCarrier</code>.
+            </p>
+          </div>
+        </div>
+
+        <h3 className="subhead">Læs touch (fra Arduino-referencen)</h3>
+        <div className="code-panel">
+          <pre>{`void loop() {
+  carrier.Buttons.update();           // altid først i loop
+
+  if (carrier.Buttons.getTouch(TOUCH0)) {
+    // holdes nede = true indtil slip
+  }
+  if (carrier.Buttons.onTouchDown(TOUCH4)) {
+    // engangs-tryk (edge)
+  }
+}`}</pre>
+        </div>
+        <p className="api-note">
+          Brug <code>getTouch</code> til hold-to-repeat (bevægelse) og <code>onTouchDown</code> til
+          engangs-actions (bombe / spell). Se også <code>onTouchUp</code> /{' '}
+          <code>onTouchChange</code> i{' '}
+          <a className="inline-link" href={CARRIER_DOC} target="_blank" rel="noreferrer">
+            technical reference
+          </a>
+          .
+        </p>
+
+        <h3 className="subhead">Spil-flow (HTTP)</h3>
         <ol className="flow">
           <li>
             <Wifi size={22} />
             <div>
               <strong>WiFi</strong>
-              <span>Forbind Oplà til netværket</span>
+              <span>MKR WiFi 1010 → dit netværk</span>
             </div>
           </li>
           <li>
@@ -103,14 +185,14 @@ export default function App() {
             <div>
               <strong>Action</strong>
               <span>
-                <code>POST …/api/controller/action</code>
+                Pad → <code>POST …/api/controller/action</code>
               </span>
             </div>
           </li>
         </ol>
 
         <div className="config-block">
-          <h3>Fælles config</h3>
+          <h3>Fælles config i sketch</h3>
           <table>
             <thead>
               <tr>
@@ -130,7 +212,7 @@ export default function App() {
                 <td>
                   <code>USE_HTTPS</code>
                 </td>
-                <td colSpan={2}>1</td>
+                <td colSpan={2}>1 (upload root-cert til boardet én gang)</td>
               </tr>
               <tr>
                 <td>
@@ -162,26 +244,71 @@ export default function App() {
 
         <div className="profiles">
           <article>
-            <h3>Nav-profil (Bomberman)</h3>
-            <p>TOUCH0–3 = retning, TOUCH4 = bombe. Action: <code>move</code> / <code>bomb</code>.</p>
+            <h3>
+              <Monitor size={18} /> Nav-profil · Bomberman
+            </h3>
+            <ul className="map-list">
+              <li>
+                <code>TOUCH0</code> → move UP
+              </li>
+              <li>
+                <code>TOUCH1</code> → move DOWN
+              </li>
+              <li>
+                <code>TOUCH2</code> → move LEFT
+              </li>
+              <li>
+                <code>TOUCH3</code> → move RIGHT
+              </li>
+              <li>
+                <code>TOUCH4</code> → bomb (<code>onTouchDown</code>)
+              </li>
+            </ul>
+            <p>
+              Action: <code>move</code> / <code>bomb</code> med evt.{' '}
+              <code>params.direction</code>.
+            </p>
           </article>
           <article>
-            <h3>Ability-profil (Wizard)</h3>
+            <h3>
+              <Sparkles size={18} /> Ability-profil · Wizard
+            </h3>
+            <ul className="map-list">
+              <li>
+                <code>TOUCH0</code> → FIREBALL
+              </li>
+              <li>
+                <code>TOUCH1</code> → LIGHTNING
+              </li>
+              <li>
+                <code>TOUCH2</code> → SHIELD
+              </li>
+              <li>
+                <code>TOUCH3</code> → HEAL
+              </li>
+              <li>
+                <code>TOUCH4</code> → DEATH_RAY / POWER_BOOST
+              </li>
+            </ul>
             <p>
-              TOUCH0–4 = spells. Action: <code>cast</code> med{' '}
-              <code>params.spellKey</code> (og evt. <code>targetId</code>).
+              Action: <code>cast</code> med <code>params.spellKey</code> (og evt.{' '}
+              <code>targetId</code>). Brug display til HP/mana fra heartbeat.
             </p>
           </article>
         </div>
 
         <p className="repo-hint">
-          Sketches ligger i hvert spil-repo under <code>iot/</code> (Bomberman) og{' '}
-          <code>ArduinoKode/</code> (Wizard).
+          Starter-sketches: Bomberman <code>iot/</code> · Wizard <code>ArduinoKode/</code>. Samme
+          pad-API — skift kun <code>GAME_BASE_PATH</code> og hvordan du mapper{' '}
+          <code>TOUCH*</code> til actions.
         </p>
       </section>
 
       <footer className="footer">
         <span>Mercantec · games.mercantec.tech</span>
+        <a className="inline-link" href={CARRIER_DOC} target="_blank" rel="noreferrer">
+          MKR IoT Carrier reference
+        </a>
       </footer>
     </div>
   )
