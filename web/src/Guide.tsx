@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { InoCode } from './InoCode'
+import PadSimulator from './PadSimulator'
 import { usePad, type PadButton } from './PadContext'
 import QrCard from './QrCard'
 import './Guide.css'
@@ -108,7 +109,11 @@ void castSpell(const char* spellKey, int targetId = -1) {
   // http.post(path) med body...
 }`
 
-const STAGES = [
+type Track = 'quick' | 'full'
+
+type Stage = { id: string; label: string; title: string }
+
+const FULL_STAGES: Stage[] = [
   { id: 'flow', label: 'FLOW', title: 'Spil-flow' },
   { id: 'hardware', label: 'HW', title: 'Hardware' },
   { id: 'setup', label: 'CFG', title: 'Sketch-setup' },
@@ -117,7 +122,14 @@ const STAGES = [
   { id: 'bomberman', label: 'BM', title: 'Bomberman' },
   { id: 'wizard', label: 'WZ', title: 'Wizard Duel' },
   { id: 'checklist', label: 'OK', title: 'Checklist' },
-] as const
+]
+
+const QUICK_STAGES: Stage[] = [
+  { id: 'setup', label: 'CFG', title: 'Config' },
+  { id: 'pads', label: 'PAD', title: 'Pads' },
+  { id: 'play', label: 'PLAY', title: 'Vælg spil' },
+  { id: 'checklist', label: 'OK', title: 'Check' },
+]
 
 const CHECK_ITEMS = [
   'WIFI_SSID / WIFI_PASS sat',
@@ -129,18 +141,43 @@ const CHECK_ITEMS = [
   'Serial Monitor 115200 — join OK + playerId',
 ]
 
+const QUICK_CHECKS = [
+  'WiFi + SERVER_HOST sat',
+  'GAME_BASE_PATH = /Bomberman eller /Wizard',
+  'Sketch uploaded + Serial join OK',
+  'Arena åbnet i browser',
+]
+
 export default function Guide() {
   const navigate = useNavigate()
   const { subscribe, blip } = usePad()
+  const [track, setTrack] = useState<Track>('quick')
+  const stages = track === 'quick' ? QUICK_STAGES : FULL_STAGES
   const [stage, setStage] = useState(0)
   const stageRef = useRef(0)
   const [checks, setChecks] = useState<boolean[]>(() => CHECK_ITEMS.map(() => false))
+  const [quickChecks, setQuickChecks] = useState<boolean[]>(() => QUICK_CHECKS.map(() => false))
+
+  const stageIds = useMemo(() => stages.map((s) => s.id), [stages])
 
   const goStage = (index: number) => {
-    const next = Math.max(0, Math.min(STAGES.length - 1, index))
+    const list = track === 'quick' ? QUICK_STAGES : FULL_STAGES
+    const next = Math.max(0, Math.min(list.length - 1, index))
     stageRef.current = next
     setStage(next)
-    document.getElementById(STAGES[next].id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    document.getElementById(list[next].id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  const switchTrack = (next: Track) => {
+    if (next === track) return
+    setTrack(next)
+    stageRef.current = 0
+    setStage(0)
+    blip('ok')
+    window.setTimeout(() => {
+      const list = next === 'quick' ? QUICK_STAGES : FULL_STAGES
+      document.getElementById(list[0].id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 50)
   }
 
   useEffect(() => {
@@ -166,10 +203,12 @@ export default function Guide() {
       }
     }
     return subscribe(onPad)
-  }, [subscribe, blip, navigate])
+  }, [subscribe, blip, navigate, track])
 
   useEffect(() => {
-    const nodes = STAGES.map((s) => document.getElementById(s.id)).filter(Boolean) as HTMLElement[]
+    const nodes = stageIds
+      .map((id) => document.getElementById(id))
+      .filter(Boolean) as HTMLElement[]
     if (!nodes.length) return
     const io = new IntersectionObserver(
       (entries) => {
@@ -177,7 +216,7 @@ export default function Guide() {
           .filter((e) => e.isIntersecting)
           .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
         if (!visible?.target?.id) return
-        const idx = STAGES.findIndex((s) => s.id === visible.target.id)
+        const idx = stageIds.indexOf(visible.target.id)
         if (idx >= 0) {
           stageRef.current = idx
           setStage(idx)
@@ -187,7 +226,7 @@ export default function Guide() {
     )
     nodes.forEach((n) => io.observe(n))
     return () => io.disconnect()
-  }, [])
+  }, [stageIds])
 
   const toggleCheck = (i: number) => {
     setChecks((prev) => {
@@ -198,17 +237,44 @@ export default function Guide() {
     blip('ok')
   }
 
-  const done = checks.filter(Boolean).length
+  const toggleQuick = (i: number) => {
+    setQuickChecks((prev) => {
+      const next = [...prev]
+      next[i] = !next[i]
+      return next
+    })
+    blip('ok')
+  }
+
+  const checkList = track === 'quick' ? QUICK_CHECKS : CHECK_ITEMS
+  const checkState = track === 'quick' ? quickChecks : checks
+  const done = checkState.filter(Boolean).length
 
   return (
     <div className="guide-layout">
       <aside className="guide-rail" aria-label="Stages">
-        <p className="rail-title">STAGES</p>
+        <p className="rail-title">TRACK</p>
+        <div className="track-switch" role="group" aria-label="Undervisningsspor">
+          <button
+            type="button"
+            className={track === 'quick' ? 'on' : ''}
+            onClick={() => switchTrack('quick')}
+          >
+            15 MIN
+          </button>
+          <button
+            type="button"
+            className={track === 'full' ? 'on' : ''}
+            onClick={() => switchTrack('full')}
+          >
+            FULL
+          </button>
+        </div>
         <p className="rail-progress">
-          {String(stage + 1).padStart(2, '0')}/{String(STAGES.length).padStart(2, '0')}
+          {String(stage + 1).padStart(2, '0')}/{String(stages.length).padStart(2, '0')}
         </p>
         <nav className="rail-nav">
-          {STAGES.map((s, i) => (
+          {stages.map((s, i) => (
             <button
               key={s.id}
               type="button"
@@ -233,12 +299,14 @@ export default function Guide() {
         <header className="guide-hero">
           <div className="hero-top">
             <p className="guide-kicker">INSTRUCTION BOOKLET</p>
-            <span className="hero-chip">LEVEL 1</span>
+            <span className="hero-chip">{track === 'quick' ? '15 MIN' : 'FULL'}</span>
           </div>
           <h1>OPLÀ CONTROLLER MANUAL</h1>
           <p className="hero-lede">
-            Fra WiFi til live arena på <code>games.mercantec.tech</code> — MKR WiFi 1010 + MKR IoT
-            Carrier.
+            {track === 'quick'
+              ? 'Hurtig track: config → pads → vælg spil → checklist. Skift til FULL for API-detaljer.'
+              : 'Fuld walkthrough: fra WiFi til live arena på games.mercantec.tech.'}{' '}
+            Hardware: MKR WiFi 1010 + MKR IoT Carrier.
           </p>
           <div className="hero-controls">
             <span>↑↓ STAGE</span>
@@ -248,290 +316,343 @@ export default function Guide() {
           <QrCard compact />
         </header>
 
-        <section id="flow" className={`guide-section ${stage === 0 ? 'on' : ''}`}>
-          <div className="section-head">
-            <span className="stage-badge">STAGE 01</span>
-            <h2>Spil-flow</h2>
-          </div>
-          <p>
-            Arduino taler HTTP. Browseren viser arenaen. Samme fire skridt — kun path og actions
-            ændrer sig.
-          </p>
-          <ol className="steps">
-            <li>
-              <span className="step-n">1</span>
-              <div>
-                <strong>BOOT</strong>
-                <span>
-                  WiFi + <code>carrier.begin()</code>
-                </span>
+        {track === 'full' && (
+          <>
+            <section id="flow" className={`guide-section ${stageIds[stage] === 'flow' ? 'on' : ''}`}>
+              <div className="section-head">
+                <span className="stage-badge">STAGE 01</span>
+                <h2>Spil-flow</h2>
               </div>
-            </li>
-            <li>
-              <span className="step-n">2</span>
-              <div>
-                <strong>JOIN</strong>
-                <span>
-                  <code>POST …/join</code> → <code>playerId</code>
-                </span>
-              </div>
-            </li>
-            <li>
-              <span className="step-n">3</span>
-              <div>
-                <strong>KEEPALIVE</strong>
-                <span>
-                  <code>POST …/heartbeat</code> hvert 2–5 sek
-                </span>
-              </div>
-            </li>
-            <li>
-              <span className="step-n">4</span>
-              <div>
-                <strong>PLAY</strong>
-                <span>
-                  Pads → <code>POST …/action</code>
-                </span>
-              </div>
-            </li>
-          </ol>
-
-          <div className="flow-compare">
-            <div className="flow-card flow-red">
-              <div className="flow-card-top">
-                <img src="/bomberman-nes.jpg" alt="" />
-                <h3>BOMBERMAN</h3>
-              </div>
-              <ol>
-                <li>Admin opretter lobby (PIN)</li>
-                <li>Arduino joiner med samme PIN</li>
-                <li>Start spil i browseren</li>
-                <li>Bomber — sidste overlevende vinder</li>
-              </ol>
-            </div>
-            <div className="flow-card flow-blue">
-              <div className="flow-card-top">
-                <img src="/wizard-duel.jpg" alt="" />
-                <h3>WIZARD DUEL</h3>
-              </div>
-              <ol>
-                <li>Arduino joiner køen</li>
-                <li>Mindst 2 spillere → Start Kamp</li>
-                <li>Cast spells (mana regenererer)</li>
-                <li>Sidste wizard med HP &gt; 0 vinder</li>
-              </ol>
-            </div>
-          </div>
-        </section>
-
-        <section id="hardware" className={`guide-section ${stage === 1 ? 'on' : ''}`}>
-          <div className="section-head">
-            <span className="stage-badge">STAGE 02</span>
-            <h2>Hardware</h2>
-          </div>
-          <div className="hw-grid">
-            <figure className="guide-figure">
-              <img
-                src={CARRIER_IMG}
-                alt="Arduino MKR IoT Carrier med BUTTON 00–04"
-                width={640}
-                height={640}
-              />
-              <figcaption>
-                BUTTON 00→04 rundt om TFT.{' '}
-                <a href={CARRIER_DOC} target="_blank" rel="noreferrer">
-                  Docs ↗
-                </a>
-              </figcaption>
-            </figure>
-            <div className="hw-facts">
               <p>
-                <strong>MKR WiFi 1010</strong> på <strong>MKR IoT Carrier</strong> (Oplà). Fem pads ={' '}
-                <code>TOUCH0</code>–<code>TOUCH4</code> + rund TFT 240×240.
+                Arduino taler HTTP. Browseren viser arenaen. Samme fire skridt — kun path og actions
+                ændrer sig.
               </p>
-              <ul className="bullet-list">
+              <ol className="steps">
                 <li>
-                  Libs: <code>Arduino_MKRIoTCarrier</code>, <code>WiFiNINA</code>,{' '}
-                  <code>ArduinoHttpClient</code>
+                  <span className="step-n">1</span>
+                  <div>
+                    <strong>BOOT</strong>
+                    <span>
+                      WiFi + <code>carrier.begin()</code>
+                    </span>
+                  </div>
                 </li>
                 <li>
-                  Init: <code>carrier.noCase()</code> / <code>withCase()</code> →{' '}
-                  <code>begin()</code>
+                  <span className="step-n">2</span>
+                  <div>
+                    <strong>JOIN</strong>
+                    <span>
+                      <code>POST …/join</code> → <code>playerId</code>
+                    </span>
+                  </div>
                 </li>
                 <li>
-                  HTTPS: root-cert én gang til <code>games.mercantec.tech:443</code>
+                  <span className="step-n">3</span>
+                  <div>
+                    <strong>KEEPALIVE</strong>
+                    <span>
+                      <code>POST …/heartbeat</code> hvert 2–5 sek
+                    </span>
+                  </div>
                 </li>
-              </ul>
-            </div>
-          </div>
-        </section>
+                <li>
+                  <span className="step-n">4</span>
+                  <div>
+                    <strong>PLAY</strong>
+                    <span>
+                      Pads → <code>POST …/action</code>
+                    </span>
+                  </div>
+                </li>
+              </ol>
+              <div className="flow-compare">
+                <div className="flow-card flow-red">
+                  <div className="flow-card-top">
+                    <img src="/bomberman-nes.jpg" alt="" />
+                    <h3>BOMBERMAN</h3>
+                  </div>
+                  <ol>
+                    <li>Admin opretter lobby (PIN)</li>
+                    <li>Arduino joiner med samme PIN</li>
+                    <li>Start spil i browseren</li>
+                    <li>Bomber — sidste overlevende vinder</li>
+                  </ol>
+                </div>
+                <div className="flow-card flow-blue">
+                  <div className="flow-card-top">
+                    <img src="/wizard-duel.jpg" alt="" />
+                    <h3>WIZARD DUEL</h3>
+                  </div>
+                  <ol>
+                    <li>Arduino joiner køen</li>
+                    <li>Mindst 2 spillere → Start Kamp</li>
+                    <li>Cast spells (mana regenererer)</li>
+                    <li>Sidste wizard med HP &gt; 0 vinder</li>
+                  </ol>
+                </div>
+              </div>
+            </section>
 
-        <section id="setup" className={`guide-section ${stage === 2 ? 'on' : ''}`}>
+            <section
+              id="hardware"
+              className={`guide-section ${stageIds[stage] === 'hardware' ? 'on' : ''}`}
+            >
+              <div className="section-head">
+                <span className="stage-badge">STAGE 02</span>
+                <h2>Hardware</h2>
+              </div>
+              <div className="hw-grid">
+                <figure className="guide-figure">
+                  <img
+                    src={CARRIER_IMG}
+                    alt="Arduino MKR IoT Carrier med BUTTON 00–04"
+                    width={640}
+                    height={640}
+                  />
+                  <figcaption>
+                    BUTTON 00→04 rundt om TFT.{' '}
+                    <a href={CARRIER_DOC} target="_blank" rel="noreferrer">
+                      Docs ↗
+                    </a>
+                  </figcaption>
+                </figure>
+                <div className="hw-facts">
+                  <p>
+                    <strong>MKR WiFi 1010</strong> på <strong>MKR IoT Carrier</strong> (Oplà). Fem
+                    pads = <code>TOUCH0</code>–<code>TOUCH4</code> + rund TFT 240×240.
+                  </p>
+                  <ul className="bullet-list">
+                    <li>
+                      Libs: <code>Arduino_MKRIoTCarrier</code>, <code>WiFiNINA</code>,{' '}
+                      <code>ArduinoHttpClient</code>
+                    </li>
+                    <li>
+                      Init: <code>carrier.noCase()</code> / <code>withCase()</code> →{' '}
+                      <code>begin()</code>
+                    </li>
+                    <li>
+                      HTTPS: root-cert én gang til <code>games.mercantec.tech:443</code>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </section>
+          </>
+        )}
+
+        <section id="setup" className={`guide-section ${stageIds[stage] === 'setup' ? 'on' : ''}`}>
           <div className="section-head">
-            <span className="stage-badge">STAGE 03</span>
+            <span className="stage-badge">{track === 'quick' ? 'STEP 01' : 'STAGE 03'}</span>
             <h2>Sketch-setup</h2>
           </div>
           <p>
-            Samme config til begge spil. Skift kun <code>GAME_BASE_PATH</code> (og PIN til Bomberman).
+            Samme config til begge spil. Skift kun <code>GAME_BASE_PATH</code>
+            {track === 'full' ? ' (og PIN til Bomberman).' : '.'} Tryk <strong>COPY</strong> og
+            indsæt i Arduino IDE.
           </p>
           <InoCode code={SETUP_SNIPPET} filename="config.ino" />
         </section>
 
-        <section id="api" className={`guide-section ${stage === 3 ? 'on' : ''}`}>
-          <div className="section-head">
-            <span className="stage-badge">STAGE 04</span>
-            <h2>API-kontrakt</h2>
-          </div>
-          <p>
-            Paths relative til <code>GAME_BASE_PATH</code>. Traefik stripper prefix → server ser{' '}
-            <code>/api/…</code>.
-          </p>
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Endpoint</th>
-                  <th>Body</th>
-                  <th>Svar</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>
-                    <code>POST …/join</code>
-                  </td>
-                  <td>
-                    pin, name, deviceId
-                  </td>
-                  <td>ok, playerId</td>
-                </tr>
-                <tr>
-                  <td>
-                    <code>POST …/heartbeat</code>
-                  </td>
-                  <td>pin?, playerId, deviceId</td>
-                  <td>ok (+ hp/mana)</td>
-                </tr>
-                <tr>
-                  <td>
-                    <code>POST …/action</code>
-                  </td>
-                  <td>action + params</td>
-                  <td>ok / fejl</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <InoCode code={JOIN_SNIPPET} filename="join.ino" />
-          <InoCode code={ACTION_SNIPPET} filename="action.ino" />
-        </section>
+        {track === 'full' && (
+          <section id="api" className={`guide-section ${stageIds[stage] === 'api' ? 'on' : ''}`}>
+            <div className="section-head">
+              <span className="stage-badge">STAGE 04</span>
+              <h2>API-kontrakt</h2>
+            </div>
+            <p>
+              Paths relative til <code>GAME_BASE_PATH</code>. Traefik stripper prefix → server ser{' '}
+              <code>/api/…</code>.
+            </p>
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Endpoint</th>
+                    <th>Body</th>
+                    <th>Svar</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <code>POST …/join</code>
+                    </td>
+                    <td>pin, name, deviceId</td>
+                    <td>ok, playerId</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>POST …/heartbeat</code>
+                    </td>
+                    <td>pin?, playerId, deviceId</td>
+                    <td>ok (+ hp/mana)</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>POST …/action</code>
+                    </td>
+                    <td>action + params</td>
+                    <td>ok / fejl</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <InoCode code={JOIN_SNIPPET} filename="join.ino" />
+            <InoCode code={ACTION_SNIPPET} filename="action.ino" />
+          </section>
+        )}
 
-        <section id="pads" className={`guide-section ${stage === 4 ? 'on' : ''}`}>
+        <section id="pads" className={`guide-section ${stageIds[stage] === 'pads' ? 'on' : ''}`}>
           <div className="section-head">
-            <span className="stage-badge">STAGE 05</span>
+            <span className="stage-badge">{track === 'quick' ? 'STEP 02' : 'STAGE 05'}</span>
             <h2>Pad-mapping</h2>
           </div>
           <p>
-            Altid <code>carrier.Buttons.update()</code> først. <code>getTouch</code> = hold,{' '}
-            <code>onTouchDown</code> = engangstryk.
+            Altid <code>carrier.Buttons.update()</code> først. Klik pads nedenfor for at se hvilken
+            action der sendes.
           </p>
-          <div className="pad-map">
-            <div className="pad-map-ring" aria-hidden="true">
-              <span className="pad p2">02 ↑</span>
-              <span className="pad p1">01 ←</span>
-              <span className="pad tft">TFT</span>
-              <span className="pad p3">03 →</span>
-              <span className="pad p0">00 ↓</span>
-              <span className="pad p4">04 ★</span>
-            </div>
-            <ul className="bullet-list">
-              <li>
-                Bomberman: 02↑ 00↓ 01← 03→ · 04 bombe
-              </li>
-              <li>Wizard: pads = spells (fx 00 FIREBALL)</li>
-            </ul>
-          </div>
+          <PadSimulator onPing={() => blip('move')} />
           <InoCode code={LOOP_SNIPPET} filename="loop.ino" />
         </section>
 
-        <section id="bomberman" className={`guide-section ${stage === 5 ? 'on' : ''}`}>
-          <div className="section-head">
-            <span className="stage-badge">STAGE 06</span>
-            <h2>Bomberman</h2>
-          </div>
-          <div className="game-panel">
-            <img className="game-panel-art" src="/bomberman-nes.jpg" alt="Bomberman NES" />
-            <ul className="bullet-list">
-              <li>
-                <code>GAME_BASE_PATH=/Bomberman</code>
-              </li>
-              <li>
-                Admin → PIN → <code>GAME_PIN</code>
-              </li>
-              <li>
-                Actions: <code>move</code> + direction, eller <code>bomb</code>
-              </li>
-              <li>
-                Arena: <a href="/Bomberman/">/Bomberman/</a>
-              </li>
-            </ul>
-          </div>
-        </section>
+        {track === 'quick' && (
+          <section id="play" className={`guide-section ${stageIds[stage] === 'play' ? 'on' : ''}`}>
+            <div className="section-head">
+              <span className="stage-badge">STEP 03</span>
+              <h2>Vælg spil</h2>
+            </div>
+            <p>Sæt <code>GAME_BASE_PATH</code>, upload sketch, åbn arena.</p>
+            <div className="flow-compare">
+              <div className="flow-card flow-red">
+                <div className="flow-card-top">
+                  <img src="/bomberman-nes.jpg" alt="" />
+                  <h3>BOMBERMAN</h3>
+                </div>
+                <ol>
+                  <li>
+                    <code>GAME_BASE_PATH=/Bomberman</code>
+                  </li>
+                  <li>Admin → PIN → GAME_PIN</li>
+                  <li>
+                    Åbn <a href="/Bomberman/">/Bomberman/</a>
+                  </li>
+                </ol>
+              </div>
+              <div className="flow-card flow-blue">
+                <div className="flow-card-top">
+                  <img src="/wizard-duel.jpg" alt="" />
+                  <h3>WIZARD DUEL</h3>
+                </div>
+                <ol>
+                  <li>
+                    <code>GAME_BASE_PATH=/Wizard</code>
+                  </li>
+                  <li>Join kø → Start Kamp</li>
+                  <li>
+                    Åbn <a href="/Wizard/">/Wizard/</a>
+                  </li>
+                </ol>
+              </div>
+            </div>
+          </section>
+        )}
 
-        <section id="wizard" className={`guide-section ${stage === 6 ? 'on' : ''}`}>
-          <div className="section-head">
-            <span className="stage-badge">STAGE 07</span>
-            <h2>Wizard Duel</h2>
-          </div>
-          <div className="game-panel">
-            <img className="game-panel-art" src="/wizard-duel.jpg" alt="Wizard Duel" />
-            <ul className="bullet-list">
-              <li>
-                <code>GAME_BASE_PATH=/Wizard</code>
-              </li>
-              <li>
-                <code>cast</code> + spellKey: FIREBALL, LIGHTNING, SHIELD, HEAL, POWER_BOOST,
-                DEATH_RAY
-              </li>
-              <li>Heartbeat → hp/mana på TFT</li>
-              <li>
-                Arena: <a href="/Wizard/">/Wizard/</a>
-              </li>
-            </ul>
-          </div>
-        </section>
+        {track === 'full' && (
+          <>
+            <section
+              id="bomberman"
+              className={`guide-section ${stageIds[stage] === 'bomberman' ? 'on' : ''}`}
+            >
+              <div className="section-head">
+                <span className="stage-badge">STAGE 06</span>
+                <h2>Bomberman</h2>
+              </div>
+              <div className="game-panel">
+                <img className="game-panel-art" src="/bomberman-nes.jpg" alt="Bomberman NES" />
+                <ul className="bullet-list">
+                  <li>
+                    <code>GAME_BASE_PATH=/Bomberman</code>
+                  </li>
+                  <li>
+                    Admin → PIN → <code>GAME_PIN</code>
+                  </li>
+                  <li>
+                    Actions: <code>move</code> + direction, eller <code>bomb</code>
+                  </li>
+                  <li>
+                    Arena: <a href="/Bomberman/">/Bomberman/</a>
+                  </li>
+                </ul>
+              </div>
+            </section>
 
-        <section id="checklist" className={`guide-section ${stage === 7 ? 'on' : ''}`}>
+            <section
+              id="wizard"
+              className={`guide-section ${stageIds[stage] === 'wizard' ? 'on' : ''}`}
+            >
+              <div className="section-head">
+                <span className="stage-badge">STAGE 07</span>
+                <h2>Wizard Duel</h2>
+              </div>
+              <div className="game-panel">
+                <img className="game-panel-art" src="/wizard-duel.jpg" alt="Wizard Duel" />
+                <ul className="bullet-list">
+                  <li>
+                    <code>GAME_BASE_PATH=/Wizard</code>
+                  </li>
+                  <li>
+                    <code>cast</code> + spellKey: FIREBALL, LIGHTNING, SHIELD, HEAL, POWER_BOOST,
+                    DEATH_RAY
+                  </li>
+                  <li>Heartbeat → hp/mana på TFT</li>
+                  <li>
+                    Arena: <a href="/Wizard/">/Wizard/</a>
+                  </li>
+                </ul>
+              </div>
+            </section>
+          </>
+        )}
+
+        <section
+          id="checklist"
+          className={`guide-section ${stageIds[stage] === 'checklist' ? 'on' : ''}`}
+        >
           <div className="section-head">
-            <span className="stage-badge">STAGE 08</span>
+            <span className="stage-badge">{track === 'quick' ? 'STEP 04' : 'STAGE 08'}</span>
             <h2>Checklist</h2>
           </div>
           <p className="check-progress">
-            CLEAR {done}/{CHECK_ITEMS.length}
+            CLEAR {done}/{checkList.length}
           </p>
           <ul className="check-list">
-            {CHECK_ITEMS.map((label, i) => (
+            {checkList.map((label, i) => (
               <li key={label}>
                 <button
                   type="button"
-                  className={`check-btn ${checks[i] ? 'done' : ''}`}
-                  onClick={() => toggleCheck(i)}
+                  className={`check-btn ${checkState[i] ? 'done' : ''}`}
+                  onClick={() => (track === 'quick' ? toggleQuick(i) : toggleCheck(i))}
                 >
-                  <span className="check-box">{checks[i] ? '■' : '□'}</span>
+                  <span className="check-box">{checkState[i] ? '■' : '□'}</span>
                   <span>{label}</span>
                 </button>
               </li>
             ))}
           </ul>
-          <p className="guide-outro">
-            Starter-sketches: Bomberman <code>iot/</code> · Wizard <code>ArduinoKode/</code>
-          </p>
+          {track === 'full' && (
+            <p className="guide-outro">
+              Starter-sketches: Bomberman <code>iot/</code> · Wizard <code>ArduinoKode/</code>
+            </p>
+          )}
           <div className="guide-end">
             <Link className="end-btn" to="/">
               ◄ TILBAGE TIL SELECT
             </Link>
-            {done === CHECK_ITEMS.length && (
-              <span className="end-clear">STAGE CLEAR!</span>
+            {done === checkList.length && <span className="end-clear">STAGE CLEAR!</span>}
+            {track === 'quick' && (
+              <button type="button" className="end-btn ghost" onClick={() => switchTrack('full')}>
+                ► FULL MANUAL
+              </button>
             )}
           </div>
         </section>

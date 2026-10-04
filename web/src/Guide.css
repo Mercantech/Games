@@ -36,6 +36,29 @@
   color: var(--nes-lcd-dim);
 }
 
+.track-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.3rem;
+  margin-bottom: 0.35rem;
+}
+
+.track-switch button {
+  font-family: var(--font-pixel);
+  font-size: 0.36rem;
+  padding: 0.45rem 0.3rem;
+  color: var(--nes-lcd);
+  background: rgba(15, 56, 15, 0.7);
+  border: 2px solid var(--nes-lcd-dim);
+  cursor: pointer;
+}
+
+.track-switch button.on {
+  background: var(--nes-lcd);
+  color: #0f380f;
+  border-color: #e8f8c0;
+}
+
 .rail-progress {
   margin: 0 0 0.35rem;
   font-family: var(--font-pixel);
@@ -407,81 +430,7 @@
 }
 
 .pad-map {
-  display: grid;
-  gap: 0.85rem;
-  margin-bottom: 0.85rem;
-}
-
-@media (min-width: 700px) {
-  .pad-map {
-    grid-template-columns: auto 1fr;
-    align-items: center;
-  }
-}
-
-.pad-map-ring {
-  width: 180px;
-  height: 180px;
-  margin: 0 auto;
-  position: relative;
-  border: 3px solid var(--nes-lcd-dim);
-  border-radius: 50%;
-  background: radial-gradient(circle at center, #1a3d1a, #0a1a0a 70%);
-}
-
-.pad {
-  position: absolute;
-  font-family: var(--font-pixel);
-  font-size: 0.36rem;
-  color: #0f380f;
-  background: var(--nes-lcd);
-  border: 2px solid #000;
-  padding: 0.3rem 0.35rem;
-}
-
-.pad.tft {
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  background: #222;
-  color: var(--nes-lcd);
-  border-radius: 50%;
-  width: 52px;
-  height: 52px;
-  display: grid;
-  place-items: center;
-  padding: 0;
-}
-
-.pad.p2 {
-  left: 50%;
-  top: 8px;
-  transform: translateX(-50%);
-}
-
-.pad.p0 {
-  left: 50%;
-  bottom: 8px;
-  transform: translateX(-50%);
-}
-
-.pad.p1 {
-  left: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.pad.p3 {
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.pad.p4 {
-  right: 18px;
-  bottom: 22px;
-  background: var(--nes-red);
-  color: #fff;
+  display: none;
 }
 
 .game-panel {
@@ -591,52 +540,6 @@
 
 .guide .ino-block {
   margin-bottom: 0.85rem;
-  background: #0a1a0a;
-  border: 2px solid #000;
-  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.45);
-}
-
-.guide .ino-filename {
-  color: rgba(155, 188, 15, 0.7);
-  background: rgba(0, 0, 0, 0.4);
-  border-bottom-color: rgba(155, 188, 15, 0.2);
-}
-
-.guide .ino-filename::before {
-  background: var(--nes-red);
-  box-shadow: 1rem 0 0 #e8b84a, 2rem 0 0 var(--nes-lcd);
-}
-
-.guide .ino-pre {
-  color: var(--nes-lcd);
-}
-
-.guide .ino-comment {
-  color: #5a7a3a;
-}
-
-.guide .ino-string {
-  color: #c4e66d;
-}
-
-.guide .ino-number {
-  color: #f0c060;
-}
-
-.guide .ino-keyword {
-  color: #ff6b6b;
-}
-
-.guide .ino-type {
-  color: #7ec8ff;
-}
-
-.guide .ino-macro {
-  color: #d7a6ff;
-}
-
-.guide .ino-fn {
-  color: #9bbc0f;
 }
 
 .guide-end {
@@ -656,6 +559,12 @@
   color: #0f380f;
   border: 3px solid #000;
   box-shadow: 3px 3px 0 #000;
+  cursor: pointer;
+}
+
+.end-btn.ghost {
+  background: transparent;
+  color: var(--nes-lcd);
 }
 
 .end-btn:hover {

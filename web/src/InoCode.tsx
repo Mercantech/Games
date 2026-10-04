@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react'
+import { useCallback, useState, type ReactNode } from 'react'
+import './InoCode.css'
 
 type TokenKind = 'comment' | 'string' | 'number' | 'keyword' | 'type' | 'macro' | 'fn' | 'plain'
 
@@ -85,13 +86,11 @@ function tokenizeLine(line: string): { kind: TokenKind; text: string }[] {
   let i = 0
 
   while (i < line.length) {
-    // line comment
     if (line[i] === '/' && line[i + 1] === '/') {
       tokens.push({ kind: 'comment', text: line.slice(i) })
       break
     }
 
-    // string
     if (line[i] === '"') {
       let j = i + 1
       while (j < line.length) {
@@ -110,7 +109,6 @@ function tokenizeLine(line: string): { kind: TokenKind; text: string }[] {
       continue
     }
 
-    // char
     if (line[i] === "'") {
       let j = i + 1
       while (j < line.length) {
@@ -129,13 +127,11 @@ function tokenizeLine(line: string): { kind: TokenKind; text: string }[] {
       continue
     }
 
-    // preprocessor
     if (line[i] === '#' && (i === 0 || /^\s*$/.test(line.slice(0, i)))) {
       tokens.push({ kind: 'macro', text: line.slice(i) })
       break
     }
 
-    // number
     if (/\d/.test(line[i]) && (i === 0 || !/[\w$]/.test(line[i - 1]))) {
       let j = i
       while (j < line.length && /[\d.xXa-fA-F]/.test(line[j])) j++
@@ -144,12 +140,10 @@ function tokenizeLine(line: string): { kind: TokenKind; text: string }[] {
       continue
     }
 
-    // identifier / keyword
     if (/[A-Za-z_]/.test(line[i])) {
       let j = i + 1
       while (j < line.length && /[\w]/.test(line[j])) j++
       const word = line.slice(i, j)
-      // function call: ident followed by (
       let k = j
       while (k < line.length && /\s/.test(line[k])) k++
       if (line[k] === '(' && !KEYWORDS.has(word) && !TYPES.has(word) && !MACROS.has(word)) {
@@ -161,7 +155,6 @@ function tokenizeLine(line: string): { kind: TokenKind; text: string }[] {
       continue
     }
 
-    // plain punctuation / whitespace chunk
     let j = i + 1
     while (
       j < line.length &&
@@ -201,11 +194,29 @@ type InoCodeProps = {
 }
 
 export function InoCode({ code, filename = 'controller.ino' }: InoCodeProps) {
+  const [copied, setCopied] = useState(false)
+  const source = code.trimEnd()
+
+  const copy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(source)
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 1600)
+    } catch {
+      /* clipboard may be blocked */
+    }
+  }, [source])
+
   return (
     <figure className="ino-block">
-      <figcaption className="ino-filename">{filename}</figcaption>
+      <figcaption className="ino-filename">
+        <span className="ino-filename-text">{filename}</span>
+        <button type="button" className="ino-copy" onClick={copy}>
+          {copied ? 'COPIED!' : 'COPY'}
+        </button>
+      </figcaption>
       <pre className="ino-pre">
-        <code className="language-ino">{highlightIno(code.trimEnd())}</code>
+        <code className="language-ino">{highlightIno(source)}</code>
       </pre>
     </figure>
   )

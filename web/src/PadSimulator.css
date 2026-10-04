@@ -1,0 +1,203 @@
+.pad-sim {
+  margin: 0 0 1rem;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.35);
+  border: 3px solid #000;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.35);
+}
+
+.pad-sim-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.pad-sim-title {
+  font-family: var(--font-pixel);
+  font-size: 0.45rem;
+  letter-spacing: 0.08em;
+  color: #e8f8c0;
+}
+
+.pad-sim-modes {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.pad-sim-modes button {
+  font-family: var(--font-pixel);
+  font-size: 0.36rem;
+  padding: 0.4rem 0.5rem;
+  color: var(--nes-lcd);
+  background: rgba(15, 56, 15, 0.7);
+  border: 2px solid var(--nes-lcd-dim);
+  cursor: pointer;
+}
+
+.pad-sim-modes button.on {
+  background: var(--nes-lcd);
+  color: #0f380f;
+  border-color: #e8f8c0;
+}
+
+.pad-sim-body {
+  display: grid;
+  gap: 0.85rem;
+}
+
+@media (min-width: 720px) {
+  .pad-sim-body {
+    grid-template-columns: auto 1fr;
+    align-items: start;
+  }
+}
+
+.pad-sim-ring {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
+  border: 3px solid var(--nes-lcd-dim);
+  border-radius: 50%;
+  background: radial-gradient(circle at center, #1a3d1a, #0a1a0a 70%);
+}
+
+.pad-sim-btn {
+  position: absolute;
+  font-family: var(--font-pixel);
+  font-size: 0.4rem;
+  color: #0f380f;
+  background: var(--nes-lcd);
+  border: 2px solid #000;
+  padding: 0.4rem 0.45rem;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 #000;
+  min-width: 2.4rem;
+}
+
+.pad-sim-btn.lit {
+  background: #fff;
+  transform: translateY(1px);
+  box-shadow: 1px 1px 0 #000;
+}
+
+.pad-sim-btn.p2 {
+  left: 50%;
+  top: 10px;
+  transform: translateX(-50%);
+}
+
+.pad-sim-btn.p2.lit {
+  transform: translateX(-50%) translateY(1px);
+}
+
+.pad-sim-btn.p0 {
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+}
+
+.pad-sim-btn.p0.lit {
+  transform: translateX(-50%) translateY(1px);
+}
+
+.pad-sim-btn.p1 {
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.pad-sim-btn.p1.lit {
+  transform: translateY(calc(-50% + 1px));
+}
+
+.pad-sim-btn.p3 {
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.pad-sim-btn.p3.lit {
+  transform: translateY(calc(-50% + 1px));
+}
+
+.pad-sim-btn.p4 {
+  right: 22px;
+  bottom: 28px;
+  background: var(--nes-red);
+  color: #fff;
+}
+
+.pad-sim-tft {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-pixel);
+  font-size: 0.38rem;
+  color: var(--nes-lcd);
+  background: #222;
+  border: 2px solid #000;
+  pointer-events: none;
+}
+
+.pad-sim-out {
+  min-width: 0;
+}
+
+.pad-sim-out-label {
+  margin: 0 0 0.45rem;
+  font-family: var(--font-pixel);
+  font-size: 0.34rem;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+  color: var(--nes-lcd-dim);
+  word-break: break-all;
+}
+
+.pad-sim-empty {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--nes-lcd-dim);
+}
+
+.pad-sim-log {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.pad-sim-log li {
+  padding: 0.45rem 0.55rem;
+  background: rgba(0, 0, 0, 0.35);
+  border: 2px solid var(--nes-lcd-dim);
+}
+
+.pad-sim-log strong {
+  display: block;
+  font-family: var(--font-pixel);
+  font-size: 0.4rem;
+  margin-bottom: 0.25rem;
+  color: #e8f8c0;
+}
+
+.pad-sim-log code {
+  display: block;
+  font-size: 1rem;
+  line-height: 1.25;
+  word-break: break-all;
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--nes-lcd);
+}
