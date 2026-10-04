@@ -12,7 +12,7 @@ type ServiceDef = {
   name: string
   path: string
   href: string
-  accent: 'red' | 'blue' | 'purple'
+  accent: 'red' | 'blue' | 'purple' | 'orange'
   lane: string
   points: number
 }
@@ -54,13 +54,22 @@ const SERVICES: ServiceDef[] = [
     lane: 'LANE 3',
     points: 1,
   },
+  {
+    id: 'pong',
+    name: 'Pong',
+    path: '/Pong/api/health',
+    href: '/Pong/',
+    accent: 'orange',
+    lane: 'LANE 4',
+    points: 1,
+  },
 ]
 
 const FUN_LINES = [
   'Ping går ud. Pong kommer hjem. Zero lag = clean rally.',
   'Hver health-check er et slag over nettet.',
   'Miss = bolden går ud. HIT = point til dig.',
-  'Tre lanes. Ét court. Hold bolden i spil.',
+  'Fire lanes. Ét court. Hold bolden i spil.',
 ]
 
 function formatTime(d: Date | null): string {

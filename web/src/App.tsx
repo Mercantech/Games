@@ -33,6 +33,7 @@ export default function App() {
               <a href="/Bomberman/">BOMBER</a>
               <a href="/Wizard/">WIZARD</a>
               <a href="/Tetris/">TETRIS</a>
+              <a href="/Pong/">PONG</a>
             </nav>
           </div>
 

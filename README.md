@@ -4,11 +4,12 @@ Retro Nintendo-agtig forside for Mercantec-spil på **https://games.mercantec.te
 
 | Path | Indhold |
 |------|---------|
-| `/` | Player select (Bomberman / Wizard / Tetris) |
+| `/` | Player select (Bomberman / Wizard / Tetris / Pong) |
 | `/guide` | 1:1 Arduino MKR IoT Carrier guide + spil-flow |
 | `/Bomberman` | Bomberman (eget compose) |
 | `/Wizard` | Wizard Duel (eget compose) |
 | `/Tetris` | Tetris battle (eget compose) |
+| `/Pong` | Classic Pong (eget compose) |
 
 ## Arduino-controller
 

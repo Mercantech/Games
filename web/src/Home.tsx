@@ -3,11 +3,11 @@ import { Link, useNavigate } from 'react-router-dom'
 import { usePad, type PadButton } from './PadContext'
 import './Home.css'
 
-type Slot = 'bomber' | 'wizard' | 'tetris' | 'guide'
+type Slot = 'bomber' | 'wizard' | 'tetris' | 'pong' | 'guide'
 
-const SLOTS: Slot[] = ['bomber', 'wizard', 'tetris', 'guide']
+const SLOTS: Slot[] = ['bomber', 'wizard', 'tetris', 'pong', 'guide']
 const COLS = 2
-const GUIDE_INDEX = 3
+const GUIDE_INDEX = 4
 
 export default function Home() {
   const [cursor, setCursor] = useState(0)
@@ -35,7 +35,13 @@ export default function Home() {
       }
       blip('insert')
       const href =
-        slot === 'bomber' ? '/Bomberman/' : slot === 'wizard' ? '/Wizard/' : '/Tetris/'
+        slot === 'bomber'
+          ? '/Bomberman/'
+          : slot === 'wizard'
+            ? '/Wizard/'
+            : slot === 'tetris'
+              ? '/Tetris/'
+              : '/Pong/'
       window.setTimeout(() => {
         window.location.href = href
       }, 420)
@@ -212,9 +218,42 @@ export default function Home() {
             <span className="cart-meta">PIN · BATTLE · GARBAGE</span>
           </div>
         </a>
-        <Link
+        <a
           ref={(el) => {
             itemRefs.current[3] = el
+          }}
+          className={`cart cart-pong ${cursor === 3 ? 'selected' : ''}`}
+          href="/Pong/"
+          role="option"
+          aria-selected={cursor === 3}
+          onMouseEnter={() => setCursor(3)}
+          onFocus={() => setCursor(3)}
+          onClick={(e) => {
+            e.preventDefault()
+            setCursor(3)
+            launch('pong')
+          }}
+        >
+          <span className="cart-label">SLOT D</span>
+          <div className="cart-art-frame">
+            <img
+              className="cart-art"
+              src="/pong-thumb.jpg"
+              alt="Pong — klassisk paddle-duel med PIN-lobby"
+              width={1024}
+              height={576}
+              loading="lazy"
+            />
+          </div>
+          <div className="cart-foot">
+            <strong>PONG</strong>
+            <span className="cart-go">{cursor === 3 ? '► START' : '► PLAY'}</span>
+            <span className="cart-meta">PIN · PADDLES · CLASSIC</span>
+          </div>
+        </a>
+        <Link
+          ref={(el) => {
+            itemRefs.current[4] = el
           }}
           className={`cart cart-guide ${cursor === GUIDE_INDEX ? 'selected' : ''}`}
           to="/guide"
@@ -224,7 +263,7 @@ export default function Home() {
           onFocus={() => setCursor(GUIDE_INDEX)}
           onClick={() => blip('ok')}
         >
-          <span className="cart-label">SLOT D</span>
+          <span className="cart-label">SLOT E</span>
           <div className="cart-art-frame cart-art-guide">
             <span className="guide-art-title">ARDUINO</span>
             <span className="guide-art-sub">CONTROLLER</span>

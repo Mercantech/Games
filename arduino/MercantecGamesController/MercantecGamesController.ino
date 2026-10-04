@@ -1,6 +1,6 @@
 /**
  * Mercantec Games Controller — MKR WiFi 1010 + MKR IoT Carrier
- * Bomberman, Wizard Duel og Tetris via config.h (GAME_MODE).
+ * Bomberman, Wizard Duel, Tetris og Pong via config.h (GAME_MODE).
  *
  * POST {GAME_BASE_PATH}/api/controller/join
  * POST {GAME_BASE_PATH}/api/controller/heartbeat
@@ -40,6 +40,7 @@ unsigned long lastBomb = 0;
 unsigned long lastSpell = 0;
 unsigned long lastRotate = 0;
 unsigned long lastHardDrop = 0;
+unsigned long lastStop = 0;
 unsigned long lastHeartbeat = 0;
 
 enum JoinResult {
@@ -222,6 +223,8 @@ bool establishSession() {
   showMsg("WIZARD DUEL", "Klar!", ST77XX_GREEN);
 #elif GAME_MODE == GAME_MODE_TETRIS
   showMsg("TETRIS", "Klar!", ST77XX_GREEN);
+#elif GAME_MODE == GAME_MODE_PONG
+  showMsg("PONG", "Klar!", ST77XX_GREEN);
 #else
   showMsg("BOMBERMAN", "Klar!", ST77XX_GREEN);
 #endif
@@ -369,6 +372,35 @@ void handleTetrisInput(unsigned long now) {
   }
 }
 
+void handlePongInput(unsigned long now) {
+  carrier.Buttons.update();
+
+  if (carrier.Buttons.getTouch(TOUCH0)) {
+    if (now - lastUp > DEBOUNCE_MS) {
+      sendAction("move", "UP");
+      lastUp = now;
+    }
+  }
+  if (carrier.Buttons.getTouch(TOUCH2)) {
+    if (now - lastDown > DEBOUNCE_MS) {
+      sendAction("move", "DOWN");
+      lastDown = now;
+    }
+  }
+  if (carrier.Buttons.onTouchDown(TOUCH1) && now - lastStop > DEBOUNCE_MS) {
+    sendAction("stop");
+    lastStop = now;
+  }
+  if (carrier.Buttons.onTouchDown(TOUCH3) && now - lastStop > DEBOUNCE_MS) {
+    sendAction("stop");
+    lastStop = now;
+  }
+  if (carrier.Buttons.onTouchDown(TOUCH4) && now - lastStop > DEBOUNCE_MS) {
+    sendAction("stop");
+    lastStop = now;
+  }
+}
+
 void handleWizardInput(unsigned long now) {
   carrier.Buttons.update();
 
@@ -430,6 +462,8 @@ void loop() {
 
 #if GAME_MODE == GAME_MODE_TETRIS
   handleTetrisInput(now);
+#elif GAME_MODE == GAME_MODE_PONG
+  handlePongInput(now);
 #elif GAME_MODE == GAME_MODE_WIZARD
   handleWizardInput(now);
 #else

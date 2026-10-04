@@ -386,6 +386,10 @@
   background: linear-gradient(90deg, rgba(168, 85, 247, 0.9), rgba(34, 211, 238, 0.9));
 }
 
+.flow-orange .flow-card-top h3 {
+  background: linear-gradient(90deg, rgba(255, 179, 71, 0.95), rgba(230, 57, 70, 0.9));
+}
+
 .flow-card ol {
   margin: 0;
   padding: 0.65rem 0.65rem 0.75rem 1.35rem;

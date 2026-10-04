@@ -89,7 +89,11 @@
 }
 
 .pong-ball.lane-2 {
-  top: 68%;
+  top: 58%;
+}
+
+.pong-ball.lane-3 {
+  top: 78%;
 }
 
 .pong-flash {
@@ -404,7 +408,7 @@
 
 @media (min-width: 720px) {
   .status-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -477,6 +481,12 @@
 .status-card.accent-purple {
   background:
     linear-gradient(160deg, rgba(168, 85, 247, 0.14), transparent 50%),
+    rgba(0, 0, 0, 0.55);
+}
+
+.status-card.accent-orange {
+  background:
+    linear-gradient(160deg, rgba(255, 107, 53, 0.18), transparent 50%),
     rgba(0, 0, 0, 0.55);
 }
 
@@ -719,6 +729,10 @@
 
 .status-card.accent-red .status-open {
   background: #ffb4b4;
+}
+
+.status-card.accent-orange .status-open {
+  background: #ffc48a;
 }
 
 .pong-footer {

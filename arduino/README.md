@@ -1,6 +1,6 @@
 # Mercantec Games — Arduino MKR IoT Carrier
 
-Fælles trådløs controller til **Bomberman**, **Wizard Duel** og **Tetris** på [games.mercantec.tech](https://games.mercantec.tech).
+Fælles trådløs controller til **Bomberman**, **Wizard Duel**, **Tetris** og **Pong** på [games.mercantec.tech](https://games.mercantec.tech).
 
 ## Hurtig start
 
@@ -16,8 +16,8 @@ Fælles trådløs controller til **Bomberman**, **Wizard Duel** og **Tetris** p�
 | `WIFI_SSID` / `WIFI_PASS` | Dit netværk |
 | `SERVER_HOST` | Produktion: `games.mercantec.tech` |
 | `PLAYER_NAME` | Navn i spillet |
-| `GAME_PIN` | **Bomberman / Tetris:** PIN fra lobby. **Wizard:** `""` er OK |
-| `GAME_MODE` | `GAME_MODE_BOMBERMAN`, `GAME_MODE_WIZARD` eller `GAME_MODE_TETRIS` |
+| `GAME_PIN` | **Bomberman / Tetris / Pong:** PIN fra lobby. **Wizard:** `""` er OK |
+| `GAME_MODE` | `GAME_MODE_BOMBERMAN`, `GAME_MODE_WIZARD`, `GAME_MODE_TETRIS` eller `GAME_MODE_PONG` |
 | `USE_HTTPS` | `1` på produktion, `0` kun lokalt HTTP |
 
 `GAME_BASE_PATH` sættes automatisk ud fra `GAME_MODE`.
@@ -71,6 +71,16 @@ Uden certifikat kan join give timeout (`JOIN TIMEOUT` på displayet).
 | TOUCH4 | Hard drop (`hardDrop`, `onTouchDown`) |
 
 Ved join viser TFT **TETRIS** / **Klar!** når `GAME_MODE_TETRIS` er valgt. Base path er `/Tetris`.
+
+### Pong
+
+| Pad | Funktion |
+|-----|----------|
+| TOUCH0 | Op (`move` UP, hold = gentag) |
+| TOUCH2 | Ned (`move` DOWN, hold = gentag) |
+| TOUCH1 / TOUCH3 / TOUCH4 | Stop paddle (`stop`, `onTouchDown`) |
+
+Ved join viser TFT **PONG** / **Klar!** når `GAME_MODE_PONG` er valgt. Base path er `/Pong`.
 
 ## TFT-fejlbeskeder
 

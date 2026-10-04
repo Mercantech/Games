@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import './PadSimulator.css'
 
-type GameMode = 'bomber' | 'wizard' | 'tetris'
+type GameMode = 'bomber' | 'wizard' | 'tetris' | 'pong'
 
 type PadMapping = { action: string; body: string }
 
@@ -12,6 +12,7 @@ type PadDef = {
   bomber: PadMapping
   wizard: PadMapping
   tetris: PadMapping
+  pong: PadMapping
 }
 
 const PADS: PadDef[] = [
@@ -31,6 +32,10 @@ const PADS: PadDef[] = [
       action: 'rotate',
       body: '{"action":"rotate"}',
     },
+    pong: {
+      action: 'move DOWN',
+      body: '{"action":"move","params":{"direction":"DOWN"}}',
+    },
   },
   {
     id: 1,
@@ -47,6 +52,10 @@ const PADS: PadDef[] = [
     tetris: {
       action: 'move LEFT',
       body: '{"action":"move","params":{"direction":"LEFT"}}',
+    },
+    pong: {
+      action: 'stop',
+      body: '{"action":"stop"}',
     },
   },
   {
@@ -65,6 +74,10 @@ const PADS: PadDef[] = [
       action: 'move RIGHT',
       body: '{"action":"move","params":{"direction":"RIGHT"}}',
     },
+    pong: {
+      action: 'stop',
+      body: '{"action":"stop"}',
+    },
   },
   {
     id: 0,
@@ -81,6 +94,10 @@ const PADS: PadDef[] = [
     tetris: {
       action: 'move DOWN',
       body: '{"action":"move","params":{"direction":"DOWN"}}',
+    },
+    pong: {
+      action: 'move UP',
+      body: '{"action":"move","params":{"direction":"UP"}}',
     },
   },
   {
@@ -99,6 +116,10 @@ const PADS: PadDef[] = [
       action: 'hardDrop',
       body: '{"action":"hardDrop"}',
     },
+    pong: {
+      action: 'stop',
+      body: '{"action":"stop"}',
+    },
   },
 ]
 
@@ -116,7 +137,13 @@ export default function PadSimulator({ onPing }: { onPing?: () => void }) {
 
   const press = (pad: PadDef) => {
     const mapping =
-      mode === 'bomber' ? pad.bomber : mode === 'wizard' ? pad.wizard : pad.tetris
+      mode === 'bomber'
+        ? pad.bomber
+        : mode === 'wizard'
+          ? pad.wizard
+          : mode === 'tetris'
+            ? pad.tetris
+            : pad.pong
     setActive(pad.id)
     window.setTimeout(() => setActive(null), 180)
     setLog((prev) =>
@@ -132,6 +159,15 @@ export default function PadSimulator({ onPing }: { onPing?: () => void }) {
     )
     onPing?.()
   }
+
+  const postHint =
+    mode === 'bomber'
+      ? 'POST …/Bomberman/api/controller/action'
+      : mode === 'wizard'
+        ? 'POST …/Wizard/api/controller/action'
+        : mode === 'tetris'
+          ? 'POST …/Tetris/api/controller/action'
+          : 'POST …/Pong/api/controller/action'
 
   return (
     <div className="pad-sim">
@@ -159,6 +195,13 @@ export default function PadSimulator({ onPing }: { onPing?: () => void }) {
           >
             TETRIS
           </button>
+          <button
+            type="button"
+            className={mode === 'pong' ? 'on' : ''}
+            onClick={() => setMode('pong')}
+          >
+            PONG
+          </button>
         </div>
       </div>
 
@@ -179,13 +222,7 @@ export default function PadSimulator({ onPing }: { onPing?: () => void }) {
         </div>
 
         <div className="pad-sim-out">
-          <p className="pad-sim-out-label">
-            {mode === 'bomber'
-              ? 'POST …/Bomberman/api/controller/action'
-              : mode === 'wizard'
-                ? 'POST …/Wizard/api/controller/action'
-                : 'POST …/Tetris/api/controller/action'}
-          </p>
+          <p className="pad-sim-out-label">{postHint}</p>
           {log.length === 0 ? (
             <p className="pad-sim-empty">Tryk en pad — se action + JSON</p>
           ) : (

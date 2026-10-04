@@ -14,13 +14,14 @@ const SETUP_SNIPPET = `// Games-repo: arduino/MercantecGamesController/config.h
 #define WIFI_PASS      "DIT_PASSWORD"
 #define SERVER_HOST    "games.mercantec.tech"
 #define PLAYER_NAME    "Arduino"
-#define GAME_PIN       "1234"   // Bomberman/Tetris. Wizard: ""
+#define GAME_PIN       "1234"   // Bomberman/Tetris/Pong. Wizard: ""
 
 #define GAME_MODE_BOMBERMAN  1
 #define GAME_MODE_WIZARD     2
 #define GAME_MODE_TETRIS     3
+#define GAME_MODE_PONG       4
 #define GAME_MODE            GAME_MODE_BOMBERMAN
-// Skift til GAME_MODE_WIZARD eller GAME_MODE_TETRIS.
+// Skift til GAME_MODE_WIZARD, GAME_MODE_TETRIS eller GAME_MODE_PONG.
 
 #define USE_HTTPS      1
 // MercantecGamesController.ino inkluderer config.h
@@ -108,6 +109,7 @@ const FULL_STAGES: Stage[] = [
   { id: 'bomberman', label: 'BM', title: 'Bomberman' },
   { id: 'wizard', label: 'WZ', title: 'Wizard Duel' },
   { id: 'tetris', label: 'TR', title: 'Tetris' },
+  { id: 'pong', label: 'PG', title: 'Pong' },
   { id: 'checklist', label: 'OK', title: 'Checklist' },
 ]
 
@@ -121,8 +123,8 @@ const QUICK_STAGES: Stage[] = [
 const CHECK_ITEMS = [
   'WIFI_SSID / WIFI_PASS sat i config.h',
   'SERVER_HOST = games.mercantec.tech, USE_HTTPS = 1',
-  'GAME_MODE matcher spillet (Bomberman / Wizard / Tetris)',
-  'Bomberman / Tetris: gyldig GAME_PIN fra lobby',
+  'GAME_MODE matcher spillet (Bomberman / Wizard / Tetris / Pong)',
+  'Bomberman / Tetris / Pong: gyldig GAME_PIN fra lobby',
   'Root-cert uploadet til MKR WiFi 1010',
   'Biblioteker: Carrier, WiFiNINA, HttpClient',
   'Serial Monitor 115200 — join OK + playerId',
@@ -291,8 +293,8 @@ export default function Guide() {
           <h1>OPLÀ CONTROLLER MANUAL</h1>
           <p className="hero-lede">
             {track === 'quick'
-              ? 'Hurtig track: config → pads → vælg spil (Bomberman / Wizard / Tetris) → checklist. Skift til FULL for API-detaljer.'
-              : 'Fuld walkthrough: fra WiFi til live arena på games.mercantec.tech (inkl. Tetris).'}{' '}
+              ? 'Hurtig track: config → pads → vælg spil (Bomberman / Wizard / Tetris / Pong) → checklist. Skift til FULL for API-detaljer.'
+              : 'Fuld walkthrough: fra WiFi til live arena på games.mercantec.tech (inkl. Tetris og Pong).'}{' '}
             Hardware: MKR WiFi 1010 + MKR IoT Carrier.
           </p>
           <div className="hero-controls">
@@ -388,6 +390,18 @@ export default function Guide() {
                     <li>Pads: venstre/højre/ned, rotate, hard drop</li>
                   </ol>
                 </div>
+                <div className="flow-card flow-orange">
+                  <div className="flow-card-top">
+                    <img src="/pong-thumb.jpg" alt="" />
+                    <h3>PONG</h3>
+                  </div>
+                  <ol>
+                    <li>Lobby med PIN (<code>GAME_BASE_PATH=/Pong</code>)</li>
+                    <li>Arduino joiner med samme PIN</li>
+                    <li>Klassisk paddle-duel — første til point vinder</li>
+                    <li>Pads: TOUCH0 op, TOUCH2 ned (hold), øvrige stop</li>
+                  </ol>
+                </div>
               </div>
             </section>
 
@@ -447,7 +461,10 @@ export default function Guide() {
             Klon eller download{' '}
             <code>arduino/MercantecGamesController/</code> fra Mercantec Games-repoet. Rediger kun{' '}
             <code>config.h</code> — skift <code>GAME_MODE</code>
-            {track === 'full' ? ', Bomberman/Tetris-PIN og GAME_MODE_TETRIS.' : '.'} Upload{' '}
+            {track === 'full'
+              ? ', Bomberman/Tetris/Pong-PIN og GAME_MODE_PONG.'
+              : '.'}{' '}
+            Upload{' '}
             <code>MercantecGamesController.ino</code>.
           </p>
           <InoCode code={SETUP_SNIPPET} filename="config.h" />
@@ -568,6 +585,21 @@ export default function Guide() {
                   </li>
                 </ol>
               </div>
+              <div className="flow-card flow-orange">
+                <div className="flow-card-top">
+                  <img src="/pong-thumb.jpg" alt="" />
+                  <h3>PONG</h3>
+                </div>
+                <ol>
+                  <li>
+                    <code>GAME_MODE_PONG</code> i config.h
+                  </li>
+                  <li>Lobby-PIN → <code>GAME_PIN</code></li>
+                  <li>
+                    Åbn <a href="/Pong/">/Pong/</a> — pad-sim PONG: TOUCH0 op, TOUCH2 ned
+                  </li>
+                </ol>
+              </div>
             </div>
           </section>
         )}
@@ -654,6 +686,33 @@ export default function Guide() {
                 </ul>
               </div>
             </section>
+
+            <section
+              id="pong"
+              className={`guide-section ${stageIds[stage] === 'pong' ? 'on' : ''}`}
+            >
+              <div className="section-head">
+                <span className="stage-badge">STAGE 09</span>
+                <h2>Pong</h2>
+              </div>
+              <div className="game-panel">
+                <img className="game-panel-art" src="/pong-thumb.jpg" alt="Classic Pong" />
+                <ul className="bullet-list">
+                  <li>
+                    <code>GAME_MODE_PONG</code> → <code>GAME_BASE_PATH=/Pong</code>
+                  </li>
+                  <li>
+                    Lobby-PIN i <code>GAME_PIN</code> (som Bomberman/Tetris)
+                  </li>
+                  <li>
+                    Actions: <code>move</code> UP/DOWN (hold), <code>stop</code> på øvrige pads
+                  </li>
+                  <li>
+                    Arena: <a href="/Pong/">/Pong/</a>
+                  </li>
+                </ul>
+              </div>
+            </section>
           </>
         )}
 
@@ -662,7 +721,7 @@ export default function Guide() {
           className={`guide-section ${stageIds[stage] === 'checklist' ? 'on' : ''}`}
         >
           <div className="section-head">
-            <span className="stage-badge">{track === 'quick' ? 'STEP 04' : 'STAGE 09'}</span>
+            <span className="stage-badge">{track === 'quick' ? 'STEP 04' : 'STAGE 10'}</span>
             <h2>Checklist</h2>
           </div>
           <p className="check-progress">
