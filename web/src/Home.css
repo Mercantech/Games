@@ -1,6 +1,6 @@
 .home {
   text-align: center;
-  padding: 0.15rem 0.1rem 0.5rem;
+  padding: 0.35rem 0.35rem 0.75rem;
 }
 
 .blink-line {
@@ -13,9 +13,9 @@
 }
 
 .title-pixel {
-  margin: 0 0 0.45rem;
+  margin: 0 0 0.55rem;
   font-family: var(--font-pixel);
-  font-size: clamp(0.95rem, 3.2vw, 1.45rem);
+  font-size: clamp(0.85rem, 2.8vw, 1.25rem);
   line-height: 1.4;
   letter-spacing: 0.04em;
   color: #fff;
@@ -27,29 +27,34 @@
 }
 
 .home-lede {
-  margin: 0 auto 0.85rem;
+  margin: 0 auto 1rem;
   max-width: 42ch;
-  font-size: 1.15rem;
-  line-height: 1.2;
+  font-size: 1.1rem;
+  line-height: 1.25;
   color: var(--nes-lcd-dim);
 }
 
 .cartridge-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
-  margin-bottom: 0.55rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.15rem;
+  width: min(100%, 34rem);
+  margin: 0 auto 0.75rem;
+  justify-items: stretch;
 }
 
 @media (max-width: 560px) {
   .cartridge-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 16rem);
+    justify-content: center;
+    gap: 0.9rem;
   }
 }
 
-@media (min-width: 720px) {
+@media (min-width: 900px) {
   .cartridge-row {
-    gap: 1rem;
+    width: min(100%, 38rem);
+    gap: 1.15rem 1.35rem;
   }
 }
 
@@ -57,13 +62,14 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 0.35rem;
+  gap: 0.28rem;
   text-align: left;
-  padding: 0.55rem 0.55rem 0.7rem;
+  padding: 0.4rem 0.4rem 0.5rem;
   border: 3px solid #000;
-  box-shadow: 4px 4px 0 #000;
+  box-shadow: 3px 3px 0 #000;
   transition: transform 0.12s steps(2, end), filter 0.12s ease;
   overflow: hidden;
+  max-width: 100%;
 }
 
 .cart.selected {
@@ -141,9 +147,9 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
+  gap: 0.25rem;
   aspect-ratio: 16 / 9;
-  max-height: min(28vh, 220px);
+  max-height: min(18vh, 140px);
   background: #0a1a0a;
   color: var(--nes-lcd);
 }
@@ -178,11 +184,12 @@
 
 .cart-art-frame {
   width: 100%;
-  margin: 0.1rem 0 0.15rem;
-  border: 3px solid #000;
+  margin: 0.05rem 0 0.1rem;
+  border: 2px solid #000;
   background: #0a0a0a;
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
   line-height: 0;
+  overflow: hidden;
 }
 
 .cart-art {
@@ -190,8 +197,8 @@
   width: 100%;
   height: auto;
   aspect-ratio: 16 / 9;
-  max-height: min(28vh, 220px);
-  object-fit: contain;
+  max-height: min(18vh, 140px);
+  object-fit: cover;
   object-position: center;
   image-rendering: auto;
   background: #0a0a0a;
@@ -204,7 +211,7 @@
 
 .cart-label {
   font-family: var(--font-pixel);
-  font-size: 0.42rem;
+  font-size: 0.36rem;
   opacity: 0.85;
   letter-spacing: 0.08em;
 }
@@ -214,26 +221,27 @@
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 0.35rem 0.75rem;
+  gap: 0.2rem 0.5rem;
 }
 
 .cart strong {
   font-family: var(--font-pixel);
-  font-size: 0.68rem;
-  line-height: 1.35;
+  font-size: 0.52rem;
+  line-height: 1.3;
   text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.45);
 }
 
 .cart-meta {
   font-family: var(--font-lcd);
-  font-size: 0.95rem;
-  opacity: 0.9;
+  font-size: 0.85rem;
+  opacity: 0.88;
   width: 100%;
+  line-height: 1.15;
 }
 
 .cart-go {
   font-family: var(--font-pixel);
-  font-size: 0.5rem;
+  font-size: 0.4rem;
   letter-spacing: 0.06em;
   margin-left: auto;
 }

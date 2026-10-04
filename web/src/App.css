@@ -145,8 +145,9 @@
 }
 
 .screen-glass:has(.home) {
-  min-height: min(48vh, 380px);
-  max-height: min(56vh, 520px);
+  min-height: min(52vh, 420px);
+  max-height: min(62vh, 580px);
+  padding: 1rem 1.1rem 1.25rem;
 }
 
 .screen-glass::-webkit-scrollbar {
