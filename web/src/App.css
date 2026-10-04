@@ -130,6 +130,8 @@
   min-height: auto;
   max-height: none;
   overflow: auto;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
   background: var(--nes-screen);
   background-image:
     radial-gradient(ellipse 120% 80% at 50% 0%, rgba(155, 188, 15, 0.12), transparent 55%),
@@ -138,6 +140,22 @@
   box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.45);
   color: var(--nes-lcd);
   padding: 0.85rem 0.85rem 1.1rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--nes-lcd-dim) #0a1a0a;
+}
+
+.screen-glass:has(.home) {
+  min-height: min(48vh, 380px);
+  max-height: min(56vh, 520px);
+}
+
+.screen-glass::-webkit-scrollbar {
+  width: 8px;
+}
+
+.screen-glass::-webkit-scrollbar-thumb {
+  background: var(--nes-lcd-dim);
+  border: 2px solid #0a1a0a;
 }
 
 .power-row {

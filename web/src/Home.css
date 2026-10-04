@@ -36,20 +36,20 @@
 
 .cartridge-row {
   display: grid;
-  gap: 0.85rem;
-  margin-bottom: 0.85rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 0.55rem;
+}
+
+@media (max-width: 560px) {
+  .cartridge-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (min-width: 720px) {
   .cartridge-row {
-    grid-template-columns: 1fr 1fr;
     gap: 1rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .cartridge-row {
-    grid-template-columns: repeat(3, 1fr);
   }
 }
 
@@ -110,6 +110,51 @@
     0 0 18px rgba(34, 211, 238, 0.25);
 }
 
+.cart-guide {
+  background: linear-gradient(180deg, #c8f060, var(--nes-lcd) 45%, #5a7a08);
+  color: #111;
+}
+
+.cart-art-guide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  aspect-ratio: 16 / 9;
+  max-height: min(28vh, 220px);
+  background: #0a1a0a;
+  color: var(--nes-lcd);
+}
+
+.guide-art-title {
+  font-family: var(--font-pixel);
+  font-size: clamp(0.55rem, 2vw, 0.85rem);
+  letter-spacing: 0.08em;
+}
+
+.guide-art-sub {
+  font-family: var(--font-pixel);
+  font-size: clamp(0.42rem, 1.6vw, 0.62rem);
+  letter-spacing: 0.12em;
+  opacity: 0.9;
+}
+
+.guide-art-hint {
+  font-family: var(--font-lcd);
+  font-size: 0.95rem;
+  color: var(--nes-lcd-dim);
+}
+
+.scroll-hint {
+  margin: 0 0 0.55rem;
+  font-family: var(--font-pixel);
+  font-size: 0.4rem;
+  letter-spacing: 0.14em;
+  color: var(--nes-lcd-dim);
+  animation: blink 1.4s steps(2, end) infinite;
+}
+
 .cart-art-frame {
   width: 100%;
   margin: 0.1rem 0 0.15rem;
@@ -124,7 +169,7 @@
   width: 100%;
   height: auto;
   aspect-ratio: 16 / 9;
-  max-height: min(42vh, 360px);
+  max-height: min(28vh, 220px);
   object-fit: contain;
   object-position: center;
   image-rendering: auto;
@@ -172,31 +217,6 @@
   margin-left: auto;
 }
 
-.guide-btn {
-  display: inline-block;
-  margin-bottom: 0.85rem;
-  padding: 0.7rem 0.9rem;
-  font-family: var(--font-pixel);
-  font-size: 0.52rem;
-  line-height: 1.5;
-  color: #111;
-  background: var(--nes-lcd);
-  border: 3px solid #000;
-  box-shadow: 4px 4px 0 #000;
-  transition: transform 0.12s steps(2, end);
-}
-
-.guide-btn:hover {
-  transform: translate(-2px, -2px);
-}
-
-.guide-btn.selected {
-  outline: 3px solid #fff;
-  outline-offset: 3px;
-  transform: translate(-3px, -3px);
-  animation: cart-pulse 0.9s steps(2, end) infinite;
-}
-
 .hint-pixel {
   margin: 0;
   font-family: var(--font-pixel);
@@ -232,7 +252,7 @@
   .blink-line,
   .title-pixel,
   .cart.selected,
-  .guide-btn.selected {
+  .scroll-hint {
     animation: none;
   }
 }

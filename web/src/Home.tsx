@@ -6,17 +6,24 @@ import './Home.css'
 type Slot = 'bomber' | 'wizard' | 'tetris' | 'guide'
 
 const SLOTS: Slot[] = ['bomber', 'wizard', 'tetris', 'guide']
+const COLS = 2
 const GUIDE_INDEX = 3
 
 export default function Home() {
   const [cursor, setCursor] = useState(0)
   const cursorRef = useRef(0)
+  const itemRefs = useRef<(HTMLElement | null)[]>([])
   const navigate = useNavigate()
   const { subscribe, blip } = usePad()
   const jingled = useRef(false)
 
   useEffect(() => {
     cursorRef.current = cursor
+    itemRefs.current[cursor]?.scrollIntoView({
+      block: 'nearest',
+      inline: 'nearest',
+      behavior: 'smooth',
+    })
   }, [cursor])
 
   const launch = useCallback(
@@ -54,23 +61,30 @@ export default function Home() {
   }, [blip])
 
   useEffect(() => {
+    const move = (delta: number) => {
+      setCursor((c) => {
+        const next = (c + delta + SLOTS.length) % SLOTS.length
+        cursorRef.current = next
+        return next
+      })
+      blip('move')
+    }
+
     const onPad = (button: PadButton) => {
-      if (button === 'left' || button === 'up') {
-        setCursor((c) => {
-          const next = (c + SLOTS.length - 1) % SLOTS.length
-          cursorRef.current = next
-          return next
-        })
-        blip('move')
+      if (button === 'left') {
+        move(-1)
         return
       }
-      if (button === 'right' || button === 'down') {
-        setCursor((c) => {
-          const next = (c + 1) % SLOTS.length
-          cursorRef.current = next
-          return next
-        })
-        blip('move')
+      if (button === 'right') {
+        move(1)
+        return
+      }
+      if (button === 'up') {
+        move(-COLS)
+        return
+      }
+      if (button === 'down') {
+        move(COLS)
         return
       }
       if (button === 'select') {
@@ -95,11 +109,14 @@ export default function Home() {
         GAMES
       </h1>
       <p className="home-lede">
-        Brug controlleren nedenunder — eller piletaster + A.
+        To cartridges pr. række — scroll ned i skærmen for flere.
       </p>
 
       <div className="cartridge-row" role="listbox" aria-label="Vælg spil">
         <a
+          ref={(el) => {
+            itemRefs.current[0] = el
+          }}
           className={`cart cart-red ${cursor === 0 ? 'selected' : ''}`}
           href="/Bomberman/"
           role="option"
@@ -130,6 +147,9 @@ export default function Home() {
           </div>
         </a>
         <a
+          ref={(el) => {
+            itemRefs.current[1] = el
+          }}
           className={`cart cart-blue ${cursor === 1 ? 'selected' : ''}`}
           href="/Wizard/"
           role="option"
@@ -160,6 +180,9 @@ export default function Home() {
           </div>
         </a>
         <a
+          ref={(el) => {
+            itemRefs.current[2] = el
+          }}
           className={`cart cart-purple ${cursor === 2 ? 'selected' : ''}`}
           href="/Tetris/"
           role="option"
@@ -178,8 +201,8 @@ export default function Home() {
               className="cart-art"
               src="/tetris-thumb.jpg"
               alt="Tetris — PIN lobby, battle og garbage lines"
-              width={320}
-              height={180}
+              width={1024}
+              height={576}
               loading="lazy"
             />
           </div>
@@ -189,20 +212,38 @@ export default function Home() {
             <span className="cart-meta">PIN · BATTLE · GARBAGE</span>
           </div>
         </a>
+        <Link
+          ref={(el) => {
+            itemRefs.current[3] = el
+          }}
+          className={`cart cart-guide ${cursor === GUIDE_INDEX ? 'selected' : ''}`}
+          to="/guide"
+          role="option"
+          aria-selected={cursor === GUIDE_INDEX}
+          onMouseEnter={() => setCursor(GUIDE_INDEX)}
+          onFocus={() => setCursor(GUIDE_INDEX)}
+          onClick={() => blip('ok')}
+        >
+          <span className="cart-label">SLOT D</span>
+          <div className="cart-art-frame cart-art-guide">
+            <span className="guide-art-title">ARDUINO</span>
+            <span className="guide-art-sub">CONTROLLER</span>
+            <span className="guide-art-hint">15 MIN · FULL</span>
+          </div>
+          <div className="cart-foot">
+            <strong>GUIDE</strong>
+            <span className="cart-go">{cursor === GUIDE_INDEX ? '► START' : '► OPEN'}</span>
+            <span className="cart-meta">PAD · WIFI · GAME_MODE</span>
+          </div>
+        </Link>
       </div>
 
-      <Link
-        className={`guide-btn ${cursor === GUIDE_INDEX ? 'selected' : ''}`}
-        to="/guide"
-        onMouseEnter={() => setCursor(GUIDE_INDEX)}
-        onFocus={() => setCursor(GUIDE_INDEX)}
-        onClick={() => blip('ok')}
-      >
-        {cursor === GUIDE_INDEX ? '► ' : ''}ARDUINO CONTROLLER GUIDE
-      </Link>
+      <p className="scroll-hint" aria-hidden="true">
+        ↓ SCROLL I SKÆRMEN
+      </p>
 
       <p className="hint-pixel">
-        CURSOR {cursor + 1}/{SLOTS.length} · A CONFIRM · INSERT CART
+        CURSOR {cursor + 1}/{SLOTS.length} · ←→ RÆKKE · ↑↓ NED · A CONFIRM
       </p>
     </div>
   )
