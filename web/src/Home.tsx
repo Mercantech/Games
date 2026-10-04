@@ -176,7 +176,7 @@ export default function Home() {
           <div className="cart-art-frame">
             <img
               className="cart-art"
-              src="/tetris-thumb.svg"
+              src="/tetris-thumb.jpg"
               alt="Tetris — PIN lobby, battle og garbage lines"
               width={320}
               height={180}
