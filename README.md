@@ -9,6 +9,10 @@ Retro Nintendo-agtig forside for Mercantec-spil på **https://games.mercantec.te
 | `/Bomberman` | Bomberman (eget compose) |
 | `/Wizard` | Wizard Duel (eget compose) |
 
+## Arduino-controller
+
+Fælles MKR IoT Carrier-sketch til begge spil: [`arduino/MercantecGamesController/`](arduino/MercantecGamesController/) — rediger kun `config.h` (`GAME_MODE`, WiFi, PIN). Se [`arduino/README.md`](arduino/README.md).
+
 ## Lokalt
 
 ```bash

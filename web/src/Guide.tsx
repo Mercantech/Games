@@ -10,35 +10,21 @@ const CARRIER_DOC =
   'https://docs.arduino.cc/tutorials/mkr-iot-carrier/mkr-iot-carrier-01-technical-reference/'
 const CARRIER_IMG = '/mkr-iot-carrier-pads.png'
 
-const SETUP_SNIPPET = `#include <Arduino_MKRIoTCarrier.h>
-#include <WiFiNINA.h>
-#include <ArduinoHttpClient.h>
-
-MKRIoTCarrier carrier;
-
+const SETUP_SNIPPET = `// Games-repo: arduino/MercantecGamesController/config.h
 #define WIFI_SSID      "DIT_WIFI"
 #define WIFI_PASS      "DIT_PASSWORD"
 #define SERVER_HOST    "games.mercantec.tech"
-#define GAME_BASE_PATH "/Bomberman"   // eller "/Wizard"
-#define GAME_PIN       "1234"
 #define PLAYER_NAME    "Arduino"
+#define GAME_PIN       "1234"   // Bomberman. Wizard: ""
+
+#define GAME_MODE_BOMBERMAN  1
+#define GAME_MODE_WIZARD     2
+#define GAME_MODE            GAME_MODE_BOMBERMAN
+// Skift til GAME_MODE_WIZARD for Wizard Duel.
+
 #define USE_HTTPS      1
-
-#if USE_HTTPS
-  #define SERVER_PORT 443
-  WiFiSSLClient wifi;
-#else
-  #define SERVER_PORT 80
-  WiFiClient wifi;
-#endif
-
-HttpClient http = HttpClient(wifi, SERVER_HOST, SERVER_PORT);
-String playerId;
-String deviceId;
-
-String apiPath(const char* endpoint) {
-  return String(GAME_BASE_PATH) + endpoint;
-}`
+// MercantecGamesController.ino inkluderer config.h
+// og sætter GAME_BASE_PATH + SERVER_PORT automatisk.`
 
 const JOIN_SNIPPET = `bool doJoin() {
   String path = apiPath("/api/controller/join");
@@ -132,9 +118,9 @@ const QUICK_STAGES: Stage[] = [
 ]
 
 const CHECK_ITEMS = [
-  'WIFI_SSID / WIFI_PASS sat',
+  'WIFI_SSID / WIFI_PASS sat i config.h',
   'SERVER_HOST = games.mercantec.tech, USE_HTTPS = 1',
-  'GAME_BASE_PATH matcher spillet',
+  'GAME_MODE matcher spillet (Bomberman / Wizard)',
   'Bomberman: gyldig GAME_PIN fra admin',
   'Root-cert uploadet til MKR WiFi 1010',
   'Biblioteker: Carrier, WiFiNINA, HttpClient',
@@ -142,8 +128,8 @@ const CHECK_ITEMS = [
 ]
 
 const QUICK_CHECKS = [
-  'WiFi + SERVER_HOST sat',
-  'GAME_BASE_PATH = /Bomberman eller /Wizard',
+  'MercantecGamesController + config.h klar',
+  'WiFi + GAME_MODE sat',
   'Sketch uploaded + Serial join OK',
   'Arena åbnet i browser',
 ]
@@ -446,11 +432,13 @@ export default function Guide() {
             <h2>Sketch-setup</h2>
           </div>
           <p>
-            Samme config til begge spil. Skift kun <code>GAME_BASE_PATH</code>
-            {track === 'full' ? ' (og PIN til Bomberman).' : '.'} Tryk <strong>COPY</strong> og
-            indsæt i Arduino IDE.
+            Klon eller download{' '}
+            <code>arduino/MercantecGamesController/</code> fra Mercantec Games-repoet. Rediger kun{' '}
+            <code>config.h</code> — skift <code>GAME_MODE</code>
+            {track === 'full' ? ' og Bomberman-PIN.' : '.'} Upload{' '}
+            <code>MercantecGamesController.ino</code>.
           </p>
-          <InoCode code={SETUP_SNIPPET} filename="config.ino" />
+          <InoCode code={SETUP_SNIPPET} filename="config.h" />
         </section>
 
         {track === 'full' && (
@@ -521,7 +509,7 @@ export default function Guide() {
               <span className="stage-badge">STEP 03</span>
               <h2>Vælg spil</h2>
             </div>
-            <p>Sæt <code>GAME_BASE_PATH</code>, upload sketch, åbn arena.</p>
+            <p>Sæt <code>GAME_MODE</code> i <code>config.h</code>, upload sketch, åbn arena.</p>
             <div className="flow-compare">
               <div className="flow-card flow-red">
                 <div className="flow-card-top">
@@ -530,7 +518,7 @@ export default function Guide() {
                 </div>
                 <ol>
                   <li>
-                    <code>GAME_BASE_PATH=/Bomberman</code>
+                    <code>GAME_MODE_BOMBERMAN</code> i config.h
                   </li>
                   <li>Admin → PIN → GAME_PIN</li>
                   <li>
@@ -545,7 +533,7 @@ export default function Guide() {
                 </div>
                 <ol>
                   <li>
-                    <code>GAME_BASE_PATH=/Wizard</code>
+                    <code>GAME_MODE_WIZARD</code> i config.h
                   </li>
                   <li>Join kø → Start Kamp</li>
                   <li>
@@ -571,7 +559,7 @@ export default function Guide() {
                 <img className="game-panel-art" src="/bomberman-nes.jpg" alt="Bomberman NES" />
                 <ul className="bullet-list">
                   <li>
-                    <code>GAME_BASE_PATH=/Bomberman</code>
+                    <code>GAME_MODE_BOMBERMAN</code> i config.h
                   </li>
                   <li>
                     Admin → PIN → <code>GAME_PIN</code>
@@ -598,7 +586,7 @@ export default function Guide() {
                 <img className="game-panel-art" src="/wizard-duel.jpg" alt="Wizard Duel" />
                 <ul className="bullet-list">
                   <li>
-                    <code>GAME_BASE_PATH=/Wizard</code>
+                    <code>GAME_MODE_WIZARD</code> i config.h
                   </li>
                   <li>
                     <code>cast</code> + spellKey: FIREBALL, LIGHTNING, SHIELD, HEAL, POWER_BOOST,
@@ -641,7 +629,9 @@ export default function Guide() {
           </ul>
           {track === 'full' && (
             <p className="guide-outro">
-              Starter-sketches: Bomberman <code>iot/</code> · Wizard <code>ArduinoKode/</code>
+              Fælles starter-kit: Games-repo{' '}
+              <code>arduino/MercantecGamesController/</code> (config.h + GAME_MODE). Ældre{' '}
+              <code>iot/</code> og <code>ArduinoKode/</code> er legacy.
             </p>
           )}
           <div className="guide-end">
