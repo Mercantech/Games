@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" width="320" height="180">
+  <rect width="320" height="180" fill="#0a0a12"/>
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a855f7"/>
+      <stop offset="50%" stop-color="#22d3ee"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+  </defs>
+  <rect x="108" y="24" width="24" height="24" fill="url(#g)" stroke="#000" stroke-width="2"/>
+  <rect x="132" y="24" width="24" height="24" fill="url(#g)" stroke="#000" stroke-width="2"/>
+  <rect x="156" y="24" width="24" height="24" fill="url(#g)" stroke="#000" stroke-width="2"/>
+  <rect x="180" y="24" width="24" height="24" fill="url(#g)" stroke="#000" stroke-width="2"/>
+  <rect x="132" y="48" width="24" height="24" fill="#22d3ee" stroke="#000" stroke-width="2"/>
+  <rect x="156" y="48" width="24" height="24" fill="#22d3ee" stroke="#000" stroke-width="2"/>
+  <rect x="108" y="72" width="24" height="24" fill="#a855f7" stroke="#000" stroke-width="2"/>
+  <rect x="132" y="72" width="24" height="24" fill="#a855f7" stroke="#000" stroke-width="2"/>
+  <rect x="156" y="72" width="24" height="24" fill="#a855f7" stroke="#000" stroke-width="2"/>
+  <rect x="180" y="72" width="24" height="24" fill="#a855f7" stroke="#000" stroke-width="2"/>
+  <text x="160" y="148" text-anchor="middle" fill="#e2e8f0" font-family="monospace" font-size="18" font-weight="bold">TETRIS</text>
+</svg>

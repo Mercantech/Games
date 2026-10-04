@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom'
 import { InoCode } from './InoCode'
 import PadSimulator from './PadSimulator'
 import { usePad, type PadButton } from './PadContext'
-import QrCard from './QrCard'
 import './Guide.css'
 
 const CARRIER_DOC =
@@ -15,12 +14,13 @@ const SETUP_SNIPPET = `// Games-repo: arduino/MercantecGamesController/config.h
 #define WIFI_PASS      "DIT_PASSWORD"
 #define SERVER_HOST    "games.mercantec.tech"
 #define PLAYER_NAME    "Arduino"
-#define GAME_PIN       "1234"   // Bomberman. Wizard: ""
+#define GAME_PIN       "1234"   // Bomberman/Tetris. Wizard: ""
 
 #define GAME_MODE_BOMBERMAN  1
 #define GAME_MODE_WIZARD     2
+#define GAME_MODE_TETRIS     3
 #define GAME_MODE            GAME_MODE_BOMBERMAN
-// Skift til GAME_MODE_WIZARD for Wizard Duel.
+// Skift til GAME_MODE_WIZARD eller GAME_MODE_TETRIS.
 
 #define USE_HTTPS      1
 // MercantecGamesController.ino inkluderer config.h
@@ -107,6 +107,7 @@ const FULL_STAGES: Stage[] = [
   { id: 'pads', label: 'PAD', title: 'Pad-mapping' },
   { id: 'bomberman', label: 'BM', title: 'Bomberman' },
   { id: 'wizard', label: 'WZ', title: 'Wizard Duel' },
+  { id: 'tetris', label: 'TR', title: 'Tetris' },
   { id: 'checklist', label: 'OK', title: 'Checklist' },
 ]
 
@@ -120,8 +121,8 @@ const QUICK_STAGES: Stage[] = [
 const CHECK_ITEMS = [
   'WIFI_SSID / WIFI_PASS sat i config.h',
   'SERVER_HOST = games.mercantec.tech, USE_HTTPS = 1',
-  'GAME_MODE matcher spillet (Bomberman / Wizard)',
-  'Bomberman: gyldig GAME_PIN fra admin',
+  'GAME_MODE matcher spillet (Bomberman / Wizard / Tetris)',
+  'Bomberman / Tetris: gyldig GAME_PIN fra lobby',
   'Root-cert uploadet til MKR WiFi 1010',
   'Biblioteker: Carrier, WiFiNINA, HttpClient',
   'Serial Monitor 115200 — join OK + playerId',
@@ -290,8 +291,8 @@ export default function Guide() {
           <h1>OPLÀ CONTROLLER MANUAL</h1>
           <p className="hero-lede">
             {track === 'quick'
-              ? 'Hurtig track: config → pads → vælg spil → checklist. Skift til FULL for API-detaljer.'
-              : 'Fuld walkthrough: fra WiFi til live arena på games.mercantec.tech.'}{' '}
+              ? 'Hurtig track: config → pads → vælg spil (Bomberman / Wizard / Tetris) → checklist. Skift til FULL for API-detaljer.'
+              : 'Fuld walkthrough: fra WiFi til live arena på games.mercantec.tech (inkl. Tetris).'}{' '}
             Hardware: MKR WiFi 1010 + MKR IoT Carrier.
           </p>
           <div className="hero-controls">
@@ -299,7 +300,6 @@ export default function Guide() {
             <span>B EXIT</span>
             <span>SELECT TOP</span>
           </div>
-          <QrCard compact />
         </header>
 
         {track === 'full' && (
@@ -376,6 +376,18 @@ export default function Guide() {
                     <li>Sidste wizard med HP &gt; 0 vinder</li>
                   </ol>
                 </div>
+                <div className="flow-card flow-purple">
+                  <div className="flow-card-top">
+                    <img src="/tetris-thumb.svg" alt="" />
+                    <h3>TETRIS</h3>
+                  </div>
+                  <ol>
+                    <li>Lobby med PIN (<code>GAME_BASE_PATH=/Tetris</code>)</li>
+                    <li>Arduino joiner med samme PIN</li>
+                    <li>Battle — send garbage lines til modstandere</li>
+                    <li>Pads: venstre/højre/ned, rotate, hard drop</li>
+                  </ol>
+                </div>
               </div>
             </section>
 
@@ -435,7 +447,7 @@ export default function Guide() {
             Klon eller download{' '}
             <code>arduino/MercantecGamesController/</code> fra Mercantec Games-repoet. Rediger kun{' '}
             <code>config.h</code> — skift <code>GAME_MODE</code>
-            {track === 'full' ? ' og Bomberman-PIN.' : '.'} Upload{' '}
+            {track === 'full' ? ', Bomberman/Tetris-PIN og GAME_MODE_TETRIS.' : '.'} Upload{' '}
             <code>MercantecGamesController.ino</code>.
           </p>
           <InoCode code={SETUP_SNIPPET} filename="config.h" />
@@ -541,6 +553,21 @@ export default function Guide() {
                   </li>
                 </ol>
               </div>
+              <div className="flow-card flow-purple">
+                <div className="flow-card-top">
+                  <img src="/tetris-thumb.svg" alt="" />
+                  <h3>TETRIS</h3>
+                </div>
+                <ol>
+                  <li>
+                    <code>GAME_MODE_TETRIS</code> i config.h
+                  </li>
+                  <li>Lobby-PIN → <code>GAME_PIN</code></li>
+                  <li>
+                    Åbn <a href="/Tetris/">/Tetris/</a> — brug pad-sim TETRIS-profil
+                  </li>
+                </ol>
+              </div>
             </div>
           </section>
         )}
@@ -599,6 +626,34 @@ export default function Guide() {
                 </ul>
               </div>
             </section>
+
+            <section
+              id="tetris"
+              className={`guide-section ${stageIds[stage] === 'tetris' ? 'on' : ''}`}
+            >
+              <div className="section-head">
+                <span className="stage-badge">STAGE 08</span>
+                <h2>Tetris</h2>
+              </div>
+              <div className="game-panel">
+                <img className="game-panel-art" src="/tetris-thumb.svg" alt="Tetris battle" />
+                <ul className="bullet-list">
+                  <li>
+                    <code>GAME_MODE_TETRIS</code> → <code>GAME_BASE_PATH=/Tetris</code>
+                  </li>
+                  <li>
+                    Lobby-PIN i <code>GAME_PIN</code> (som Bomberman)
+                  </li>
+                  <li>
+                    Actions: <code>move</code> LEFT/RIGHT/DOWN, <code>rotate</code>,{' '}
+                    <code>hardDrop</code>
+                  </li>
+                  <li>
+                    Arena: <a href="/Tetris/">/Tetris/</a>
+                  </li>
+                </ul>
+              </div>
+            </section>
           </>
         )}
 
@@ -607,7 +662,7 @@ export default function Guide() {
           className={`guide-section ${stageIds[stage] === 'checklist' ? 'on' : ''}`}
         >
           <div className="section-head">
-            <span className="stage-badge">{track === 'quick' ? 'STEP 04' : 'STAGE 08'}</span>
+            <span className="stage-badge">{track === 'quick' ? 'STEP 04' : 'STAGE 09'}</span>
             <h2>Checklist</h2>
           </div>
           <p className="check-progress">

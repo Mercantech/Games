@@ -1,6 +1,6 @@
 /**
  * Mercantec Games Controller — MKR WiFi 1010 + MKR IoT Carrier
- * Bomberman og Wizard Duel via config.h (GAME_MODE).
+ * Bomberman, Wizard Duel og Tetris via config.h (GAME_MODE).
  *
  * POST {GAME_BASE_PATH}/api/controller/join
  * POST {GAME_BASE_PATH}/api/controller/heartbeat
@@ -38,6 +38,8 @@ unsigned long lastLeft = 0;
 unsigned long lastRight = 0;
 unsigned long lastBomb = 0;
 unsigned long lastSpell = 0;
+unsigned long lastRotate = 0;
+unsigned long lastHardDrop = 0;
 unsigned long lastHeartbeat = 0;
 
 enum JoinResult {
@@ -218,6 +220,8 @@ bool establishSession() {
 
 #if GAME_MODE == GAME_MODE_WIZARD
   showMsg("WIZARD DUEL", "Klar!", ST77XX_GREEN);
+#elif GAME_MODE == GAME_MODE_TETRIS
+  showMsg("TETRIS", "Klar!", ST77XX_GREEN);
 #else
   showMsg("BOMBERMAN", "Klar!", ST77XX_GREEN);
 #endif
@@ -334,6 +338,37 @@ void handleBombermanInput(unsigned long now) {
   }
 }
 
+void handleTetrisInput(unsigned long now) {
+  carrier.Buttons.update();
+
+  if (carrier.Buttons.getTouch(TOUCH1)) {
+    if (now - lastLeft > DEBOUNCE_MS) {
+      sendAction("move", "LEFT");
+      lastLeft = now;
+    }
+  }
+  if (carrier.Buttons.getTouch(TOUCH3)) {
+    if (now - lastRight > DEBOUNCE_MS) {
+      sendAction("move", "RIGHT");
+      lastRight = now;
+    }
+  }
+  if (carrier.Buttons.getTouch(TOUCH0)) {
+    if (now - lastDown > DEBOUNCE_MS) {
+      sendAction("move", "DOWN");
+      lastDown = now;
+    }
+  }
+  if (carrier.Buttons.onTouchDown(TOUCH2) && now - lastRotate > DEBOUNCE_MS) {
+    sendAction("rotate");
+    lastRotate = now;
+  }
+  if (carrier.Buttons.onTouchDown(TOUCH4) && now - lastHardDrop > DEBOUNCE_MS) {
+    sendAction("hardDrop");
+    lastHardDrop = now;
+  }
+}
+
 void handleWizardInput(unsigned long now) {
   carrier.Buttons.update();
 
@@ -393,7 +428,9 @@ void loop() {
     lastHeartbeat = now;
   }
 
-#if GAME_MODE == GAME_MODE_WIZARD
+#if GAME_MODE == GAME_MODE_TETRIS
+  handleTetrisInput(now);
+#elif GAME_MODE == GAME_MODE_WIZARD
   handleWizardInput(now);
 #else
   handleBombermanInput(now);

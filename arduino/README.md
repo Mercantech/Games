@@ -1,6 +1,6 @@
 # Mercantec Games — Arduino MKR IoT Carrier
 
-Fælles trådløs controller til **Bomberman** og **Wizard Duel** på [games.mercantec.tech](https://games.mercantec.tech).
+Fælles trådløs controller til **Bomberman**, **Wizard Duel** og **Tetris** på [games.mercantec.tech](https://games.mercantec.tech).
 
 ## Hurtig start
 
@@ -16,8 +16,8 @@ Fælles trådløs controller til **Bomberman** og **Wizard Duel** på [games.mer
 | `WIFI_SSID` / `WIFI_PASS` | Dit netværk |
 | `SERVER_HOST` | Produktion: `games.mercantec.tech` |
 | `PLAYER_NAME` | Navn i spillet |
-| `GAME_PIN` | **Bomberman:** PIN fra admin. **Wizard:** `""` er OK |
-| `GAME_MODE` | `GAME_MODE_BOMBERMAN` eller `GAME_MODE_WIZARD` |
+| `GAME_PIN` | **Bomberman / Tetris:** PIN fra lobby. **Wizard:** `""` er OK |
+| `GAME_MODE` | `GAME_MODE_BOMBERMAN`, `GAME_MODE_WIZARD` eller `GAME_MODE_TETRIS` |
 | `USE_HTTPS` | `1` på produktion, `0` kun lokalt HTTP |
 
 `GAME_BASE_PATH` sættes automatisk ud fra `GAME_MODE`.
@@ -59,6 +59,18 @@ Uden certifikat kan join give timeout (`JOIN TIMEOUT` på displayet).
 | TOUCH2 | SHIELD |
 | TOUCH3 | LIGHTNING |
 | TOUCH4 | DEATH_RAY |
+
+### Tetris
+
+| Pad | Funktion |
+|-----|----------|
+| TOUCH1 | Venstre (`move` LEFT) |
+| TOUCH3 | Højre (`move` RIGHT) |
+| TOUCH0 | Ned / soft drop (`move` DOWN, hold) |
+| TOUCH2 | Rotér (`rotate`, `onTouchDown`) |
+| TOUCH4 | Hard drop (`hardDrop`, `onTouchDown`) |
+
+Ved join viser TFT **TETRIS** / **Klar!** når `GAME_MODE_TETRIS` er valgt. Base path er `/Tetris`.
 
 ## TFT-fejlbeskeder
 

@@ -22,6 +22,7 @@ type ServiceResult = {
 const SERVICES: ServiceDef[] = [
   { id: 'bomberman', name: 'Bomberman', path: '/Bomberman/api/health' },
   { id: 'wizard', name: 'Wizard Duel', path: '/Wizard/api/health' },
+  { id: 'tetris', name: 'Tetris', path: '/Tetris/api/health' },
 ]
 
 function formatTime(d: Date | null): string {

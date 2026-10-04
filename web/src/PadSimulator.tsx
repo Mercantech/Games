@@ -1,14 +1,17 @@
 import { useState } from 'react'
 import './PadSimulator.css'
 
-type GameMode = 'bomber' | 'wizard'
+type GameMode = 'bomber' | 'wizard' | 'tetris'
+
+type PadMapping = { action: string; body: string }
 
 type PadDef = {
   id: 0 | 1 | 2 | 3 | 4
   className: string
   label: string
-  bomber: { action: string; body: string }
-  wizard: { action: string; body: string }
+  bomber: PadMapping
+  wizard: PadMapping
+  tetris: PadMapping
 }
 
 const PADS: PadDef[] = [
@@ -24,6 +27,10 @@ const PADS: PadDef[] = [
       action: 'cast SHIELD',
       body: '{"action":"cast","params":{"spellKey":"SHIELD"}}',
     },
+    tetris: {
+      action: 'rotate',
+      body: '{"action":"rotate"}',
+    },
   },
   {
     id: 1,
@@ -36,6 +43,10 @@ const PADS: PadDef[] = [
     wizard: {
       action: 'cast HEAL',
       body: '{"action":"cast","params":{"spellKey":"HEAL"}}',
+    },
+    tetris: {
+      action: 'move LEFT',
+      body: '{"action":"move","params":{"direction":"LEFT"}}',
     },
   },
   {
@@ -50,6 +61,10 @@ const PADS: PadDef[] = [
       action: 'cast LIGHTNING',
       body: '{"action":"cast","params":{"spellKey":"LIGHTNING"}}',
     },
+    tetris: {
+      action: 'move RIGHT',
+      body: '{"action":"move","params":{"direction":"RIGHT"}}',
+    },
   },
   {
     id: 0,
@@ -63,6 +78,10 @@ const PADS: PadDef[] = [
       action: 'cast FIREBALL',
       body: '{"action":"cast","params":{"spellKey":"FIREBALL"}}',
     },
+    tetris: {
+      action: 'move DOWN',
+      body: '{"action":"move","params":{"direction":"DOWN"}}',
+    },
   },
   {
     id: 4,
@@ -75,6 +94,10 @@ const PADS: PadDef[] = [
     wizard: {
       action: 'cast DEATH_RAY',
       body: '{"action":"cast","params":{"spellKey":"DEATH_RAY"}}',
+    },
+    tetris: {
+      action: 'hardDrop',
+      body: '{"action":"hardDrop"}',
     },
   },
 ]
@@ -92,7 +115,8 @@ export default function PadSimulator({ onPing }: { onPing?: () => void }) {
   const [log, setLog] = useState<LogEntry[]>([])
 
   const press = (pad: PadDef) => {
-    const mapping = mode === 'bomber' ? pad.bomber : pad.wizard
+    const mapping =
+      mode === 'bomber' ? pad.bomber : mode === 'wizard' ? pad.wizard : pad.tetris
     setActive(pad.id)
     window.setTimeout(() => setActive(null), 180)
     setLog((prev) =>
@@ -128,6 +152,13 @@ export default function PadSimulator({ onPing }: { onPing?: () => void }) {
           >
             WIZARD
           </button>
+          <button
+            type="button"
+            className={mode === 'tetris' ? 'on' : ''}
+            onClick={() => setMode('tetris')}
+          >
+            TETRIS
+          </button>
         </div>
       </div>
 
@@ -149,7 +180,11 @@ export default function PadSimulator({ onPing }: { onPing?: () => void }) {
 
         <div className="pad-sim-out">
           <p className="pad-sim-out-label">
-            {mode === 'bomber' ? 'POST …/Bomberman/api/controller/action' : 'POST …/Wizard/api/controller/action'}
+            {mode === 'bomber'
+              ? 'POST …/Bomberman/api/controller/action'
+              : mode === 'wizard'
+                ? 'POST …/Wizard/api/controller/action'
+                : 'POST …/Tetris/api/controller/action'}
           </p>
           {log.length === 0 ? (
             <p className="pad-sim-empty">Tryk en pad — se action + JSON</p>

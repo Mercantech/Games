@@ -1,6 +1,7 @@
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import NesController from './NesController'
 import { PadProvider } from './PadContext'
+import QrCard from './QrCard'
 import './App.css'
 
 export default function App() {
@@ -31,6 +32,7 @@ export default function App() {
               </Link>
               <a href="/Bomberman/">BOMBER</a>
               <a href="/Wizard/">WIZARD</a>
+              <a href="/Tetris/">TETRIS</a>
             </nav>
           </div>
 
@@ -48,6 +50,7 @@ export default function App() {
             <NesController />
           </div>
         </div>
+        <QrCard />
       </div>
     </PadProvider>
   )

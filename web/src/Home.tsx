@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { usePad, type PadButton } from './PadContext'
-import QrCard from './QrCard'
 import './Home.css'
 
-type Slot = 'bomber' | 'wizard' | 'guide'
+type Slot = 'bomber' | 'wizard' | 'tetris' | 'guide'
 
-const SLOTS: Slot[] = ['bomber', 'wizard', 'guide']
+const SLOTS: Slot[] = ['bomber', 'wizard', 'tetris', 'guide']
+const GUIDE_INDEX = 3
 
 export default function Home() {
   const [cursor, setCursor] = useState(0)
@@ -27,7 +27,8 @@ export default function Home() {
         return
       }
       blip('insert')
-      const href = slot === 'bomber' ? '/Bomberman/' : '/Wizard/'
+      const href =
+        slot === 'bomber' ? '/Bomberman/' : slot === 'wizard' ? '/Wizard/' : '/Tetris/'
       window.setTimeout(() => {
         window.location.href = href
       }, 420)
@@ -73,8 +74,8 @@ export default function Home() {
         return
       }
       if (button === 'select') {
-        cursorRef.current = 2
-        setCursor(2)
+        cursorRef.current = GUIDE_INDEX
+        setCursor(GUIDE_INDEX)
         blip('move')
         return
       }
@@ -158,19 +159,47 @@ export default function Home() {
             <span className="cart-meta">SPELLS · MANA · LAST STANDING</span>
           </div>
         </a>
+        <a
+          className={`cart cart-purple ${cursor === 2 ? 'selected' : ''}`}
+          href="/Tetris/"
+          role="option"
+          aria-selected={cursor === 2}
+          onMouseEnter={() => setCursor(2)}
+          onFocus={() => setCursor(2)}
+          onClick={(e) => {
+            e.preventDefault()
+            setCursor(2)
+            launch('tetris')
+          }}
+        >
+          <span className="cart-label">SLOT C</span>
+          <div className="cart-art-frame">
+            <img
+              className="cart-art"
+              src="/tetris-thumb.svg"
+              alt="Tetris — PIN lobby, battle og garbage lines"
+              width={320}
+              height={180}
+              loading="lazy"
+            />
+          </div>
+          <div className="cart-foot">
+            <strong>TETRIS</strong>
+            <span className="cart-go">{cursor === 2 ? '► START' : '► PLAY'}</span>
+            <span className="cart-meta">PIN · BATTLE · GARBAGE</span>
+          </div>
+        </a>
       </div>
 
       <Link
-        className={`guide-btn ${cursor === 2 ? 'selected' : ''}`}
+        className={`guide-btn ${cursor === GUIDE_INDEX ? 'selected' : ''}`}
         to="/guide"
-        onMouseEnter={() => setCursor(2)}
-        onFocus={() => setCursor(2)}
+        onMouseEnter={() => setCursor(GUIDE_INDEX)}
+        onFocus={() => setCursor(GUIDE_INDEX)}
         onClick={() => blip('ok')}
       >
-        {cursor === 2 ? '► ' : ''}ARDUINO CONTROLLER GUIDE
+        {cursor === GUIDE_INDEX ? '► ' : ''}ARDUINO CONTROLLER GUIDE
       </Link>
-
-      <QrCard />
 
       <p className="hint-pixel">
         CURSOR {cursor + 1}/{SLOTS.length} · A CONFIRM · INSERT CART
