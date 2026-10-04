@@ -3,7 +3,7 @@ import { usePad } from './PadContext'
 import './Status.css'
 
 const REFRESH_MS = 15_000
-const SCORE_KEY = 'mercantec-status-highscore'
+const SCORE_KEY = 'mercantec-pong-highscore'
 
 type CheckState = 'idle' | 'checking' | 'ok' | 'down'
 
@@ -13,7 +13,7 @@ type ServiceDef = {
   path: string
   href: string
   accent: 'red' | 'blue' | 'purple'
-  bumper: string
+  lane: string
   points: number
 }
 
@@ -33,8 +33,8 @@ const SERVICES: ServiceDef[] = [
     path: '/Bomberman/api/health',
     href: '/Bomberman/',
     accent: 'red',
-    bumper: 'BUMPER A',
-    points: 500,
+    lane: 'LANE 1',
+    points: 1,
   },
   {
     id: 'wizard',
@@ -42,8 +42,8 @@ const SERVICES: ServiceDef[] = [
     path: '/Wizard/api/health',
     href: '/Wizard/',
     accent: 'blue',
-    bumper: 'BUMPER B',
-    points: 750,
+    lane: 'LANE 2',
+    points: 1,
   },
   {
     id: 'tetris',
@@ -51,16 +51,16 @@ const SERVICES: ServiceDef[] = [
     path: '/Tetris/api/health',
     href: '/Tetris/',
     accent: 'purple',
-    bumper: 'BUMPER C',
-    points: 1000,
+    lane: 'LANE 3',
+    points: 1,
   },
 ]
 
 const FUN_LINES = [
-  'Hold maskinen i live — ingen TILT i undervisningen.',
-  'Ping = points. Hurtig latency = MULTIBALL-vibes.',
-  'Nudge forsigtigt. For hårdt = TILT.',
-  'Tre bumpers. Ét highscore. Zero downtime.',
+  'Ping går ud. Pong kommer hjem. Zero lag = clean rally.',
+  'Hver health-check er et slag over nettet.',
+  'Miss = bolden går ud. HIT = point til dig.',
+  'Tre lanes. Ét court. Hold bolden i spil.',
 ]
 
 function formatTime(d: Date | null): string {
@@ -73,15 +73,15 @@ function formatTime(d: Date | null): string {
 }
 
 function padScore(n: number): string {
-  return String(Math.max(0, Math.floor(n))).padStart(7, '0')
+  return String(Math.max(0, Math.floor(n))).padStart(2, '0')
 }
 
 function awardForLatency(base: number, ms: number | null): number {
   if (ms == null) return 0
-  if (ms < 80) return base * 3
-  if (ms < 150) return base * 2
+  if (ms < 80) return base + 2
+  if (ms < 150) return base + 1
   if (ms < 400) return base
-  return Math.max(50, Math.floor(base / 2))
+  return base
 }
 
 function latencyTone(ms: number | null): 'fast' | 'mid' | 'slow' | 'none' {
@@ -133,23 +133,23 @@ function overallFrom(results: ServiceResult[], checking: boolean): Overall {
 
 const BANNER: Record<Overall, { label: string; sub: string; className: string }> = {
   go: {
-    label: 'MULTIBALL MODE',
-    sub: 'Alle bumpers lyser — free game vibes',
+    label: 'RALLY ON',
+    sub: 'Alle lanes returnerer bolden',
     className: 'banner-go',
   },
   degraded: {
-    label: 'DRAIN WARNING',
-    sub: 'En bumper er mørk — red ball!',
+    label: 'EDGE BALL',
+    sub: 'En lane missede — hold fokus',
     className: 'banner-degraded',
   },
   down: {
-    label: 'TILT',
-    sub: 'Ingen hit — maskinen sover',
+    label: 'OUT OF BOUNDS',
+    sub: 'Ingen pong — bolden er ude',
     className: 'banner-down',
   },
   boot: {
-    label: 'BALL IN PLAY',
-    sub: 'Plunger trækker… scanner lanes',
+    label: 'SERVE…',
+    sub: 'Ping på vej over banen',
     className: 'banner-boot',
   },
 }
@@ -175,7 +175,8 @@ export default function Status() {
   const [checking, setChecking] = useState(false)
   const [tick, setTick] = useState(0)
   const [lastRunAt, setLastRunAt] = useState<number | null>(null)
-  const [score, setScore] = useState(0)
+  const [playerScore, setPlayerScore] = useState(0)
+  const [serverScore, setServerScore] = useState(0)
   const [highScore, setHighScore] = useState(() => {
     try {
       return Number(sessionStorage.getItem(SCORE_KEY) || '0') || 0
@@ -183,13 +184,13 @@ export default function Status() {
       return 0
     }
   })
-  const [nudge, setNudge] = useState(false)
-  const [ballLane, setBallLane] = useState(0)
   const [funIx, setFunIx] = useState(0)
+  const [activeLane, setActiveLane] = useState<number | null>(null)
+  const [ballPhase, setBallPhase] = useState<'idle' | 'ping' | 'pong' | 'miss'>('idle')
+  const [flashWord, setFlashWord] = useState<'PING' | 'PONG' | 'MISS' | null>(null)
   const [popups, setPopups] = useState<{ id: string; pts: number; key: number }[]>([])
   const timerRef = useRef<number | null>(null)
   const countdownRef = useRef<number | null>(null)
-  const ballRef = useRef<number | null>(null)
   const popupKey = useRef(0)
 
   const pushPopup = useCallback((id: string, pts: number) => {
@@ -197,7 +198,12 @@ export default function Status() {
     setPopups((p) => [...p, { id, pts, key }])
     window.setTimeout(() => {
       setPopups((p) => p.filter((x) => x.key !== key))
-    }, 900)
+    }, 850)
+  }, [])
+
+  const flash = useCallback((word: 'PING' | 'PONG' | 'MISS') => {
+    setFlashWord(word)
+    window.setTimeout(() => setFlashWord(null), 420)
   }, [])
 
   const runChecks = useCallback(async () => {
@@ -211,48 +217,60 @@ export default function Status() {
       return next
     })
 
-    let roundScore = 0
+    let hits = 0
+    let misses = 0
 
-    await Promise.all(
-      SERVICES.map(async (svc) => {
-        const url = `${origin}${svc.path}`
-        try {
-          const { latencyMs } = await pingHealth(url)
-          const hitPoints = awardForLatency(svc.points, latencyMs)
-          roundScore += hitPoints
-          blip(latencyMs < 150 ? 'ok' : 'move')
-          pushPopup(svc.id, hitPoints)
-          setResults((prev) => ({
-            ...prev,
-            [svc.id]: {
-              state: 'ok',
-              url,
-              latencyMs,
-              lastChecked: new Date(),
-              error: null,
-              hitPoints,
-            },
-          }))
-        } catch (e) {
-          const message = e instanceof Error ? e.message : 'Ukendt fejl'
-          blip('back')
-          setResults((prev) => ({
-            ...prev,
-            [svc.id]: {
-              state: 'down',
-              url,
-              latencyMs: null,
-              lastChecked: new Date(),
-              error: message,
-              hitPoints: 0,
-            },
-          }))
-        }
-      }),
-    )
+    for (let i = 0; i < SERVICES.length; i++) {
+      const svc = SERVICES[i]
+      setActiveLane(i)
+      setBallPhase('ping')
+      flash('PING')
+      blip('move')
 
-    setScore((prev) => {
-      const next = prev + roundScore
+      const url = `${origin}${svc.path}`
+      try {
+        const { latencyMs } = await pingHealth(url)
+        const hitPoints = awardForLatency(svc.points, latencyMs)
+        hits += hitPoints
+        setBallPhase('pong')
+        flash('PONG')
+        blip('ok')
+        pushPopup(svc.id, hitPoints)
+        setResults((prev) => ({
+          ...prev,
+          [svc.id]: {
+            state: 'ok',
+            url,
+            latencyMs,
+            lastChecked: new Date(),
+            error: null,
+            hitPoints,
+          },
+        }))
+        await new Promise((r) => window.setTimeout(r, 180))
+      } catch (e) {
+        const message = e instanceof Error ? e.message : 'Ukendt fejl'
+        misses += 1
+        setBallPhase('miss')
+        flash('MISS')
+        blip('back')
+        setResults((prev) => ({
+          ...prev,
+          [svc.id]: {
+            state: 'down',
+            url,
+            latencyMs: null,
+            lastChecked: new Date(),
+            error: message,
+            hitPoints: 0,
+          },
+        }))
+        await new Promise((r) => window.setTimeout(r, 220))
+      }
+    }
+
+    setPlayerScore((prev) => {
+      const next = prev + hits
       setHighScore((hi) => {
         const best = Math.max(hi, next)
         try {
@@ -264,19 +282,14 @@ export default function Status() {
       })
       return next
     })
-    if (roundScore > 0) blip('jingle')
+    setServerScore((prev) => prev + misses)
+    if (hits > 0 && misses === 0) blip('jingle')
+    setActiveLane(null)
+    setBallPhase('idle')
     setChecking(false)
     setLastRunAt(Date.now())
     setTick(0)
-  }, [origin, blip, pushPopup])
-
-  const doNudge = useCallback(() => {
-    if (checking) return
-    setNudge(true)
-    blip('insert')
-    window.setTimeout(() => setNudge(false), 450)
-    void runChecks()
-  }, [checking, blip, runChecks])
+  }, [origin, blip, pushPopup, flash])
 
   useEffect(() => {
     void runChecks()
@@ -291,19 +304,6 @@ export default function Status() {
       if (countdownRef.current != null) window.clearInterval(countdownRef.current)
     }
   }, [runChecks])
-
-  useEffect(() => {
-    if (!checking) {
-      if (ballRef.current != null) window.clearInterval(ballRef.current)
-      return
-    }
-    ballRef.current = window.setInterval(() => {
-      setBallLane((n) => (n + 1) % SERVICES.length)
-    }, 280)
-    return () => {
-      if (ballRef.current != null) window.clearInterval(ballRef.current)
-    }
-  }, [checking])
 
   const list = SERVICES.map((s) => results[s.id])
   const overall = overallFrom(list, checking)
@@ -324,40 +324,35 @@ export default function Status() {
   }, [checking, lastRunAt, tick])
 
   return (
-    <div className={`status-page pinball ${nudge ? 'is-nudge' : ''} overall-${overall}`}>
-      <div className="pin-cabinet" aria-hidden="true">
-        <span className="pin-chrome left" />
-        <span className="pin-chrome right" />
-        <span className="pin-screw s1" />
-        <span className="pin-screw s2" />
-        <span className="pin-screw s3" />
-        <span className="pin-screw s4" />
+    <div className={`status-page pong overall-${overall} ${checking ? 'is-rally' : ''}`}>
+      <div className="pong-court" aria-hidden="true">
+        <div className="pong-net" />
+        <div className={`pong-paddle left ${checking ? 'swing' : ''}`} />
+        <div className={`pong-paddle right ${ballPhase === 'pong' ? 'swing' : ''}`} />
+        <div
+          className={`pong-ball phase-${ballPhase} ${activeLane != null ? `lane-${activeLane}` : ''}`}
+        />
+        {flashWord ? <div className={`pong-flash word-${flashWord.toLowerCase()}`}>{flashWord}</div> : null}
       </div>
 
-      <div className="pin-backglass">
-        <p className="blink-line status-blink">ARCADE DIAGNOSTIC</p>
-        <h1 className="title-pixel status-title">SERVER PINBALL</h1>
+      <header className="pong-header">
+        <p className="blink-line status-blink">TABLE TENNIS HEALTH</p>
+        <h1 className="title-pixel status-title">STATUS PONG</h1>
         <p className="status-lede">{FUN_LINES[funIx]}</p>
-      </div>
+      </header>
 
-      <div className="pin-scoreboard" aria-live="polite">
-        <div className="reel">
-          <span className="reel-label">SCORE</span>
-          <strong className="reel-digits">{padScore(score)}</strong>
+      <div className="pong-scoreboard" aria-live="polite">
+        <div className="pong-side">
+          <span className="pong-who">YOU</span>
+          <strong className="pong-big">{padScore(playerScore)}</strong>
         </div>
-        <div className="reel reel-hi">
-          <span className="reel-label">HIGH</span>
-          <strong className="reel-digits">{padScore(highScore)}</strong>
+        <div className="pong-vs">
+          <span>VS</span>
+          <em>HIGH {padScore(highScore)}</em>
         </div>
-        <div className="reel reel-balls">
-          <span className="reel-label">BALLS</span>
-          <strong className="reel-digits balls">
-            {SERVICES.map((_, i) => (
-              <span key={i} className={i < okCount ? 'lit' : ''}>
-                ●
-              </span>
-            ))}
-          </strong>
+        <div className="pong-side right">
+          <span className="pong-who">MISS</span>
+          <strong className="pong-big dim">{padScore(serverScore)}</strong>
         </div>
       </div>
 
@@ -369,7 +364,7 @@ export default function Status() {
         </div>
         <div className="banner-stats">
           <span>
-            <em>{okCount}</em> HIT
+            <em>{okCount}</em> PONG
           </span>
           <span>
             <em>{downCount}</em> MISS
@@ -380,141 +375,123 @@ export default function Status() {
         </div>
       </div>
 
-      <div className="status-toolbar pin-controls">
+      <div className="status-toolbar pong-controls">
         <button
           type="button"
-          className={`status-refresh plunger ${checking ? 'is-busy' : ''}`}
+          className={`status-refresh serve-btn ${checking ? 'is-busy' : ''}`}
           onClick={() => void runChecks()}
           disabled={checking}
         >
-          {checking ? 'BALL IN PLAY…' : 'PLUNGER ▶'}
-        </button>
-        <button type="button" className="nudge-btn" onClick={doNudge} disabled={checking}>
-          NUDGE
+          {checking ? 'RALLY…' : 'SERVE / PING'}
         </button>
         <div className="status-countdown" aria-label={`Næste tjek om ${nextInSec} sekunder`}>
           <div className="countdown-track">
             <div className="countdown-fill" style={{ width: `${countdownPct}%` }} />
           </div>
           <span className="status-auto">
-            {checking ? 'Bumpers tæller…' : `Auto-plunge ${nextInSec}s`}
+            {checking ? 'Bolden er i spil…' : `Auto-serve ${nextInSec}s`}
           </span>
         </div>
       </div>
 
-      <div className="pin-playfield">
-        <div
-          className={`pin-ball ${checking ? 'is-rolling' : 'is-rest'}`}
-          style={{ ['--lane' as string]: String(ballLane) }}
-          aria-hidden="true"
-        />
-
-        <ul className="status-grid">
-          {SERVICES.map((svc, i) => {
-            const r = results[svc.id]
-            const stateLabel =
-              r.state === 'checking'
-                ? 'SPIN'
-                : r.state === 'ok'
-                  ? 'HIT!'
-                  : r.state === 'down'
-                    ? 'OUT'
-                    : '—'
-            const rowClass =
-              r.state === 'ok'
-                ? 'row-ok'
+      <ul className="status-grid">
+        {SERVICES.map((svc, i) => {
+          const r = results[svc.id]
+          const stateLabel =
+            r.state === 'checking'
+              ? 'PING…'
+              : r.state === 'ok'
+                ? 'PONG'
                 : r.state === 'down'
-                  ? 'row-down'
-                  : r.state === 'checking'
-                    ? 'row-check'
-                    : 'row-idle'
-            const tone = latencyTone(r.latencyMs)
-            const popup = popups.find((p) => p.id === svc.id)
+                  ? 'MISS'
+                  : '—'
+          const rowClass =
+            r.state === 'ok'
+              ? 'row-ok'
+              : r.state === 'down'
+                ? 'row-down'
+                : r.state === 'checking'
+                  ? 'row-check'
+                  : 'row-idle'
+          const tone = latencyTone(r.latencyMs)
+          const popup = popups.find((p) => p.id === svc.id)
+          const isActive = activeLane === i
 
-            return (
-              <li
-                key={svc.id}
-                className={`status-card bumper accent-${svc.accent} ${rowClass} ${
-                  checking && ballLane === i ? 'ball-here' : ''
-                }`}
-                style={{ animationDelay: `${i * 90}ms` }}
-              >
-                <div className="status-card-scan" aria-hidden="true" />
-                <div className="bumper-ring" aria-hidden="true" />
-                {popup ? (
-                  <span key={popup.key} className="hit-popup">
-                    +{popup.pts}
-                  </span>
-                ) : null}
+          return (
+            <li
+              key={svc.id}
+              className={`status-card pong-lane accent-${svc.accent} ${rowClass} ${
+                isActive ? 'is-active' : ''
+              }`}
+              style={{ animationDelay: `${i * 90}ms` }}
+            >
+              <div className="status-card-scan" aria-hidden="true" />
+              {popup ? (
+                <span key={popup.key} className="hit-popup">
+                  +{popup.pts}
+                </span>
+              ) : null}
 
-                <div className="status-card-head">
-                  <div className="status-id">
-                    <span className={`status-dot state-${r.state}`} />
-                    <div>
-                      <span className="status-bumper-label">{svc.bumper}</span>
-                      <span className="status-name">{svc.name}</span>
-                    </div>
-                  </div>
-                  <span className={`status-pill pill-${r.state}`}>{stateLabel}</span>
-                </div>
-
-                <div className="latency-block">
-                  <div className="latency-top">
-                    <span>SPEED</span>
-                    <strong className={`lat-${tone}`}>
-                      {r.latencyMs != null ? `${r.latencyMs} ms` : '—'}
-                    </strong>
-                  </div>
-                  <div className="latency-bar" aria-hidden="true">
-                    <div
-                      className={`latency-fill lat-${tone} ${r.state === 'checking' ? 'is-pulse' : ''}`}
-                      style={{
-                        width: r.state === 'checking' ? '40%' : `${latencyPct(r.latencyMs)}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <dl className="status-meta">
+              <div className="status-card-head">
+                <div className="status-id">
+                  <span className={`status-dot state-${r.state}`} />
                   <div>
-                    <dt>LANE</dt>
-                    <dd className="status-url">{r.url || `${origin}${svc.path}`}</dd>
+                    <span className="status-bumper-label">{svc.lane}</span>
+                    <span className="status-name">{svc.name}</span>
                   </div>
-                  <div className="meta-row-split">
-                    <div>
-                      <dt>SIDST HIT</dt>
-                      <dd>{formatTime(r.lastChecked)}</dd>
-                    </div>
-                    <div>
-                      <dt>POINTS</dt>
-                      <dd className="pts">{r.hitPoints > 0 ? `+${r.hitPoints}` : '—'}</dd>
-                    </div>
+                </div>
+                <span className={`status-pill pill-${r.state}`}>{stateLabel}</span>
+              </div>
+
+              <div className="latency-block">
+                <div className="latency-top">
+                  <span>RTT</span>
+                  <strong className={`lat-${tone}`}>
+                    {r.latencyMs != null ? `${r.latencyMs} ms` : '—'}
+                  </strong>
+                </div>
+                <div className="latency-bar" aria-hidden="true">
+                  <div
+                    className={`latency-fill lat-${tone} ${r.state === 'checking' ? 'is-pulse' : ''}`}
+                    style={{
+                      width: r.state === 'checking' ? '55%' : `${latencyPct(r.latencyMs)}%`,
+                    }}
+                  />
+                </div>
+              </div>
+
+              <dl className="status-meta">
+                <div>
+                  <dt>ENDPOINT</dt>
+                  <dd className="status-url">{r.url || `${origin}${svc.path}`}</dd>
+                </div>
+                <div className="meta-row-split">
+                  <div>
+                    <dt>SIDST PING</dt>
+                    <dd>{formatTime(r.lastChecked)}</dd>
                   </div>
-                  {r.error ? (
-                    <div className="status-err-block">
-                      <dt>DRAIN</dt>
-                      <dd className="status-err">{r.error}</dd>
-                    </div>
-                  ) : null}
-                </dl>
+                  <div>
+                    <dt>POINTS</dt>
+                    <dd className="pts">{r.hitPoints > 0 ? `+${r.hitPoints}` : '—'}</dd>
+                  </div>
+                </div>
+                {r.error ? (
+                  <div className="status-err-block">
+                    <dt>MISS REASON</dt>
+                    <dd className="status-err">{r.error}</dd>
+                  </div>
+                ) : null}
+              </dl>
 
-                <a className="status-open" href={svc.href}>
-                  PLAY →
-                </a>
-              </li>
-            )
-          })}
-        </ul>
+              <a className="status-open" href={svc.href}>
+                PLAY →
+              </a>
+            </li>
+          )
+        })}
+      </ul>
 
-        <div className="pin-flippers" aria-hidden="true">
-          <span className={`flipper left ${checking ? 'kick' : ''}`} />
-          <span className={`flipper right ${checking ? 'kick' : ''}`} />
-        </div>
-      </div>
-
-      <p className="pin-footer hint-pixel">
-        PLUNGER = SCAN · NUDGE = FORCE · HURTIG LATENCY = ×2/×3
-      </p>
+      <p className="pong-footer hint-pixel">SERVE = SCAN · PING → PONG · HURTIG RTT = BONUS POINT</p>
     </div>
   )
 }
