@@ -5,7 +5,9 @@ import './App.css'
 
 export default function App() {
   const { pathname } = useLocation()
+  const onHome = pathname === '/'
   const onGuide = pathname.startsWith('/guide')
+  const onStatus = pathname.startsWith('/status')
 
   return (
     <PadProvider>
@@ -18,11 +20,14 @@ export default function App() {
               <span className="brand-sub">GAMES · EST. ARENA</span>
             </div>
             <nav className="console-nav">
-              <Link to="/" className={!onGuide ? 'active' : undefined}>
+              <Link to="/" className={onHome ? 'active' : undefined}>
                 SELECT
               </Link>
               <Link to="/guide" className={onGuide ? 'active' : undefined}>
                 GUIDE
+              </Link>
+              <Link to="/status" className={onStatus ? 'active' : undefined}>
+                STATUS
               </Link>
               <a href="/Bomberman/">BOMBER</a>
               <a href="/Wizard/">WIZARD</a>
