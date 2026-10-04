@@ -73,6 +73,7 @@
 }
 
 .console-nav a {
+  position: relative;
   font-family: var(--font-pixel);
   font-size: 0.52rem;
   padding: 0.55rem 0.65rem;
@@ -91,7 +92,30 @@
 .console-nav a.active {
   background: var(--nes-red);
   color: #fff;
-  box-shadow: inset -2px -2px 0 var(--nes-red-dark), inset 2px 2px 0 #ff6b6b;
+  border-color: #fff;
+  box-shadow:
+    inset -2px -2px 0 var(--nes-red-dark),
+    inset 2px 2px 0 #ff6b6b,
+    0 0 0 2px #000;
+  transform: translateY(1px);
+}
+
+.console-nav a.active::before {
+  content: '►';
+  margin-right: 0.35rem;
+  font-size: 0.45rem;
+}
+
+.console-nav a.active::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #9bbc0f;
+  box-shadow: 0 0 6px #9bbc0f;
 }
 
 .screen-bezel {

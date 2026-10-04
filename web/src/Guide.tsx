@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { InoCode } from './InoCode'
 import { usePad, type PadButton } from './PadContext'
+import QrCard from './QrCard'
 import './Guide.css'
 
 const CARRIER_DOC =
@@ -244,6 +245,7 @@ export default function Guide() {
             <span>B EXIT</span>
             <span>SELECT TOP</span>
           </div>
+          <QrCard compact />
         </header>
 
         <section id="flow" className={`guide-section ${stage === 0 ? 'on' : ''}`}>

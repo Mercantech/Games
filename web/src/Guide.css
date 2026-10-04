@@ -329,10 +329,12 @@
 .flow-card-top img {
   width: 100%;
   height: auto;
-  max-height: 140px;
-  object-fit: cover;
+  aspect-ratio: 16 / 9;
+  max-height: 180px;
+  object-fit: contain;
   object-position: center;
   display: block;
+  background: #0a0a0a;
 }
 
 .flow-card-top h3 {
@@ -497,7 +499,8 @@
 .game-panel-art {
   width: 100%;
   height: auto;
-  max-height: 200px;
+  aspect-ratio: 16 / 9;
+  max-height: 240px;
   object-fit: contain;
   background: #0a0a0a;
   border: 3px solid #000;

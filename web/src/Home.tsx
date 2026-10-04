@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { usePad, type PadButton } from './PadContext'
+import QrCard from './QrCard'
 import './Home.css'
 
 type Slot = 'bomber' | 'wizard' | 'guide'
@@ -12,10 +13,44 @@ export default function Home() {
   const cursorRef = useRef(0)
   const navigate = useNavigate()
   const { subscribe, blip } = usePad()
+  const jingled = useRef(false)
 
   useEffect(() => {
     cursorRef.current = cursor
   }, [cursor])
+
+  const launch = useCallback(
+    (slot: Slot) => {
+      if (slot === 'guide') {
+        blip('ok')
+        navigate('/guide')
+        return
+      }
+      blip('insert')
+      const href = slot === 'bomber' ? '/Bomberman/' : '/Wizard/'
+      window.setTimeout(() => {
+        window.location.href = href
+      }, 420)
+    },
+    [blip, navigate],
+  )
+
+  useEffect(() => {
+    const play = () => {
+      if (jingled.current) return
+      jingled.current = true
+      blip('jingle')
+    }
+    const t = window.setTimeout(play, 400)
+    const unlock = () => play()
+    window.addEventListener('pointerdown', unlock, { once: true })
+    window.addEventListener('keydown', unlock, { once: true })
+    return () => {
+      window.clearTimeout(t)
+      window.removeEventListener('pointerdown', unlock)
+      window.removeEventListener('keydown', unlock)
+    }
+  }, [blip])
 
   useEffect(() => {
     const onPad = (button: PadButton) => {
@@ -44,15 +79,11 @@ export default function Home() {
         return
       }
       if (button === 'a' || button === 'start') {
-        blip('ok')
-        const slot = SLOTS[cursorRef.current]
-        if (slot === 'bomber') window.location.href = '/Bomberman/'
-        else if (slot === 'wizard') window.location.href = '/Wizard/'
-        else navigate('/guide')
+        launch(SLOTS[cursorRef.current])
       }
     }
     return subscribe(onPad)
-  }, [subscribe, blip, navigate])
+  }, [subscribe, blip, launch])
 
   return (
     <div className="home">
@@ -74,6 +105,11 @@ export default function Home() {
           aria-selected={cursor === 0}
           onMouseEnter={() => setCursor(0)}
           onFocus={() => setCursor(0)}
+          onClick={(e) => {
+            e.preventDefault()
+            setCursor(0)
+            launch('bomber')
+          }}
         >
           <span className="cart-label">SLOT A</span>
           <div className="cart-art-frame">
@@ -99,6 +135,11 @@ export default function Home() {
           aria-selected={cursor === 1}
           onMouseEnter={() => setCursor(1)}
           onFocus={() => setCursor(1)}
+          onClick={(e) => {
+            e.preventDefault()
+            setCursor(1)
+            launch('wizard')
+          }}
         >
           <span className="cart-label">SLOT B</span>
           <div className="cart-art-frame">
@@ -124,12 +165,15 @@ export default function Home() {
         to="/guide"
         onMouseEnter={() => setCursor(2)}
         onFocus={() => setCursor(2)}
+        onClick={() => blip('ok')}
       >
         {cursor === 2 ? '► ' : ''}ARDUINO CONTROLLER GUIDE
       </Link>
 
+      <QrCard />
+
       <p className="hint-pixel">
-        CURSOR {cursor + 1}/{SLOTS.length} · A CONFIRM · B CANCEL
+        CURSOR {cursor + 1}/{SLOTS.length} · A CONFIRM · INSERT CART
       </p>
     </div>
   )

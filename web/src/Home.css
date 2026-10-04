@@ -100,7 +100,8 @@
   display: block;
   width: 100%;
   height: auto;
-  max-height: min(38vh, 320px);
+  aspect-ratio: 16 / 9;
+  max-height: min(42vh, 360px);
   object-fit: contain;
   object-position: center;
   image-rendering: auto;
