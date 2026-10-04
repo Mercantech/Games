@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { usePad } from './PadContext'
 import './Status.css'
 
 const REFRESH_MS = 15_000
+const SCORE_KEY = 'mercantec-status-highscore'
 
 type CheckState = 'idle' | 'checking' | 'ok' | 'down'
 
@@ -11,7 +13,8 @@ type ServiceDef = {
   path: string
   href: string
   accent: 'red' | 'blue' | 'purple'
-  tag: string
+  bumper: string
+  points: number
 }
 
 type ServiceResult = {
@@ -20,6 +23,7 @@ type ServiceResult = {
   latencyMs: number | null
   lastChecked: Date | null
   error: string | null
+  hitPoints: number
 }
 
 const SERVICES: ServiceDef[] = [
@@ -29,7 +33,8 @@ const SERVICES: ServiceDef[] = [
     path: '/Bomberman/api/health',
     href: '/Bomberman/',
     accent: 'red',
-    tag: 'PIN · BOMBS',
+    bumper: 'BUMPER A',
+    points: 500,
   },
   {
     id: 'wizard',
@@ -37,7 +42,8 @@ const SERVICES: ServiceDef[] = [
     path: '/Wizard/api/health',
     href: '/Wizard/',
     accent: 'blue',
-    tag: 'SPELLS · MANA',
+    bumper: 'BUMPER B',
+    points: 750,
   },
   {
     id: 'tetris',
@@ -45,8 +51,16 @@ const SERVICES: ServiceDef[] = [
     path: '/Tetris/api/health',
     href: '/Tetris/',
     accent: 'purple',
-    tag: 'BATTLE · GARBAGE',
+    bumper: 'BUMPER C',
+    points: 1000,
   },
+]
+
+const FUN_LINES = [
+  'Hold maskinen i live — ingen TILT i undervisningen.',
+  'Ping = points. Hurtig latency = MULTIBALL-vibes.',
+  'Nudge forsigtigt. For hårdt = TILT.',
+  'Tre bumpers. Ét highscore. Zero downtime.',
 ]
 
 function formatTime(d: Date | null): string {
@@ -56,6 +70,18 @@ function formatTime(d: Date | null): string {
     minute: '2-digit',
     second: '2-digit',
   })
+}
+
+function padScore(n: number): string {
+  return String(Math.max(0, Math.floor(n))).padStart(7, '0')
+}
+
+function awardForLatency(base: number, ms: number | null): number {
+  if (ms == null) return 0
+  if (ms < 80) return base * 3
+  if (ms < 150) return base * 2
+  if (ms < 400) return base
+  return Math.max(50, Math.floor(base / 2))
 }
 
 function latencyTone(ms: number | null): 'fast' | 'mid' | 'slow' | 'none' {
@@ -107,29 +133,30 @@ function overallFrom(results: ServiceResult[], checking: boolean): Overall {
 
 const BANNER: Record<Overall, { label: string; sub: string; className: string }> = {
   go: {
-    label: 'ALL SYSTEMS GO',
-    sub: 'Alle spil svarer',
+    label: 'MULTIBALL MODE',
+    sub: 'Alle bumpers lyser — free game vibes',
     className: 'banner-go',
   },
   degraded: {
-    label: 'DEGRADED',
-    sub: 'Nogle services er nede',
+    label: 'DRAIN WARNING',
+    sub: 'En bumper er mørk — red ball!',
     className: 'banner-degraded',
   },
   down: {
-    label: 'SYSTEMS DOWN',
-    sub: 'Ingen health-svar',
+    label: 'TILT',
+    sub: 'Ingen hit — maskinen sover',
     className: 'banner-down',
   },
   boot: {
-    label: 'BOOTING…',
-    sub: 'Scanner endpoints',
+    label: 'BALL IN PLAY',
+    sub: 'Plunger trækker… scanner lanes',
     className: 'banner-boot',
   },
 }
 
 export default function Status() {
   const origin = typeof window !== 'undefined' ? window.location.origin : ''
+  const { blip } = usePad()
   const [results, setResults] = useState<Record<string, ServiceResult>>(() =>
     Object.fromEntries(
       SERVICES.map((s) => [
@@ -140,6 +167,7 @@ export default function Status() {
           latencyMs: null,
           lastChecked: null,
           error: null,
+          hitPoints: 0,
         },
       ]),
     ),
@@ -147,24 +175,53 @@ export default function Status() {
   const [checking, setChecking] = useState(false)
   const [tick, setTick] = useState(0)
   const [lastRunAt, setLastRunAt] = useState<number | null>(null)
+  const [score, setScore] = useState(0)
+  const [highScore, setHighScore] = useState(() => {
+    try {
+      return Number(sessionStorage.getItem(SCORE_KEY) || '0') || 0
+    } catch {
+      return 0
+    }
+  })
+  const [nudge, setNudge] = useState(false)
+  const [ballLane, setBallLane] = useState(0)
+  const [funIx, setFunIx] = useState(0)
+  const [popups, setPopups] = useState<{ id: string; pts: number; key: number }[]>([])
   const timerRef = useRef<number | null>(null)
   const countdownRef = useRef<number | null>(null)
+  const ballRef = useRef<number | null>(null)
+  const popupKey = useRef(0)
+
+  const pushPopup = useCallback((id: string, pts: number) => {
+    const key = ++popupKey.current
+    setPopups((p) => [...p, { id, pts, key }])
+    window.setTimeout(() => {
+      setPopups((p) => p.filter((x) => x.key !== key))
+    }, 900)
+  }, [])
 
   const runChecks = useCallback(async () => {
     setChecking(true)
+    setFunIx((i) => (i + 1) % FUN_LINES.length)
     setResults((prev) => {
       const next = { ...prev }
       for (const s of SERVICES) {
-        next[s.id] = { ...next[s.id], state: 'checking', error: null }
+        next[s.id] = { ...next[s.id], state: 'checking', error: null, hitPoints: 0 }
       }
       return next
     })
+
+    let roundScore = 0
 
     await Promise.all(
       SERVICES.map(async (svc) => {
         const url = `${origin}${svc.path}`
         try {
           const { latencyMs } = await pingHealth(url)
+          const hitPoints = awardForLatency(svc.points, latencyMs)
+          roundScore += hitPoints
+          blip(latencyMs < 150 ? 'ok' : 'move')
+          pushPopup(svc.id, hitPoints)
           setResults((prev) => ({
             ...prev,
             [svc.id]: {
@@ -173,10 +230,12 @@ export default function Status() {
               latencyMs,
               lastChecked: new Date(),
               error: null,
+              hitPoints,
             },
           }))
         } catch (e) {
           const message = e instanceof Error ? e.message : 'Ukendt fejl'
+          blip('back')
           setResults((prev) => ({
             ...prev,
             [svc.id]: {
@@ -185,15 +244,39 @@ export default function Status() {
               latencyMs: null,
               lastChecked: new Date(),
               error: message,
+              hitPoints: 0,
             },
           }))
         }
       }),
     )
+
+    setScore((prev) => {
+      const next = prev + roundScore
+      setHighScore((hi) => {
+        const best = Math.max(hi, next)
+        try {
+          sessionStorage.setItem(SCORE_KEY, String(best))
+        } catch {
+          /* ignore */
+        }
+        return best
+      })
+      return next
+    })
+    if (roundScore > 0) blip('jingle')
     setChecking(false)
     setLastRunAt(Date.now())
     setTick(0)
-  }, [origin])
+  }, [origin, blip, pushPopup])
+
+  const doNudge = useCallback(() => {
+    if (checking) return
+    setNudge(true)
+    blip('insert')
+    window.setTimeout(() => setNudge(false), 450)
+    void runChecks()
+  }, [checking, blip, runChecks])
 
   useEffect(() => {
     void runChecks()
@@ -208,6 +291,19 @@ export default function Status() {
       if (countdownRef.current != null) window.clearInterval(countdownRef.current)
     }
   }, [runChecks])
+
+  useEffect(() => {
+    if (!checking) {
+      if (ballRef.current != null) window.clearInterval(ballRef.current)
+      return
+    }
+    ballRef.current = window.setInterval(() => {
+      setBallLane((n) => (n + 1) % SERVICES.length)
+    }, 280)
+    return () => {
+      if (ballRef.current != null) window.clearInterval(ballRef.current)
+    }
+  }, [checking])
 
   const list = SERVICES.map((s) => results[s.id])
   const overall = overallFrom(list, checking)
@@ -228,18 +324,42 @@ export default function Status() {
   }, [checking, lastRunAt, tick])
 
   return (
-    <div className="status-page">
-      <div className="status-radar" aria-hidden="true">
-        <span className="radar-ring r1" />
-        <span className="radar-ring r2" />
-        <span className="radar-ring r3" />
-        <span className="radar-sweep" />
-        <span className="radar-core" />
+    <div className={`status-page pinball ${nudge ? 'is-nudge' : ''} overall-${overall}`}>
+      <div className="pin-cabinet" aria-hidden="true">
+        <span className="pin-chrome left" />
+        <span className="pin-chrome right" />
+        <span className="pin-screw s1" />
+        <span className="pin-screw s2" />
+        <span className="pin-screw s3" />
+        <span className="pin-screw s4" />
       </div>
 
-      <p className="blink-line status-blink">SYSTEM DIAGNOSTIC</p>
-      <h1 className="title-pixel status-title">STATUS</h1>
-      <p className="status-lede">Live health fra browseren — ping, latency og uptime-vibe.</p>
+      <div className="pin-backglass">
+        <p className="blink-line status-blink">ARCADE DIAGNOSTIC</p>
+        <h1 className="title-pixel status-title">SERVER PINBALL</h1>
+        <p className="status-lede">{FUN_LINES[funIx]}</p>
+      </div>
+
+      <div className="pin-scoreboard" aria-live="polite">
+        <div className="reel">
+          <span className="reel-label">SCORE</span>
+          <strong className="reel-digits">{padScore(score)}</strong>
+        </div>
+        <div className="reel reel-hi">
+          <span className="reel-label">HIGH</span>
+          <strong className="reel-digits">{padScore(highScore)}</strong>
+        </div>
+        <div className="reel reel-balls">
+          <span className="reel-label">BALLS</span>
+          <strong className="reel-digits balls">
+            {SERVICES.map((_, i) => (
+              <span key={i} className={i < okCount ? 'lit' : ''}>
+                ●
+              </span>
+            ))}
+          </strong>
+        </div>
+      </div>
 
       <div className={`status-banner ${banner.className}`} role="status">
         <div className="banner-led" aria-hidden="true" />
@@ -249,114 +369,152 @@ export default function Status() {
         </div>
         <div className="banner-stats">
           <span>
-            <em>{okCount}</em> UP
+            <em>{okCount}</em> HIT
           </span>
           <span>
-            <em>{downCount}</em> DOWN
+            <em>{downCount}</em> MISS
           </span>
           <span>
-            <em>{SERVICES.length}</em> NODES
+            <em>{SERVICES.length}</em> LANES
           </span>
         </div>
       </div>
 
-      <div className="status-toolbar">
+      <div className="status-toolbar pin-controls">
         <button
           type="button"
-          className={`status-refresh ${checking ? 'is-busy' : ''}`}
+          className={`status-refresh plunger ${checking ? 'is-busy' : ''}`}
           onClick={() => void runChecks()}
           disabled={checking}
         >
-          {checking ? 'SCANNER…' : 'OPDATER NU'}
+          {checking ? 'BALL IN PLAY…' : 'PLUNGER ▶'}
+        </button>
+        <button type="button" className="nudge-btn" onClick={doNudge} disabled={checking}>
+          NUDGE
         </button>
         <div className="status-countdown" aria-label={`Næste tjek om ${nextInSec} sekunder`}>
           <div className="countdown-track">
             <div className="countdown-fill" style={{ width: `${countdownPct}%` }} />
           </div>
           <span className="status-auto">
-            {checking ? 'Scanner…' : `Næste scan ${nextInSec}s`}
+            {checking ? 'Bumpers tæller…' : `Auto-plunge ${nextInSec}s`}
           </span>
         </div>
       </div>
 
-      <ul className="status-grid">
-        {SERVICES.map((svc, i) => {
-          const r = results[svc.id]
-          const stateLabel =
-            r.state === 'checking'
-              ? 'TJEKKER'
-              : r.state === 'ok'
-                ? 'ONLINE'
+      <div className="pin-playfield">
+        <div
+          className={`pin-ball ${checking ? 'is-rolling' : 'is-rest'}`}
+          style={{ ['--lane' as string]: String(ballLane) }}
+          aria-hidden="true"
+        />
+
+        <ul className="status-grid">
+          {SERVICES.map((svc, i) => {
+            const r = results[svc.id]
+            const stateLabel =
+              r.state === 'checking'
+                ? 'SPIN'
+                : r.state === 'ok'
+                  ? 'HIT!'
+                  : r.state === 'down'
+                    ? 'OUT'
+                    : '—'
+            const rowClass =
+              r.state === 'ok'
+                ? 'row-ok'
                 : r.state === 'down'
-                  ? 'OFFLINE'
-                  : '—'
-          const rowClass =
-            r.state === 'ok'
-              ? 'row-ok'
-              : r.state === 'down'
-                ? 'row-down'
-                : r.state === 'checking'
-                  ? 'row-check'
-                  : 'row-idle'
-          const tone = latencyTone(r.latencyMs)
+                  ? 'row-down'
+                  : r.state === 'checking'
+                    ? 'row-check'
+                    : 'row-idle'
+            const tone = latencyTone(r.latencyMs)
+            const popup = popups.find((p) => p.id === svc.id)
 
-          return (
-            <li
-              key={svc.id}
-              className={`status-card accent-${svc.accent} ${rowClass}`}
-              style={{ animationDelay: `${i * 90}ms` }}
-            >
-              <div className="status-card-scan" aria-hidden="true" />
-              <div className="status-card-head">
-                <div className="status-id">
-                  <span className={`status-dot state-${r.state}`} />
-                  <div>
-                    <span className="status-name">{svc.name}</span>
-                    <span className="status-tag">{svc.tag}</span>
-                  </div>
-                </div>
-                <span className={`status-pill pill-${r.state}`}>{stateLabel}</span>
-              </div>
-
-              <div className="latency-block">
-                <div className="latency-top">
-                  <span>LATENCY</span>
-                  <strong className={`lat-${tone}`}>
-                    {r.latencyMs != null ? `${r.latencyMs} ms` : '—'}
-                  </strong>
-                </div>
-                <div className="latency-bar" aria-hidden="true">
-                  <div
-                    className={`latency-fill lat-${tone} ${r.state === 'checking' ? 'is-pulse' : ''}`}
-                    style={{ width: r.state === 'checking' ? '40%' : `${latencyPct(r.latencyMs)}%` }}
-                  />
-                </div>
-              </div>
-
-              <dl className="status-meta">
-                <div>
-                  <dt>ENDPOINT</dt>
-                  <dd className="status-url">{r.url || `${origin}${svc.path}`}</dd>
-                </div>
-                <div>
-                  <dt>SIDST TJEKKET</dt>
-                  <dd>{formatTime(r.lastChecked)}</dd>
-                </div>
-                {r.error ? (
-                  <div className="status-err-block">
-                    <dt>FEJL</dt>
-                    <dd className="status-err">{r.error}</dd>
-                  </div>
+            return (
+              <li
+                key={svc.id}
+                className={`status-card bumper accent-${svc.accent} ${rowClass} ${
+                  checking && ballLane === i ? 'ball-here' : ''
+                }`}
+                style={{ animationDelay: `${i * 90}ms` }}
+              >
+                <div className="status-card-scan" aria-hidden="true" />
+                <div className="bumper-ring" aria-hidden="true" />
+                {popup ? (
+                  <span key={popup.key} className="hit-popup">
+                    +{popup.pts}
+                  </span>
                 ) : null}
-              </dl>
 
-              <a className="status-open" href={svc.href}>
-                ÅBN SPIL →
-              </a>
-            </li>
-          )
-        })}
-      </ul>
+                <div className="status-card-head">
+                  <div className="status-id">
+                    <span className={`status-dot state-${r.state}`} />
+                    <div>
+                      <span className="status-bumper-label">{svc.bumper}</span>
+                      <span className="status-name">{svc.name}</span>
+                    </div>
+                  </div>
+                  <span className={`status-pill pill-${r.state}`}>{stateLabel}</span>
+                </div>
+
+                <div className="latency-block">
+                  <div className="latency-top">
+                    <span>SPEED</span>
+                    <strong className={`lat-${tone}`}>
+                      {r.latencyMs != null ? `${r.latencyMs} ms` : '—'}
+                    </strong>
+                  </div>
+                  <div className="latency-bar" aria-hidden="true">
+                    <div
+                      className={`latency-fill lat-${tone} ${r.state === 'checking' ? 'is-pulse' : ''}`}
+                      style={{
+                        width: r.state === 'checking' ? '40%' : `${latencyPct(r.latencyMs)}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <dl className="status-meta">
+                  <div>
+                    <dt>LANE</dt>
+                    <dd className="status-url">{r.url || `${origin}${svc.path}`}</dd>
+                  </div>
+                  <div className="meta-row-split">
+                    <div>
+                      <dt>SIDST HIT</dt>
+                      <dd>{formatTime(r.lastChecked)}</dd>
+                    </div>
+                    <div>
+                      <dt>POINTS</dt>
+                      <dd className="pts">{r.hitPoints > 0 ? `+${r.hitPoints}` : '—'}</dd>
+                    </div>
+                  </div>
+                  {r.error ? (
+                    <div className="status-err-block">
+                      <dt>DRAIN</dt>
+                      <dd className="status-err">{r.error}</dd>
+                    </div>
+                  ) : null}
+                </dl>
+
+                <a className="status-open" href={svc.href}>
+                  PLAY →
+                </a>
+              </li>
+            )
+          })}
+        </ul>
+
+        <div className="pin-flippers" aria-hidden="true">
+          <span className={`flipper left ${checking ? 'kick' : ''}`} />
+          <span className={`flipper right ${checking ? 'kick' : ''}`} />
+        </div>
+      </div>
+
+      <p className="pin-footer hint-pixel">
+        PLUNGER = SCAN · NUDGE = FORCE · HURTIG LATENCY = ×2/×3
+      </p>
     </div>
   )
 }
