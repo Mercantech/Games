@@ -36,25 +36,25 @@
 
 .cartridge-row {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem 1.15rem;
-  width: min(100%, 34rem);
+  grid-template-columns: repeat(2, minmax(0, 11.5rem));
+  gap: 1.1rem 1.35rem;
+  width: max-content;
+  max-width: 100%;
   margin: 0 auto 0.75rem;
-  justify-items: stretch;
+  justify-content: center;
 }
 
 @media (max-width: 560px) {
   .cartridge-row {
-    grid-template-columns: minmax(0, 16rem);
-    justify-content: center;
-    gap: 0.9rem;
+    grid-template-columns: minmax(0, 12.5rem);
+    gap: 1rem;
   }
 }
 
 @media (min-width: 900px) {
   .cartridge-row {
-    width: min(100%, 38rem);
-    gap: 1.15rem 1.35rem;
+    grid-template-columns: repeat(2, minmax(0, 13rem));
+    gap: 1.25rem 1.6rem;
   }
 }
 
@@ -62,14 +62,14 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 0.28rem;
+  gap: 0.2rem;
   text-align: left;
-  padding: 0.4rem 0.4rem 0.5rem;
+  padding: 0.28rem;
   border: 3px solid #000;
   box-shadow: 3px 3px 0 #000;
   transition: transform 0.12s steps(2, end), filter 0.12s ease;
   overflow: hidden;
-  max-width: 100%;
+  width: 100%;
 }
 
 .cart.selected {
@@ -149,7 +149,7 @@
   justify-content: center;
   gap: 0.25rem;
   aspect-ratio: 16 / 9;
-  max-height: min(18vh, 140px);
+  width: 100%;
   background: #0a1a0a;
   color: var(--nes-lcd);
 }
@@ -184,7 +184,7 @@
 
 .cart-art-frame {
   width: 100%;
-  margin: 0.05rem 0 0.1rem;
+  margin: 0;
   border: 2px solid #000;
   background: #0a0a0a;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
@@ -197,8 +197,7 @@
   width: 100%;
   height: auto;
   aspect-ratio: 16 / 9;
-  max-height: min(18vh, 140px);
-  object-fit: cover;
+  object-fit: contain;
   object-position: center;
   image-rendering: auto;
   background: #0a0a0a;
@@ -211,9 +210,10 @@
 
 .cart-label {
   font-family: var(--font-pixel);
-  font-size: 0.36rem;
-  opacity: 0.85;
+  font-size: 0.32rem;
+  opacity: 0.8;
   letter-spacing: 0.08em;
+  line-height: 1.2;
 }
 
 .cart-foot {
@@ -221,28 +221,29 @@
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 0.2rem 0.5rem;
+  gap: 0.15rem 0.4rem;
+  padding: 0 0.05rem 0.05rem;
 }
 
 .cart strong {
   font-family: var(--font-pixel);
-  font-size: 0.52rem;
-  line-height: 1.3;
+  font-size: 0.42rem;
+  line-height: 1.25;
   text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.45);
 }
 
 .cart-meta {
   font-family: var(--font-lcd);
-  font-size: 0.85rem;
-  opacity: 0.88;
+  font-size: 0.78rem;
+  opacity: 0.85;
   width: 100%;
-  line-height: 1.15;
+  line-height: 1.1;
 }
 
 .cart-go {
   font-family: var(--font-pixel);
-  font-size: 0.4rem;
-  letter-spacing: 0.06em;
+  font-size: 0.34rem;
+  letter-spacing: 0.05em;
   margin-left: auto;
 }
 
