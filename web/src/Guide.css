@@ -524,6 +524,56 @@
   border: 2px solid #000;
 }
 
+.proto-compare {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+@media (min-width: 700px) {
+  .proto-compare {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.proto-card {
+  border: 3px solid #000;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 0.75rem 0.85rem;
+}
+
+.proto-card h3 {
+  margin: 0 0 0.45rem;
+  font-family: var(--font-pixel);
+  font-size: 0.48rem;
+  letter-spacing: 0.06em;
+  color: #e8f8c0;
+}
+
+.proto-card.proto-mqtt h3 {
+  color: #9bbc0f;
+}
+
+.proto-card .bullet-list {
+  margin: 0;
+}
+
+.proto-sub {
+  margin: 0.85rem 0 0.4rem;
+  font-family: var(--font-pixel);
+  font-size: 0.45rem;
+  letter-spacing: 0.06em;
+  color: #e8f8c0;
+}
+
+.proto-note {
+  margin-top: 0.65rem;
+  padding: 0.55rem 0.65rem;
+  border: 2px dashed var(--nes-lcd-dim);
+  background: rgba(15, 56, 15, 0.35);
+  font-size: 1.05rem;
+}
+
 .guide table {
   width: 100%;
   border-collapse: collapse;

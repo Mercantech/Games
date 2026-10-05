@@ -91,6 +91,7 @@ const FULL_STAGES: Stage[] = [
   { id: 'hardware', label: 'HW', title: 'Hardware' },
   { id: 'setup', label: 'CFG', title: 'Sketch-setup' },
   { id: 'api', label: 'API', title: 'API-kontrakt' },
+  { id: 'realtime', label: 'RT', title: 'WebSocket / MQTT' },
   { id: 'pads', label: 'PAD', title: 'Pad-mapping' },
   { id: 'bomberman', label: 'BM', title: 'Bomberman' },
   { id: 'wizard', label: 'WZ', title: 'Wizard Duel' },
@@ -113,6 +114,7 @@ const CHECK_ITEMS = [
   'Bomberman / Tetris / Pong: gyldig GAME_PIN fra lobby',
   'Root-cert uploadet til MKR WiFi 1010',
   'Biblioteker: Carrier, WiFiNINA, HttpClient',
+  'Ved: browser = WebSocket, pad = HTTP (MQTT bruges ikke)',
   'Serial Monitor 115200 — join OK + playerId',
 ]
 
@@ -300,8 +302,9 @@ export default function Guide() {
                 <h2>Spil-flow</h2>
               </div>
               <p>
-                Arduino taler HTTP. Browseren viser arenaen. Samme fire skridt — kun path og actions
-                ændrer sig.
+                Arduino taler <strong>HTTP</strong>. Browseren holder en{' '}
+                <strong>WebSocket</strong> til live state. MQTT bruges ikke i Mercantec Games —
+                se STAGE «WebSocket / MQTT» for forskellen.
               </p>
               <ol className="steps">
                 <li>
@@ -507,9 +510,127 @@ export default function Guide() {
           </section>
         )}
 
+        {track === 'full' && (
+          <section
+            id="realtime"
+            className={`guide-section ${stageIds[stage] === 'realtime' ? 'on' : ''}`}
+          >
+            <div className="section-head">
+              <span className="stage-badge">STAGE 05</span>
+              <h2>WebSocket vs MQTT</h2>
+            </div>
+            <p>
+              Begge kan sende beskeder i realtid — men de er bygget til forskellige jobs. Her er
+              forskellen, og hvad Mercantec Games faktisk bruger.
+            </p>
+
+            <div className="proto-compare">
+              <div className="proto-card">
+                <h3>WebSocket</h3>
+                <ul className="bullet-list">
+                  <li>Én vedvarende forbindelse mellem klient og server</li>
+                  <li>Begge sider kan sende når som helst (fuld duplex)</li>
+                  <li>Typisk JSON-beskeder — perfekt til spil-state hvert frame</li>
+                  <li>Kører oven på HTTP(S) — virker bag Traefik / Cloudflare</li>
+                </ul>
+              </div>
+              <div className="proto-card proto-mqtt">
+                <h3>MQTT</h3>
+                <ul className="bullet-list">
+                  <li>Publish/subscribe via en <em>broker</em> (topics)</li>
+                  <li>Klienter kender ikke hinanden — kun topic-navne</li>
+                  <li>Letvægts, god til sensorer, IoT og mange devices</li>
+                  <li>Kræver broker + ofte ekstra netværk/firewall-setup</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>WebSocket</th>
+                    <th>MQTT</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Model</td>
+                    <td>Punkt-til-punkt (browser ↔ spilserver)</td>
+                    <td>Pub/sub via broker</td>
+                  </tr>
+                  <tr>
+                    <td>Typisk brug</td>
+                    <td>Live UI, lobby, score, paddles</td>
+                    <td>Sensorer, telemetri, mange IoT-noder</td>
+                  </tr>
+                  <tr>
+                    <td>Mercantec Games</td>
+                    <td>
+                      <strong>Ja</strong> — alle fire arenaer
+                    </td>
+                    <td>
+                      <strong>Nej</strong> — ikke i brug
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3 className="proto-sub">Hvad understøtter hvad?</h3>
+            <p>
+              Split: browseren får live state over WebSocket. Oplà-pad&apos;en sender inputs over
+              HTTP (join / heartbeat / action) — samme mønster for alle spil.
+            </p>
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Spil</th>
+                    <th>Browser ↔ server</th>
+                    <th>Arduino ↔ server</th>
+                    <th>MQTT</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Bomberman</td>
+                    <td>WebSocket</td>
+                    <td>HTTP REST</td>
+                    <td>—</td>
+                  </tr>
+                  <tr>
+                    <td>Wizard Duel</td>
+                    <td>WebSocket</td>
+                    <td>HTTP REST</td>
+                    <td>—</td>
+                  </tr>
+                  <tr>
+                    <td>Tetris</td>
+                    <td>WebSocket</td>
+                    <td>HTTP REST</td>
+                    <td>—</td>
+                  </tr>
+                  <tr>
+                    <td>Pong</td>
+                    <td>WebSocket</td>
+                    <td>HTTP REST</td>
+                    <td>—</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="proto-note">
+              Kort sagt: I behøver ikke MQTT-bibliotek på MKR&apos;en til disse spil. Pad ={' '}
+              <code>HttpClient</code> + POST. Browser = <code>new WebSocket(…)</code>.
+            </p>
+          </section>
+        )}
+
         <section id="pads" className={`guide-section ${stageIds[stage] === 'pads' ? 'on' : ''}`}>
           <div className="section-head">
-            <span className="stage-badge">{track === 'quick' ? 'STEP 02' : 'STAGE 05'}</span>
+            <span className="stage-badge">{track === 'quick' ? 'STEP 02' : 'STAGE 06'}</span>
             <h2>Pad-mapping</h2>
           </div>
           <p>
@@ -534,7 +655,10 @@ export default function Guide() {
               <span className="stage-badge">STEP 03</span>
               <h2>Vælg spil</h2>
             </div>
-            <p>Sæt <code>GAME_MODE</code> i <code>config.h</code>, upload sketch, åbn arena.</p>
+            <p>
+              Sæt <code>GAME_MODE</code> i <code>config.h</code>, upload sketch, åbn arena. Pad
+              sender HTTP; browseren bruger WebSocket (ingen MQTT).
+            </p>
             <div className="flow-compare">
               <div className="flow-card flow-red">
                 <div className="flow-card-top">
@@ -607,7 +731,7 @@ export default function Guide() {
               className={`guide-section ${stageIds[stage] === 'bomberman' ? 'on' : ''}`}
             >
               <div className="section-head">
-                <span className="stage-badge">STAGE 06</span>
+                <span className="stage-badge">STAGE 07</span>
                 <h2>Bomberman</h2>
               </div>
               <div className="game-panel">
@@ -634,7 +758,7 @@ export default function Guide() {
               className={`guide-section ${stageIds[stage] === 'wizard' ? 'on' : ''}`}
             >
               <div className="section-head">
-                <span className="stage-badge">STAGE 07</span>
+                <span className="stage-badge">STAGE 08</span>
                 <h2>Wizard Duel</h2>
               </div>
               <div className="game-panel">
@@ -660,7 +784,7 @@ export default function Guide() {
               className={`guide-section ${stageIds[stage] === 'tetris' ? 'on' : ''}`}
             >
               <div className="section-head">
-                <span className="stage-badge">STAGE 08</span>
+                <span className="stage-badge">STAGE 09</span>
                 <h2>Tetris</h2>
               </div>
               <div className="game-panel">
@@ -688,7 +812,7 @@ export default function Guide() {
               className={`guide-section ${stageIds[stage] === 'pong' ? 'on' : ''}`}
             >
               <div className="section-head">
-                <span className="stage-badge">STAGE 09</span>
+                <span className="stage-badge">STAGE 10</span>
                 <h2>Pong</h2>
               </div>
               <div className="game-panel">
@@ -718,7 +842,7 @@ export default function Guide() {
           className={`guide-section ${stageIds[stage] === 'checklist' ? 'on' : ''}`}
         >
           <div className="section-head">
-            <span className="stage-badge">{track === 'quick' ? 'STEP 04' : 'STAGE 10'}</span>
+            <span className="stage-badge">{track === 'quick' ? 'STEP 04' : 'STAGE 11'}</span>
             <h2>Checklist</h2>
           </div>
           <p className="check-progress">

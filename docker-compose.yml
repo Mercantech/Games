@@ -3,7 +3,7 @@ services:
     build:
       context: .
       args:
-        CACHEBUST: ${CACHEBUST:-20261005-arcade}
+        CACHEBUST: ${CACHEBUST:-20261005-ws-mqtt}
     restart: unless-stopped
     networks:
       - dokploy-network
