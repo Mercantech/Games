@@ -78,9 +78,11 @@ Ved join viser TFT **TETRIS** / **Klar!** når `GAME_MODE_TETRIS` er valgt. Base
 |-----|----------|
 | TOUCH0 | Op (`move` UP, hold = gentag) |
 | TOUCH2 | Ned (`move` DOWN, hold = gentag) |
-| TOUCH1 / TOUCH3 / TOUCH4 | Stop paddle (`stop`, `onTouchDown`) |
+| TOUCH1 | Arcade **WIDE** (højere paddle) |
+| TOUCH3 | Arcade **NUDGE** (snap til bold) |
+| TOUCH4 | Arcade **SMASH** (næste hit hurtigere) |
 
-Ved join viser TFT **PONG** / **Klar!** når `GAME_MODE_PONG` er valgt. Base path er `/Pong`.
+Powers virker kun i **Arcade**-lobby (Classic ignorerer dem). Ved join viser TFT **PONG** / **Klar!** når `GAME_MODE_PONG` er valgt. Base path er `/Pong`.
 
 ## TFT-fejlbeskeder
 

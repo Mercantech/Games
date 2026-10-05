@@ -387,7 +387,7 @@ export default function Guide() {
                     <li>Lobby med PIN (<code>GAME_BASE_PATH=/Pong</code>)</li>
                     <li>Arduino joiner med samme PIN</li>
                     <li>Klassisk paddle-duel — første til point vinder</li>
-                    <li>Pads: TOUCH0 op, TOUCH2 ned (hold), øvrige stop</li>
+                    <li>Pads: TOUCH0 op, TOUCH2 ned · Arcade: 1 WIDE, 3 NUDGE, 4 SMASH</li>
                   </ol>
                 </div>
               </div>
@@ -592,7 +592,7 @@ export default function Guide() {
                   </li>
                   <li>Lobby-PIN → <code>GAME_PIN</code></li>
                   <li>
-                    Åbn <a href="/Pong/">/Pong/</a> — pad-sim PONG: TOUCH0 op, TOUCH2 ned
+                    Åbn <a href="/Pong/">/Pong/</a> — pad-sim: UP/DOWN + Arcade WIDE/NUDGE/SMASH
                   </li>
                 </ol>
               </div>
@@ -701,7 +701,8 @@ export default function Guide() {
                     Lobby-PIN i <code>GAME_PIN</code> (som Bomberman/Tetris)
                   </li>
                   <li>
-                    Actions: <code>move</code> UP/DOWN (hold), <code>stop</code> på øvrige pads
+                    Actions: <code>move</code> UP/DOWN · Arcade: <code>wide</code> /{' '}
+                    <code>nudge</code> / <code>smash</code> (TOUCH1/3/4)
                   </li>
                   <li>
                     Arena: <a href="/Pong/">/Pong/</a>

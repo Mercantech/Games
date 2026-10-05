@@ -41,7 +41,7 @@ export const GAME_BANNERS: Record<
     title: 'PONG',
     path: '/Pong',
     accent: 'banner-pong',
-    tagline: 'Paddle UP / DOWN · classic duel',
+    tagline: 'UP/DOWN · Arcade: WIDE / NUDGE / SMASH',
   },
 }
 
@@ -96,11 +96,12 @@ export const LOOP_SNIPPETS: Record<GameMode, string> = {
   // Heartbeat hvert 3 sek
   // POST /Pong/api/controller/heartbeat
 
-  // === PONG pad-map ===
+  // === PONG pad-map (Arcade: 1/3/4 = powers) ===
   if (carrier.Buttons.getTouch(TOUCH0)) sendAction("move", "UP");
   if (carrier.Buttons.getTouch(TOUCH2)) sendAction("move", "DOWN");
-  // TOUCH1 / TOUCH3 / TOUCH4 → stop (valgfrit)
-  // if (carrier.Buttons.onTouchDown(TOUCH1)) sendAction("stop");
+  if (carrier.Buttons.onTouchDown(TOUCH1)) sendAction("wide");
+  if (carrier.Buttons.onTouchDown(TOUCH3)) sendAction("nudge");
+  if (carrier.Buttons.onTouchDown(TOUCH4)) sendAction("smash");
 }`,
 }
 
@@ -143,8 +144,8 @@ const PADS: PadDef[] = [
       body: '{"action":"move","params":{"direction":"LEFT"}}',
     },
     pong: {
-      action: 'stop',
-      body: '{"action":"stop"}',
+      action: 'wide',
+      body: '{"action":"wide"}',
     },
   },
   {
@@ -164,8 +165,8 @@ const PADS: PadDef[] = [
       body: '{"action":"move","params":{"direction":"RIGHT"}}',
     },
     pong: {
-      action: 'stop',
-      body: '{"action":"stop"}',
+      action: 'nudge',
+      body: '{"action":"nudge"}',
     },
   },
   {
@@ -206,8 +207,8 @@ const PADS: PadDef[] = [
       body: '{"action":"hardDrop"}',
     },
     pong: {
-      action: 'stop',
-      body: '{"action":"stop"}',
+      action: 'smash',
+      body: '{"action":"smash"}',
     },
   },
 ]

@@ -387,17 +387,18 @@ void handlePongInput(unsigned long now) {
       lastDown = now;
     }
   }
+  // Arcade: TOUCH1=WIDE, TOUCH3=NUDGE, TOUCH4=SMASH (Classic-lobby ignorerer)
   if (carrier.Buttons.onTouchDown(TOUCH1) && now - lastStop > DEBOUNCE_MS) {
-    sendAction("stop");
+    sendAction("wide");
     lastStop = now;
   }
-  if (carrier.Buttons.onTouchDown(TOUCH3) && now - lastStop > DEBOUNCE_MS) {
-    sendAction("stop");
-    lastStop = now;
+  if (carrier.Buttons.onTouchDown(TOUCH3) && now - lastBomb > DEBOUNCE_MS) {
+    sendAction("nudge");
+    lastBomb = now;
   }
-  if (carrier.Buttons.onTouchDown(TOUCH4) && now - lastStop > DEBOUNCE_MS) {
-    sendAction("stop");
-    lastStop = now;
+  if (carrier.Buttons.onTouchDown(TOUCH4) && now - lastHardDrop > DEBOUNCE_MS) {
+    sendAction("smash");
+    lastHardDrop = now;
   }
 }
 
