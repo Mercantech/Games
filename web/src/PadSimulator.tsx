@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './PadSimulator.css'
 
-type GameMode = 'bomber' | 'wizard' | 'tetris' | 'pong'
+export type GameMode = 'bomber' | 'wizard' | 'tetris' | 'pong'
 
 type PadMapping = { action: string; body: string }
 
@@ -13,6 +13,95 @@ type PadDef = {
   wizard: PadMapping
   tetris: PadMapping
   pong: PadMapping
+}
+
+export const GAME_BANNERS: Record<
+  GameMode,
+  { title: string; path: string; accent: string; tagline: string }
+> = {
+  bomber: {
+    title: 'BOMBERMAN',
+    path: '/Bomberman',
+    accent: 'banner-bomber',
+    tagline: 'Nav · bomb · multiplayer',
+  },
+  wizard: {
+    title: 'WIZARD DUEL',
+    path: '/Wizard',
+    accent: 'banner-wizard',
+    tagline: 'Cast spells · mana · last standing',
+  },
+  tetris: {
+    title: 'TETRIS',
+    path: '/Tetris',
+    accent: 'banner-tetris',
+    tagline: 'Move · rotate · hard drop · battle',
+  },
+  pong: {
+    title: 'PONG',
+    path: '/Pong',
+    accent: 'banner-pong',
+    tagline: 'Paddle UP / DOWN · classic duel',
+  },
+}
+
+export const LOOP_SNIPPETS: Record<GameMode, string> = {
+  bomber: `void loop() {
+  carrier.Buttons.update();
+
+  // Heartbeat hvert 3 sek
+  // POST /Bomberman/api/controller/heartbeat
+
+  // === BOMBERMAN pad-map ===
+  if (carrier.Buttons.getTouch(TOUCH2)) sendAction("move", "UP");
+  if (carrier.Buttons.getTouch(TOUCH0)) sendAction("move", "DOWN");
+  if (carrier.Buttons.getTouch(TOUCH1)) sendAction("move", "LEFT");
+  if (carrier.Buttons.getTouch(TOUCH3)) sendAction("move", "RIGHT");
+  if (carrier.Buttons.onTouchDown(TOUCH4)) sendAction("bomb");
+}`,
+  wizard: `void loop() {
+  carrier.Buttons.update();
+
+  // Heartbeat hvert 3 sek
+  // POST /Wizard/api/controller/heartbeat
+
+  // === WIZARD DUEL pad-map ===
+  if (carrier.Buttons.onTouchDown(TOUCH0))
+    castSpell("FIREBALL", 1);
+  if (carrier.Buttons.onTouchDown(TOUCH1))
+    castSpell("HEAL");
+  if (carrier.Buttons.onTouchDown(TOUCH2))
+    castSpell("SHIELD");
+  if (carrier.Buttons.onTouchDown(TOUCH3))
+    castSpell("LIGHTNING");
+  if (carrier.Buttons.onTouchDown(TOUCH4))
+    castSpell("DEATH_RAY", 1);
+}`,
+  tetris: `void loop() {
+  carrier.Buttons.update();
+
+  // Heartbeat hvert 3 sek
+  // POST /Tetris/api/controller/heartbeat
+
+  // === TETRIS pad-map ===
+  if (carrier.Buttons.getTouch(TOUCH1)) sendAction("move", "LEFT");
+  if (carrier.Buttons.getTouch(TOUCH3)) sendAction("move", "RIGHT");
+  if (carrier.Buttons.getTouch(TOUCH0)) sendAction("move", "DOWN");
+  if (carrier.Buttons.onTouchDown(TOUCH2)) sendAction("rotate");
+  if (carrier.Buttons.onTouchDown(TOUCH4)) sendAction("hardDrop");
+}`,
+  pong: `void loop() {
+  carrier.Buttons.update();
+
+  // Heartbeat hvert 3 sek
+  // POST /Pong/api/controller/heartbeat
+
+  // === PONG pad-map ===
+  if (carrier.Buttons.getTouch(TOUCH0)) sendAction("move", "UP");
+  if (carrier.Buttons.getTouch(TOUCH2)) sendAction("move", "DOWN");
+  // TOUCH1 / TOUCH3 / TOUCH4 → stop (valgfrit)
+  // if (carrier.Buttons.onTouchDown(TOUCH1)) sendAction("stop");
+}`,
 }
 
 const PADS: PadDef[] = [
@@ -130,10 +219,27 @@ type LogEntry = {
   at: number
 }
 
-export default function PadSimulator({ onPing }: { onPing?: () => void }) {
-  const [mode, setMode] = useState<GameMode>('bomber')
+type Props = {
+  mode?: GameMode
+  onModeChange?: (mode: GameMode) => void
+  onPing?: () => void
+}
+
+export default function PadSimulator({ mode: controlledMode, onModeChange, onPing }: Props) {
+  const [internalMode, setInternalMode] = useState<GameMode>('bomber')
+  const mode = controlledMode ?? internalMode
   const [active, setActive] = useState<number | null>(null)
   const [log, setLog] = useState<LogEntry[]>([])
+
+  const setMode = (next: GameMode) => {
+    if (controlledMode == null) setInternalMode(next)
+    onModeChange?.(next)
+    setLog([])
+  }
+
+  useEffect(() => {
+    setLog([])
+  }, [mode])
 
   const press = (pad: PadDef) => {
     const mapping =
@@ -160,44 +266,45 @@ export default function PadSimulator({ onPing }: { onPing?: () => void }) {
     onPing?.()
   }
 
-  const postHint =
-    mode === 'bomber'
-      ? 'POST …/Bomberman/api/controller/action'
-      : mode === 'wizard'
-        ? 'POST …/Wizard/api/controller/action'
-        : mode === 'tetris'
-          ? 'POST …/Tetris/api/controller/action'
-          : 'POST …/Pong/api/controller/action'
+  const banner = GAME_BANNERS[mode]
+  const postHint = `POST …${banner.path}/api/controller/action`
 
   return (
-    <div className="pad-sim">
+    <div className={`pad-sim mode-${mode}`}>
+      <div className={`pad-game-banner ${banner.accent}`} role="status">
+        <span className="pad-game-banner-mark">NOW PLAYING</span>
+        <strong className="pad-game-banner-title">{banner.title}</strong>
+        <span className="pad-game-banner-path">{banner.path}</span>
+        <span className="pad-game-banner-tag">{banner.tagline}</span>
+      </div>
+
       <div className="pad-sim-toolbar">
         <span className="pad-sim-title">PAD SIMULATOR</span>
         <div className="pad-sim-modes" role="group" aria-label="Spilprofil">
           <button
             type="button"
-            className={mode === 'bomber' ? 'on' : ''}
+            className={`mode-bomber ${mode === 'bomber' ? 'on' : ''}`}
             onClick={() => setMode('bomber')}
           >
             BOMBERMAN
           </button>
           <button
             type="button"
-            className={mode === 'wizard' ? 'on' : ''}
+            className={`mode-wizard ${mode === 'wizard' ? 'on' : ''}`}
             onClick={() => setMode('wizard')}
           >
             WIZARD
           </button>
           <button
             type="button"
-            className={mode === 'tetris' ? 'on' : ''}
+            className={`mode-tetris ${mode === 'tetris' ? 'on' : ''}`}
             onClick={() => setMode('tetris')}
           >
             TETRIS
           </button>
           <button
             type="button"
-            className={mode === 'pong' ? 'on' : ''}
+            className={`mode-pong ${mode === 'pong' ? 'on' : ''}`}
             onClick={() => setMode('pong')}
           >
             PONG
@@ -224,7 +331,7 @@ export default function PadSimulator({ onPing }: { onPing?: () => void }) {
         <div className="pad-sim-out">
           <p className="pad-sim-out-label">{postHint}</p>
           {log.length === 0 ? (
-            <p className="pad-sim-empty">Tryk en pad — se action + JSON</p>
+            <p className="pad-sim-empty">Tryk en pad — se action + JSON for {banner.title}</p>
           ) : (
             <ul className="pad-sim-log">
               {log.map((entry) => (

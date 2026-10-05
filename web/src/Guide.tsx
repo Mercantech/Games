@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { InoCode } from './InoCode'
-import PadSimulator from './PadSimulator'
+import PadSimulator, {
+  GAME_BANNERS,
+  LOOP_SNIPPETS,
+  type GameMode,
+} from './PadSimulator'
 import { usePad, type PadButton } from './PadContext'
 import './Guide.css'
 
@@ -48,25 +52,7 @@ const JOIN_SNIPPET = `bool doJoin() {
   return status == 200;
 }`
 
-const LOOP_SNIPPET = `void loop() {
-  carrier.Buttons.update();
-
-  // Heartbeat hvert 3 sek
-  // POST {GAME_BASE_PATH}/api/controller/heartbeat
-
-  // Nav-profil (Bomberman):
-  if (carrier.Buttons.getTouch(TOUCH2)) sendAction("move", "UP");
-  if (carrier.Buttons.getTouch(TOUCH0)) sendAction("move", "DOWN");
-  if (carrier.Buttons.getTouch(TOUCH1)) sendAction("move", "LEFT");
-  if (carrier.Buttons.getTouch(TOUCH3)) sendAction("move", "RIGHT");
-  if (carrier.Buttons.onTouchDown(TOUCH4)) sendAction("bomb");
-
-  // Ability-profil (Wizard) i stedet:
-  // if (carrier.Buttons.onTouchDown(TOUCH0))
-  //   castSpell("FIREBALL", 1);
-}`
-
-const ACTION_SNIPPET = `// Bomberman
+const ACTION_SNIPPET = `// Shared helper — body formes efter spil
 void sendAction(const char* action, const char* direction = nullptr) {
   String path = apiPath("/api/controller/action");
   String body =
@@ -81,7 +67,7 @@ void sendAction(const char* action, const char* direction = nullptr) {
   // http.post(path) med body...
 }
 
-// Wizard
+// Wizard bruger cast i stedet for move:
 void castSpell(const char* spellKey, int targetId = -1) {
   String path = apiPath("/api/controller/action");
   String body =
@@ -146,6 +132,8 @@ export default function Guide() {
   const stageRef = useRef(0)
   const [checks, setChecks] = useState<boolean[]>(() => CHECK_ITEMS.map(() => false))
   const [quickChecks, setQuickChecks] = useState<boolean[]>(() => QUICK_CHECKS.map(() => false))
+  const [padMode, setPadMode] = useState<GameMode>('bomber')
+  const padBanner = GAME_BANNERS[padMode]
 
   const stageIds = useMemo(() => stages.map((s) => s.id), [stages])
 
@@ -525,11 +513,19 @@ export default function Guide() {
             <h2>Pad-mapping</h2>
           </div>
           <p>
-            Altid <code>carrier.Buttons.update()</code> først. Klik pads nedenfor for at se hvilken
-            action der sendes.
+            Altid <code>carrier.Buttons.update()</code> først. Skift spil-banner ovenfor — pad-log
+            og <code>loop.ino</code> følger med.
           </p>
-          <PadSimulator onPing={() => blip('move')} />
-          <InoCode code={LOOP_SNIPPET} filename="loop.ino" />
+          <PadSimulator
+            mode={padMode}
+            onModeChange={setPadMode}
+            onPing={() => blip('move')}
+          />
+          <div className={`pad-code-banner ${padBanner.accent}`} role="status">
+            <span>loop.ino · {padBanner.title}</span>
+            <span>{padBanner.path}</span>
+          </div>
+          <InoCode code={LOOP_SNIPPETS[padMode]} filename={`loop-${padMode}.ino`} />
         </section>
 
         {track === 'quick' && (

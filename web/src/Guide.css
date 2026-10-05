@@ -586,6 +586,41 @@
   animation: blink 0.9s steps(2, end) infinite;
 }
 
+.pad-code-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+  margin: 0 0 0.55rem;
+  padding: 0.5rem 0.65rem;
+  border: 3px solid #000;
+  box-shadow: 3px 3px 0 #000;
+  font-family: var(--font-pixel);
+  font-size: 0.4rem;
+  letter-spacing: 0.06em;
+}
+
+.pad-code-banner.banner-bomber {
+  background: linear-gradient(90deg, #9b1218, #e71e28 55%, #ff5a5a);
+  color: #fff;
+}
+
+.pad-code-banner.banner-wizard {
+  background: linear-gradient(90deg, #0d4f8a, #209cee 55%, #7ec8f8);
+  color: #fff;
+}
+
+.pad-code-banner.banner-tetris {
+  background: linear-gradient(90deg, #6366f1, #a855f7 40%, #22d3ee);
+  color: #fff;
+}
+
+.pad-code-banner.banner-pong {
+  background: linear-gradient(90deg, #c1121f, #ff6b35 45%, #ffe566);
+  color: #111;
+}
+
 @keyframes blink {
   50% {
     opacity: 0;
