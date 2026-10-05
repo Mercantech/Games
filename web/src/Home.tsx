@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { usePad, type PadButton } from './PadContext'
 import './Home.css'
 
-type Slot = 'bomber' | 'wizard' | 'tetris' | 'pong' | 'guide'
+type Slot = 'bomber' | 'wizard' | 'tetris' | 'pong' | 'tower' | 'guide'
 
 type CartDef = {
   id: Slot
@@ -88,8 +88,25 @@ const CARTS: CartDef[] = [
     details: ['2 spillere (+ tilskuere)', 'Venstre / højre paddle', 'Arduino-pad: UP / DOWN'],
   },
   {
-    id: 'guide',
+    id: 'tower',
     label: 'SLOT E',
+    title: 'TOWER DEFENSE',
+    meta: 'TAP · WAVES · OPLÀ',
+    href: '/TowerDefense/',
+    cartClass: 'cart-tower',
+    img: {
+      src: '/tower-defense-thumb.jpg',
+      alt: 'Tower Defense Tap — fæstning, sti og tårne',
+      width: 1024,
+      height: 576,
+      loading: 'lazy',
+    },
+    blurb: 'Byg langs stien, overlev 12 waves. Fem knapper: flyt slot, vælg tårn, place.',
+    details: ['Singleplayer', 'Arrow · Cannon · Frost', 'Arduino-klar controller-API'],
+  },
+  {
+    id: 'guide',
+    label: 'SLOT F',
     title: 'GUIDE',
     meta: 'PAD · WIFI · GAME_MODE',
     href: '/guide',

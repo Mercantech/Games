@@ -3,7 +3,7 @@ services:
     build:
       context: .
       args:
-        CACHEBUST: ${CACHEBUST:-20261005-bomber-mqtt}
+        CACHEBUST: ${CACHEBUST:-20261005-tower}
     restart: unless-stopped
     networks:
       - dokploy-network

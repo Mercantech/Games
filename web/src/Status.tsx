@@ -12,7 +12,7 @@ type ServiceDef = {
   name: string
   path: string
   href: string
-  accent: 'red' | 'blue' | 'purple' | 'orange'
+  accent: 'red' | 'blue' | 'purple' | 'orange' | 'green'
   lane: string
   points: number
 }
@@ -61,6 +61,15 @@ const SERVICES: ServiceDef[] = [
     href: '/Pong/',
     accent: 'orange',
     lane: 'LANE 4',
+    points: 1,
+  },
+  {
+    id: 'tower',
+    name: 'Tower Defense',
+    path: '/TowerDefense/api/health',
+    href: '/TowerDefense/',
+    accent: 'green',
+    lane: 'LANE 5',
     points: 1,
   },
 ]

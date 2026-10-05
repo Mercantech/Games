@@ -34,6 +34,7 @@ export default function App() {
               <a href="/Wizard/">WIZARD</a>
               <a href="/Tetris/">TETRIS</a>
               <a href="/Pong/">PONG</a>
+              <a href="/TowerDefense/">TOWER</a>
             </nav>
           </div>
 
