@@ -3,7 +3,7 @@ services:
     build:
       context: .
       args:
-        CACHEBUST: ${CACHEBUST:-1}
+        CACHEBUST: ${CACHEBUST:-20261005-arcade}
     restart: unless-stopped
     networks:
       - dokploy-network
