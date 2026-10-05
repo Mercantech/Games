@@ -3,7 +3,7 @@ services:
     image: eclipse-mosquitto:2
     restart: unless-stopped
     volumes:
-      - ./config:/mosquitto/config:ro
+      - ./config/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
       - mqtt-data:/mosquitto/data
       - mqtt-log:/mosquitto/log
     networks:

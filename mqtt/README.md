@@ -14,7 +14,8 @@ Broker til **Oplà-pads** (Bomberman v1). Browser bruger stadig WebSocket mod sp
 3. Env (secrets — aldrig i git):
    - `MQTT_SERVER_USER` / `MQTT_SERVER_PASS` → bruger `bomberman-server` (matcher ACL)
    - `MQTT_PAD_USER` / `MQTT_PAD_PASS` → bruger `games-pad` (Oplà i `config.h`)
-4. Opret `/mosquitto/config/passwords` på volume (én gang):
+4. **8883 til MKR:** Opret DNS **games-mqtt.mercantec.tech** (ikke `mqtt.mercantec.tech`) → Traefik TCP → broker. Uncomment TLS-listener i `mosquitto.conf` og mount cert.
+5. Opret `/mosquitto/config/passwords` på volume (én gang):
 
 ```bash
 docker exec -it <mqtt-container> sh
