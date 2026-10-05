@@ -15,9 +15,26 @@
 #define GAME_MODE            GAME_MODE_BOMBERMAN
 // Skift til GAME_MODE_WIZARD, GAME_MODE_TETRIS eller GAME_MODE_PONG.
 
+// Pad-transport (kun Bomberman understøtter MQTT i v1):
+#define PAD_TRANSPORT_HTTP   0
+#define PAD_TRANSPORT_MQTT     1
+#define PAD_TRANSPORT          PAD_TRANSPORT_HTTP
+
+// MQTT (Oplà → games-mqtt.mercantec.tech) — kun ved PAD_TRANSPORT_MQTT + BOMBERMAN
+#define MQTT_USE_TLS           1
+#define MQTT_HOST              "games-mqtt.mercantec.tech"
+#define MQTT_PORT              8883
+#define MQTT_USER              "games-pad"
+#define MQTT_PASS              "SKIFT_MIG"
+#define MQTT_TOPIC_PREFIX      "mercantec/bomberman/v1"
+
 // 1 = HTTPS (produktion). 0 = HTTP kun lokalt.
 #define USE_HTTPS      1
 // ==================================
+
+#if PAD_TRANSPORT == PAD_TRANSPORT_MQTT && GAME_MODE != GAME_MODE_BOMBERMAN
+#error MQTT pad-transport understøttes kun med GAME_MODE_BOMBERMAN
+#endif
 
 #if GAME_MODE == GAME_MODE_WIZARD
   #define GAME_BASE_PATH "/Wizard"
@@ -33,4 +50,9 @@
   #define SERVER_PORT 443
 #else
   #define SERVER_PORT 80
+#endif
+
+#if PAD_TRANSPORT == PAD_TRANSPORT_MQTT && !MQTT_USE_TLS
+  #undef MQTT_PORT
+  #define MQTT_PORT 1883
 #endif

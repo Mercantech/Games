@@ -1,0 +1,12 @@
+# Oplà-pads (pad-bruger): read/write kun under eget deviceId i join-resp og errors.
+# Server-bruger (bomberman-bridge): fuld adgang til mercantec/bomberman/#
+
+user bomberman-server
+topic readwrite mercantec/bomberman/#
+
+user games-pad
+topic read mercantec/bomberman/+/join/resp/+
+topic read mercantec/bomberman/+/error/+
+topic write mercantec/bomberman/+/join
+topic write mercantec/bomberman/+/action/+
+topic write mercantec/bomberman/+/heartbeat/+

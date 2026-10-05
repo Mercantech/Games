@@ -19,6 +19,9 @@ Fælles trådløs controller til **Bomberman**, **Wizard Duel**, **Tetris** og *
 | `GAME_PIN` | **Bomberman / Tetris / Pong:** PIN fra lobby. **Wizard:** `""` er OK |
 | `GAME_MODE` | `GAME_MODE_BOMBERMAN`, `GAME_MODE_WIZARD`, `GAME_MODE_TETRIS` eller `GAME_MODE_PONG` |
 | `USE_HTTPS` | `1` på produktion, `0` kun lokalt HTTP |
+| `PAD_TRANSPORT` | `PAD_TRANSPORT_HTTP` (default) eller `PAD_TRANSPORT_MQTT` (**kun Bomberman**) |
+| `MQTT_HOST` | Produktion: `games-mqtt.mercantec.tech` (port 8883 MQTTS) |
+| `MQTT_USER` / `MQTT_PASS` | Pad-bruger fra broker (Dokploy secret) |
 
 `GAME_BASE_PATH` sættes automatisk ud fra `GAME_MODE`.
 
@@ -29,6 +32,7 @@ Installer via **Library Manager**:
 - **Arduino_MKRIoTCarrier**
 - **WiFiNINA** (følger MKR WiFi 1010)
 - **ArduinoHttpClient**
+- **PubSubClient** (kun ved `PAD_TRANSPORT_MQTT` + Bomberman)
 
 ## HTTPS / root-certifikat
 
@@ -41,6 +45,8 @@ Uden certifikat kan join give timeout (`JOIN TIMEOUT` på displayet).
 ## Pad-mapping
 
 ### Bomberman (guide / canonical)
+
+**Transport:** HTTP (default) eller MQTT (`PAD_TRANSPORT_MQTT`) mod `games-mqtt.mercantec.tech`. Pad-sim i portalen bruger stadig HTTP.
 
 | Pad | Funktion |
 |-----|----------|

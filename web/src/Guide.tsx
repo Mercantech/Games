@@ -114,7 +114,7 @@ const CHECK_ITEMS = [
   'Bomberman / Tetris / Pong: gyldig GAME_PIN fra lobby',
   'Root-cert uploadet til MKR WiFi 1010',
   'Biblioteker: Carrier, WiFiNINA, HttpClient',
-  'Ved: browser = WebSocket, pad = HTTP (MQTT bruges ikke)',
+  'Bomberman pad: HTTP eller MQTT (PAD_TRANSPORT) — øvrige spil kun HTTP',
   'Serial Monitor 115200 — join OK + playerId',
 ]
 
@@ -303,8 +303,8 @@ export default function Guide() {
               </div>
               <p>
                 Arduino taler <strong>HTTP</strong>. Browseren holder en{' '}
-                <strong>WebSocket</strong> til live state. MQTT bruges ikke i Mercantec Games —
-                se STAGE «WebSocket / MQTT» for forskellen.
+                <strong>WebSocket</strong> til live state. Oplà kan bruge HTTP — eller{' '}
+                <strong>MQTT</strong> til Bomberman — se STAGE «WebSocket / MQTT».
               </p>
               <ol className="steps">
                 <li>
@@ -580,8 +580,8 @@ export default function Guide() {
 
             <h3 className="proto-sub">Hvad understøtter hvad?</h3>
             <p>
-              Split: browseren får live state over WebSocket. Oplà-pad&apos;en sender inputs over
-              HTTP (join / heartbeat / action) — samme mønster for alle spil.
+              Browser: WebSocket. Oplà: HTTP (alle spil) eller MQTT (kun Bomberman, valgfrit).
+              Broker: <code>games-mqtt.mercantec.tech</code> (MQTTS 8883).
             </p>
             <div className="table-wrap">
               <table>
@@ -597,8 +597,8 @@ export default function Guide() {
                   <tr>
                     <td>Bomberman</td>
                     <td>WebSocket</td>
-                    <td>HTTP REST</td>
-                    <td>—</td>
+                    <td>HTTP REST (default)</td>
+                    <td>Valgfri (pad)</td>
                   </tr>
                   <tr>
                     <td>Wizard Duel</td>
@@ -622,8 +622,9 @@ export default function Guide() {
               </table>
             </div>
             <p className="proto-note">
-              Kort sagt: I behøver ikke MQTT-bibliotek på MKR&apos;en til disse spil. Pad ={' '}
-              <code>HttpClient</code> + POST. Browser = <code>new WebSocket(…)</code>.
+              Default pad: <code>HttpClient</code> + POST. Bomberman MQTT:{' '}
+              <code>PAD_TRANSPORT_MQTT</code>, <code>PubSubClient</code>, topics under{' '}
+              <code>mercantec/bomberman/v1/…</code>. Browser = <code>new WebSocket(…)</code>.
             </p>
           </section>
         )}
@@ -656,8 +657,8 @@ export default function Guide() {
               <h2>Vælg spil</h2>
             </div>
             <p>
-              Sæt <code>GAME_MODE</code> i <code>config.h</code>, upload sketch, åbn arena. Pad
-              sender HTTP; browseren bruger WebSocket (ingen MQTT).
+              Sæt <code>GAME_MODE</code> i <code>config.h</code>, upload sketch, åbn arena.
+              Bomberman kan bruge MQTT-pad — ellers HTTP.
             </p>
             <div className="flow-compare">
               <div className="flow-card flow-red">
@@ -745,6 +746,11 @@ export default function Guide() {
                   </li>
                   <li>
                     Actions: <code>move</code> + direction, eller <code>bomb</code>
+                  </li>
+                  <li>
+                    Valgfri MQTT: <code>PAD_TRANSPORT_MQTT</code>, broker{' '}
+                    <code>games-mqtt.mercantec.tech</code>, prefix{' '}
+                    <code>mercantec/bomberman/v1</code>
                   </li>
                   <li>
                     Arena: <a href="/Bomberman/">/Bomberman/</a>

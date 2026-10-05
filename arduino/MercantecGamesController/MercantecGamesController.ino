@@ -12,6 +12,10 @@
 #include <ArduinoHttpClient.h>
 #include "config.h"
 
+#if PAD_TRANSPORT == PAD_TRANSPORT_MQTT
+  #include <PubSubClient.h>
+#endif
+
 MKRIoTCarrier carrier;
 
 #if USE_HTTPS
@@ -20,6 +24,19 @@ MKRIoTCarrier carrier;
   WiFiClient wifi;
 #endif
 HttpClient client = HttpClient(wifi, SERVER_HOST, SERVER_PORT);
+
+#if PAD_TRANSPORT == PAD_TRANSPORT_MQTT
+  #if MQTT_USE_TLS
+    WiFiSSLClient mqttWifi;
+  #else
+    WiFiClient mqttWifi;
+  #endif
+  PubSubClient mqtt(mqttWifi);
+  String mqttJoinRespTopic;
+  String mqttErrorTopic;
+  volatile bool mqttJoinPending = false;
+  volatile bool mqttJoinBadPin = false;
+#endif
 
 const int TFT_W = 240;
 const int TFT_H = 240;
@@ -125,6 +142,141 @@ bool parsePlayerId(const String& resp) {
   return playerId.length() > 0;
 }
 
+#if PAD_TRANSPORT == PAD_TRANSPORT_MQTT
+
+void mqttBuildTopics() {
+  mqttJoinRespTopic = String(MQTT_TOPIC_PREFIX) + "/" + String(GAME_PIN) +
+                      "/join/resp/" + deviceId;
+  mqttErrorTopic = String(MQTT_TOPIC_PREFIX) + "/" + String(GAME_PIN) +
+                   "/error/" + deviceId;
+}
+
+void mqttCallback(char* topic, byte* payload, unsigned int length) {
+  String msg;
+  msg.reserve(length + 1);
+  for (unsigned int i = 0; i < length; i++) {
+    msg += (char)payload[i];
+  }
+  Serial.print("[MQTT] msg ");
+  Serial.print(topic);
+  Serial.print(" ");
+  Serial.println(msg);
+
+  if (String(topic) == mqttJoinRespTopic) {
+    if (parsePlayerId(msg)) {
+      mqttJoinPending = false;
+    }
+  } else if (String(topic) == mqttErrorTopic) {
+    mqttJoinPending = false;
+    mqttJoinBadPin = true;
+    playerId = "";
+  }
+}
+
+bool mqttConnectBroker() {
+  mqtt.setServer(MQTT_HOST, MQTT_PORT);
+  mqtt.setCallback(mqttCallback);
+  mqtt.setBufferSize(512);
+
+  Serial.print("[MQTT] Connect ");
+  Serial.print(MQTT_HOST);
+  Serial.print(":");
+  Serial.println(MQTT_PORT);
+
+  if (mqtt.connected()) {
+    return true;
+  }
+
+  bool ok = mqtt.connect(deviceId.c_str(), MQTT_USER, MQTT_PASS);
+  if (!ok) {
+    Serial.print("[MQTT] FAIL rc=");
+    Serial.println(mqtt.state());
+    return false;
+  }
+  Serial.println("[MQTT] OK");
+  mqttBuildTopics();
+  mqtt.subscribe(mqttJoinRespTopic.c_str(), 1);
+  mqtt.subscribe(mqttErrorTopic.c_str(), 1);
+  return true;
+}
+
+JoinResult doJoinOnceMqtt() {
+  if (String(GAME_PIN).length() == 0) {
+    return JOIN_BAD_PIN;
+  }
+  if (!mqttConnectBroker()) {
+    return JOIN_TIMEOUT;
+  }
+
+  String joinTopic = String(MQTT_TOPIC_PREFIX) + "/" + String(GAME_PIN) + "/join";
+  String body = "{\"name\":\"" + String(PLAYER_NAME) +
+                "\",\"deviceId\":\"" + deviceId + "\"}";
+
+  mqttJoinPending = true;
+  mqttJoinBadPin = false;
+  playerId = "";
+  Serial.println("[MQTT JOIN] " + joinTopic);
+  Serial.println(body);
+  if (!mqtt.publish(joinTopic.c_str(), body.c_str(), false)) {
+    return JOIN_TIMEOUT;
+  }
+
+  unsigned long deadline = millis() + 8000;
+  while (mqttJoinPending && millis() < deadline) {
+    mqtt.loop();
+    delay(10);
+  }
+
+  if (playerId.length() > 0) {
+    return JOIN_OK;
+  }
+  if (mqttJoinBadPin) {
+    return JOIN_BAD_PIN;
+  }
+  return JOIN_TIMEOUT;
+}
+
+JoinResult doJoinWithRetriesMqtt() {
+  JoinResult last = JOIN_FAIL;
+  for (int attempt = 0; attempt < JOIN_ATTEMPTS; attempt++) {
+    if (attempt > 0) {
+      showMsg("Joiner igen...", nullptr, ST77XX_YELLOW);
+      delay(800);
+    }
+    last = doJoinOnceMqtt();
+    if (last == JOIN_OK) return JOIN_OK;
+    if (last == JOIN_BAD_PIN) return JOIN_BAD_PIN;
+    delay(500);
+  }
+  return last;
+}
+
+void sendMqttHeartbeat() {
+  if (playerId.length() == 0) return;
+  if (!mqtt.connected() && !mqttConnectBroker()) return;
+
+  String topic = String(MQTT_TOPIC_PREFIX) + "/" + String(GAME_PIN) +
+                 "/heartbeat/" + playerId;
+  String body = "{\"deviceId\":\"" + deviceId + "\"}";
+  mqtt.publish(topic.c_str(), body.c_str(), false);
+}
+
+void sendMqttAction(const char* action, const char* direction = nullptr) {
+  if (playerId.length() == 0) return;
+  if (!mqtt.connected() && !mqttConnectBroker()) return;
+
+  String topic = String(MQTT_TOPIC_PREFIX) + "/" + String(GAME_PIN) +
+                 "/action/" + playerId;
+  String body = "{\"action\":\"" + String(action) + "\"";
+  if (direction) {
+    body += ",\"params\":{\"direction\":\"" + String(direction) + "\"}";
+  }
+  body += "}";
+  mqtt.publish(topic.c_str(), body.c_str(), false);
+}
+
+#endif
+
 JoinResult doJoinOnce() {
   String path = apiPath("/api/controller/join");
   String body = "{\"name\":\"" + String(PLAYER_NAME) +
@@ -213,7 +365,11 @@ bool establishSession() {
   Serial.println(deviceId);
 
   showMsg("Joiner spil...", nullptr, ST77XX_YELLOW);
+#if PAD_TRANSPORT == PAD_TRANSPORT_MQTT
+  JoinResult jr = doJoinWithRetriesMqtt();
+#else
   JoinResult jr = doJoinWithRetries();
+#endif
   if (jr != JOIN_OK) {
     showJoinError(jr);
     return false;
@@ -234,6 +390,10 @@ bool establishSession() {
 
 void sendHeartbeat() {
   if (playerId.length() == 0) return;
+#if PAD_TRANSPORT == PAD_TRANSPORT_MQTT
+  sendMqttHeartbeat();
+  return;
+#endif
   String path = apiPath("/api/controller/heartbeat");
   String body = "{\"playerId\":\"" + playerId +
                 "\",\"deviceId\":\"" + deviceId + "\"";
@@ -247,6 +407,11 @@ void sendHeartbeat() {
 
 void sendAction(const char* action, const char* direction = nullptr) {
   if (playerId.length() == 0) return;
+
+#if PAD_TRANSPORT == PAD_TRANSPORT_MQTT
+  sendMqttAction(action, direction);
+  return;
+#endif
 
   String path = apiPath("/api/controller/action");
   String body = "{\"playerId\":\"" + playerId +
@@ -288,6 +453,12 @@ void castSpell(const char* spellKey, int targetId = 1) {
 
 void ensureWifiAndSession() {
   if (WiFi.status() == WL_CONNECTED && playerId.length() > 0) {
+#if PAD_TRANSPORT == PAD_TRANSPORT_MQTT
+    if (!mqtt.connected()) {
+      mqttConnectBroker();
+    }
+    mqtt.loop();
+#endif
     return;
   }
 
@@ -295,6 +466,9 @@ void ensureWifiAndSession() {
     showError("WIFI LOST", "Genopretter...");
     Serial.println("[WiFi] lost — reconnect");
     playerId = "";
+#if PAD_TRANSPORT == PAD_TRANSPORT_MQTT
+    mqtt.disconnect();
+#endif
     if (!connectWifi()) {
       return;
     }
@@ -460,6 +634,10 @@ void loop() {
     sendHeartbeat();
     lastHeartbeat = now;
   }
+
+#if PAD_TRANSPORT == PAD_TRANSPORT_MQTT
+  mqtt.loop();
+#endif
 
 #if GAME_MODE == GAME_MODE_TETRIS
   handleTetrisInput(now);
