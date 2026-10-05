@@ -745,6 +745,10 @@
   background: #ffc48a;
 }
 
+.status-card.accent-green .status-open {
+  background: #8fbc8f;
+}
+
 .pong-footer {
   margin: 0.9rem 0 0;
   text-align: center;
