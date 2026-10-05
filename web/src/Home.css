@@ -1,22 +1,22 @@
 .home {
   text-align: center;
-  padding: 0.35rem 0 0.75rem;
+  padding: 0.2rem 0 0.65rem;
 }
 
 .blink-line {
-  margin: 0 0 0.65rem;
+  margin: 0 0 0.45rem;
   font-family: var(--font-pixel);
-  font-size: 0.58rem;
+  font-size: 0.52rem;
   letter-spacing: 0.15em;
   color: var(--nes-lcd);
   animation: blink 1.1s steps(2, end) infinite;
 }
 
 .title-pixel {
-  margin: 0 0 0.45rem;
+  margin: 0 0 0.3rem;
   font-family: var(--font-pixel);
-  font-size: clamp(0.9rem, 3vw, 1.35rem);
-  line-height: 1.4;
+  font-size: clamp(0.8rem, 2.6vw, 1.15rem);
+  line-height: 1.35;
   letter-spacing: 0.04em;
   color: #fff;
   text-shadow:
@@ -27,32 +27,32 @@
 }
 
 .home-lede {
-  margin: 0 auto 1rem;
+  margin: 0 auto 0.85rem;
   max-width: 42ch;
-  font-size: 1.15rem;
-  line-height: 1.25;
+  font-size: 1.05rem;
+  line-height: 1.2;
   color: var(--nes-lcd-dim);
 }
 
 .cartridge-row {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.15rem 1.25rem;
+  gap: 1.25rem 1.35rem;
   width: 100%;
-  margin: 0 0 0.85rem;
+  margin: 0 0 0.75rem;
   box-sizing: border-box;
 }
 
 @media (max-width: 560px) {
   .cartridge-row {
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: 1.1rem;
   }
 }
 
 @media (min-width: 900px) {
   .cartridge-row {
-    gap: 1.35rem 1.5rem;
+    gap: 1.45rem 1.65rem;
   }
 }
 
@@ -60,9 +60,9 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 0.35rem;
+  gap: 0.4rem;
   text-align: left;
-  padding: 0.55rem;
+  padding: 0.7rem;
   border: 3px solid #000;
   box-shadow: 4px 4px 0 #000;
   transition: transform 0.12s steps(2, end), filter 0.12s ease;
@@ -149,6 +149,7 @@
   gap: 0.35rem;
   aspect-ratio: 16 / 9;
   width: 100%;
+  min-height: min(22vh, 200px);
   background: #0a1a0a;
   color: var(--nes-lcd);
 }
@@ -196,6 +197,7 @@
   width: 100%;
   height: auto;
   aspect-ratio: 16 / 9;
+  min-height: min(22vh, 200px);
   object-fit: contain;
   object-position: center;
   image-rendering: auto;
@@ -209,7 +211,7 @@
 
 .cart-label {
   font-family: var(--font-pixel);
-  font-size: 0.4rem;
+  font-size: 0.45rem;
   opacity: 0.85;
   letter-spacing: 0.08em;
   line-height: 1.2;
@@ -220,19 +222,19 @@
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 0.25rem 0.6rem;
+  gap: 0.3rem 0.7rem;
 }
 
 .cart strong {
   font-family: var(--font-pixel);
-  font-size: 0.58rem;
+  font-size: 0.68rem;
   line-height: 1.3;
   text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.45);
 }
 
 .cart-meta {
   font-family: var(--font-lcd);
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   opacity: 0.9;
   width: 100%;
   line-height: 1.15;
@@ -240,7 +242,7 @@
 
 .cart-go {
   font-family: var(--font-pixel);
-  font-size: 0.42rem;
+  font-size: 0.48rem;
   letter-spacing: 0.05em;
   margin-left: auto;
 }

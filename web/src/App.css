@@ -23,7 +23,7 @@
 }
 
 .console-shell {
-  width: min(1180px, 100%);
+  width: min(1320px, 100%);
   background: linear-gradient(180deg, var(--nes-body-light) 0%, var(--nes-body) 40%, #222 100%);
   border: 4px solid var(--nes-bevel);
   box-shadow:
@@ -126,6 +126,11 @@
   box-shadow: inset 0 0 0 3px #444;
 }
 
+.screen-bezel:has(.home) {
+  margin: 0.55rem 0.65rem 0.35rem;
+  padding: 0.55rem;
+}
+
 .screen-glass {
   min-height: auto;
   max-height: none;
@@ -145,9 +150,9 @@
 }
 
 .screen-glass:has(.home) {
-  min-height: min(58vh, 480px);
-  max-height: min(72vh, 720px);
-  padding: 1rem 1.15rem 1.25rem;
+  min-height: min(68vh, 620px);
+  max-height: min(82vh, 860px);
+  padding: 0.85rem 0.95rem 1.1rem;
 }
 
 .screen-glass::-webkit-scrollbar {
