@@ -8,6 +8,7 @@ export default function App() {
   const { pathname } = useLocation()
   const onHome = pathname === '/'
   const onGuide = pathname.startsWith('/guide')
+  const onManual = pathname.startsWith('/manual')
   const onStatus = pathname.startsWith('/status')
 
   return (
@@ -26,6 +27,9 @@ export default function App() {
               </Link>
               <Link to="/guide" className={onGuide ? 'active' : undefined}>
                 GUIDE
+              </Link>
+              <Link to="/manual/bomber" className={onManual ? 'active' : undefined}>
+                MANUAL
               </Link>
               <Link to="/status" className={onStatus ? 'active' : undefined}>
                 STATUS
