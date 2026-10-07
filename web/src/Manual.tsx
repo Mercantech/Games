@@ -14,7 +14,7 @@ type GameManual = {
   id: GameId
   short: string
   title: string
-  kicker: string
+  tagline: string
   href: string
   thumb: string
   thumbAlt: string
@@ -34,7 +34,7 @@ const GAMES: GameManual[] = [
     id: 'bomber',
     short: 'BOMBER',
     title: 'BOMBERMAN',
-    kicker: 'PIN · BOMBER · SIDSTE I LIVE',
+    tagline: 'Læg bomber. Spræng mursten. Sidste i live vinder.',
     href: '/Bomberman/',
     thumb: '/bomberman-nes.jpg',
     thumbAlt: 'Bomberman — maze med mursten og bomber',
@@ -43,32 +43,32 @@ const GAMES: GameManual[] = [
     idea: 'I deler én maze. Bløde mursten kan sprænges. Faste søjler kan ikke. En bombe eksploderer i et kors — og den rammer også dig.',
     win: 'Sidste spiller i live vinder. Dør alle i samme blast, er der ingen vinder.',
     flow: [
-      { n: '01', title: 'PIN', text: 'Admin opretter lobby og bane (9×9 til 21×21). Del PIN med holdet.' },
-      { n: '02', title: 'JOIN', text: 'Alle skriver PIN og joiner. Når I er klar: Start spil.' },
-      { n: '03', title: 'BLAST', text: 'Læg bomber, hent power-ups i murbrokkerne, og vær den sidste tilbage.' },
+      { n: '01', title: 'PIN', text: 'Admin opretter lobby og bane. Del PIN med holdet.' },
+      { n: '02', title: 'JOIN', text: 'Alle joiner. Når I er klar: Start spil.' },
+      { n: '03', title: 'BLAST', text: 'Læg bomber, hent power-ups, vær den sidste tilbage.' },
     ],
     keys: [
-      { key: '↑ ↓ ← →', does: 'Gå én felt ad gangen. WASD gør det samme.' },
-      { key: 'MELLEMRUM', does: 'Læg en bombe på dit felt. Den tæller ned og eksploderer i et kors.' },
+      { key: '↑ ↓ ← →', does: 'Gå. WASD gør det samme.' },
+      { key: 'MELLEMRUM', does: 'Læg bombe. Den tæller ned og eksploderer i et kors.' },
     ],
-    pad: 'Oplà: move + retning, eller bomb. Valgfrit MQTT kun på Bomberman.',
+    pad: 'Oplà: move + retning, eller bomb. Valgfrit MQTT kun her.',
     scenes: [
-      { id: 'maze', title: 'MAZEN', caption: 'Brun = blød mur. Mørk = fast søjle. Gå kun på gulvet.' },
-      { id: 'blast', title: 'EKSPLOSION', caption: 'Bomben slår i kors. Skjul dig bag en søjle — eller bliv væk.' },
-      { id: 'loot', title: 'POWER-UPS', caption: 'B = flere bomber. F = længere flamme. S = mere fart.' },
-      { id: 'duel', title: 'DUEL', caption: 'Pres modstanderen ind i et hjørne. Sidste i live vinder.' },
+      { id: 'maze', title: 'MAZEN', caption: 'Brun = blød mur. Mørk = fast søjle.' },
+      { id: 'blast', title: 'BLAST', caption: 'Kors-eksplosion. Skjul dig bag søjler.' },
+      { id: 'loot', title: 'LOOT', caption: 'B flere bomber · F længere flamme · S fart' },
+      { id: 'duel', title: 'DUEL', caption: 'Pres modstanderen ind i et hjørne.' },
     ],
     tips: [
-      { title: 'Læg og løb', text: 'Placer bomben og gå væk med det samme. Din egen flamme er lige så farlig.' },
-      { title: 'Saml F først', text: 'Længere flamme åbner flere mursten og giver dig kontrol over midten.' },
-      { title: 'Brug søjlerne', text: 'Faste søjler stopper flammen. Stil dig bag dem, når modstanderen bomber.' },
+      { title: 'Læg og løb', text: 'Din egen flamme er lige så farlig.' },
+      { title: 'Saml F først', text: 'Længere flamme åbner midten af banen.' },
+      { title: 'Brug søjlerne', text: 'Faste søjler stopper flammen.' },
     ],
   },
   {
     id: 'tetris',
     short: 'TETRIS',
     title: 'TETRIS',
-    kicker: 'PIN · BATTLE · GARBAGE',
+    tagline: 'Clear linjer. Send garbage. Sidste brønd stående vinder.',
     href: '/Tetris/',
     thumb: '/tetris-thumb.jpg',
     thumbAlt: 'Battle Tetris — brønde og garbage',
@@ -77,114 +77,107 @@ const GAMES: GameManual[] = [
     idea: 'Hver spiller har sin egen 10×20 brønd. Linjer du clearer, bliver til skrald hos en tilfældig modstander — med ét hul, så de kan grave sig ud.',
     win: 'Sidste spiller i live vinder. Går flere ud samtidig, vinder den højeste score.',
     flow: [
-      { n: '01', title: 'LOBBY', text: 'Opret lobby og del PIN. 2–4 spillere joiner med navn.' },
-      { n: '02', title: 'START', text: 'Start spil. Brikkerne kommer fra en fælles 7-bag: I, O, T, S, Z, J, L.' },
-      { n: '03', title: 'SEND', text: '1 linje sender intet. 2 → 1 skrald. 3 → 2. Tetris (4) → 4 rækker.' },
+      { n: '01', title: 'LOBBY', text: 'Opret lobby. Del PIN. 2–4 spillere joiner.' },
+      { n: '02', title: 'START', text: 'Brikkerne kommer fra en fælles 7-bag.' },
+      { n: '03', title: 'SEND', text: '2 linjer → 1 skrald. Tetris → 4 rækker.' },
     ],
     keys: [
-      { key: '← →', does: 'Flyt brikken. A og D virker også.' },
-      { key: '↓', does: 'Soft drop. S gør det samme.' },
-      { key: '↑  /  X', does: 'Roter med uret.' },
-      { key: 'MELLEMRUM', does: 'Hard drop — brikken smækker ned med det samme.' },
-      { key: 'C', does: 'Hold. Byt med den brik du har lagt til side.' },
+      { key: '← →', does: 'Flyt. A / D virker også.' },
+      { key: '↓', does: 'Soft drop.' },
+      { key: '↑ / X', does: 'Roter med uret.' },
+      { key: 'MELLEMRUM', does: 'Hard drop.' },
+      { key: 'C', does: 'Hold — byt med den gemte brik.' },
     ],
-    pad: 'Oplà: GAME_MODE_TETRIS. Actions: move LEFT/RIGHT/DOWN, rotate, hardDrop, hold.',
+    pad: 'Oplà: move LEFT/RIGHT/DOWN, rotate, hardDrop, hold.',
     scenes: [
-      { id: 'well', title: 'DIN BRØND', caption: 'Hold til venstre. Next til højre. Aktiv brik i midten.' },
-      { id: 'clear', title: 'CLEAR', caption: 'Fyld en hel række — den forsvinder, og du får plads igen.' },
-      { id: 'garbage', title: 'GARBAGE', caption: 'Grå rækker med ét hul lander hos en modstander.' },
-      { id: 'topout', title: 'TOP OUT', caption: 'Når brønden er fuld, er du ude. De andre spiller videre.' },
+      { id: 'well', title: 'BRØND', caption: 'Hold · aktiv brik · next' },
+      { id: 'clear', title: 'CLEAR', caption: 'En fuld række forsvinder.' },
+      { id: 'garbage', title: 'GARBAGE', caption: 'Grå række med ét hul lander hos andre.' },
+      { id: 'topout', title: 'TOP OUT', caption: 'Fuld brønd = ude.' },
     ],
     tips: [
-      { title: 'Spar I-brikken', text: 'Hold I til en Tetris. Fire linjer sender fire skrald — det gør ondt.' },
-      { title: 'Grav i hullet', text: 'Garbage har altid ét hul. Sigte efter det, før bunken vokser.' },
-      { title: 'Kig på next', text: 'Planlæg to brikker frem. Soft drop køber dig tid, hard drop låser dig fast.' },
+      { title: 'Spar I', text: 'Hold I til en Tetris — fire skrald gør ondt.' },
+      { title: 'Grav i hullet', text: 'Garbage har altid ét hul. Sigte efter det.' },
+      { title: 'Kig på next', text: 'Planlæg to brikker frem.' },
     ],
   },
   {
     id: 'pong',
     short: 'PONG',
     title: 'PONG',
-    kicker: 'PIN · 2 PADDLER · FØRST TIL 11',
+    tagline: 'To paddles. Én bold. Første til 11.',
     href: '/Pong/',
     thumb: '/pong-thumb.jpg',
     thumbAlt: 'Pong — paddles og bold',
-    players: '2 (+ tilskuere)',
+    players: '2',
     time: '3–6 min',
-    idea: 'To paddles, én bold, ét net. Bolden bliver hurtigere, og vinklen du rammer med sender den et nyt sted hen. Flere end to i lobbyen bliver tilskuere.',
-    win: 'Første til 11 point vinder. Classic er ren duel. Arcade tilføjer WIDE, NUDGE og SMASH.',
+    idea: 'Bolden bliver hurtigere, og vinklen du rammer med sender den et nyt sted hen. Flere end to i lobbyen bliver tilskuere.',
+    win: 'Første til 11 vinder. Classic er ren duel. Arcade tilføjer WIDE, NUDGE og SMASH.',
     flow: [
-      { n: '01', title: 'MODE', text: 'Opret lobby som Classic eller Arcade, og del PIN.' },
-      { n: '02', title: 'SIDER', text: 'Første spiller får venstre paddle. Næste får højre. Resten ser på.' },
-      { n: '03', title: '11', text: 'Start når begge paddles er inde. Point når bolden går forbi en paddle.' },
+      { n: '01', title: 'MODE', text: 'Vælg Classic eller Arcade. Del PIN.' },
+      { n: '02', title: 'SIDER', text: 'Første får venstre paddle. Næste får højre.' },
+      { n: '03', title: '11', text: 'Point når bolden går forbi en paddle.' },
     ],
     keys: [
-      { key: 'W / S', does: 'Venstre paddle op og ned. Pile virker også på venstre.' },
-      { key: '↑ / ↓', does: 'Højre paddle. Kun pile — ikke W/S.' },
-      { key: '1  /  Q', does: 'Arcade: WIDE. Paddle bliver højere et øjeblik.' },
-      { key: '3  /  E', does: 'Arcade: NUDGE. Paddle snapper mod bolden.' },
-      { key: '4  /  SPACE', does: 'Arcade: SMASH. Næste retur er en hurtig orange bold.' },
+      { key: 'W / S', does: 'Venstre paddle. Pile virker også.' },
+      { key: '↑ / ↓', does: 'Højre paddle — kun pile.' },
+      { key: '1 / Q', does: 'Arcade WIDE — højere paddle.' },
+      { key: '3 / E', does: 'Arcade NUDGE — snap til bold.' },
+      { key: '4 / SPACE', does: 'Arcade SMASH — næste hit er orange og hurtig.' },
     ],
-    pad: 'Oplà: TOUCH0 op, TOUCH2 ned. Arcade: TOUCH1 WIDE, TOUCH3 NUDGE, TOUCH4 SMASH.',
+    pad: 'TOUCH0 op · TOUCH2 ned · Arcade: 1 WIDE · 3 NUDGE · 4 SMASH.',
     scenes: [
-      { id: 'classic', title: 'CLASSIC', caption: 'Hvide paddles. Ingen powers. Ren timing og vinkel.' },
-      { id: 'wide', title: 'WIDE', caption: 'Paddle bliver blå og højere. Bedre dækning i et kort vindue.' },
-      { id: 'nudge', title: 'NUDGE', caption: 'Paddle snapper mod bolden — godt når du er for sent ude.' },
-      { id: 'smash', title: 'SMASH', caption: 'Næste hit farver bolden orange og sender den afsted hurtigt.' },
+      { id: 'classic', title: 'CLASSIC', caption: 'Hvide paddles. Ren timing.' },
+      { id: 'wide', title: 'WIDE', caption: 'Blå, højere paddle et øjeblik.' },
+      { id: 'nudge', title: 'NUDGE', caption: 'Paddle snapper mod bolden.' },
+      { id: 'smash', title: 'SMASH', caption: 'Orange bold. Hurtig retur.' },
     ],
     tips: [
-      { title: 'Ram med kanten', text: 'Midten giver et fladt slag. Øvre/nedre kant giver skarpere vinkel.' },
-      { title: 'Spar SMASH', text: 'Vent til bolden er tæt på dig. En ladet smash midt i banen er spildt.' },
-      { title: 'Tilskuere er OK', text: 'Kun to paddles. Ekstra joiner ser kampen — del PIN alligevel.' },
+      { title: 'Ram med kanten', text: 'Kant giver skarpere vinkel end midten.' },
+      { title: 'Spar SMASH', text: 'Vent til bolden er tæt på dig.' },
+      { title: 'Tilskuere er OK', text: 'Kun to paddles. Resten ser på.' },
     ],
   },
   {
     id: 'tower',
     short: 'TOWER',
     title: 'TOWER DEFENSE',
-    kicker: 'SOLO · 12 WAVES · TRE TÅRNE',
+    tagline: 'Byg langs stien. Overlev 12 waves.',
     href: '/TowerDefense/',
     thumb: '/tower-defense-thumb.jpg',
     thumbAlt: 'Tower Defense — sti, tårne og fæstning',
     players: '1',
     time: '8–15 min',
-    idea: 'Creeps følger stien gennem gården. Du bygger ved siden af den. Arrow skyder hurtigt, Cannon rammer i splash, Frost sinker dem. De der når fæstningen, koster liv.',
-    win: 'Du starter med 120 gold og 20 liv. Overlev wave 12. En tank der slipper igennem koster 2 liv. X sælger et tårn for ca. 60 % tilbage.',
+    idea: 'Creeps følger stien. Du bygger ved siden af den. Arrow skyder hurtigt, Cannon splash, Frost sinker. Slipper de igennem, mister du liv.',
+    win: '120 gold og 20 liv fra start. Overlev wave 12. Tank koster 2 liv. X sælger for ca. 60 %.',
     flow: [
-      { n: '01', title: 'START', text: 'Én spiller. Tryk Start. Ingen PIN — banen er din.' },
-      { n: '02', title: 'BYG', text: 'Flyt cursor til et ledigt slot, vælg tårn, og byg. Space på et tårn opgraderer det.' },
-      { n: '03', title: 'WAVE', text: 'N kalder næste wave tidligere. Gold kommer fra kills. 12 waves, så er gården holdt.' },
+      { n: '01', title: 'START', text: 'Én spiller. Ingen PIN. Tryk Start.' },
+      { n: '02', title: 'BYG', text: 'Flyt cursor, vælg tårn, Space bygger eller opgraderer.' },
+      { n: '03', title: 'WAVE', text: 'N kalder næste wave. Hold i 12 runder.' },
     ],
     keys: [
-      { key: 'PILE', does: 'Flyt cursor mellem build-slots. WASD gør det samme.' },
-      { key: 'Q  /  E', does: 'Forrige eller næste tårntype. 1, 2 og 3 vælger direkte.' },
-      { key: 'SPACE', does: 'Byg på tomt slot, eller opgrader tårnet under cursoren.' },
-      { key: 'X', does: 'Sælg tårnet og få en del af guldet tilbage.' },
-      { key: 'N', does: 'Kald næste wave, hvis du er klar før køen er tom.' },
+      { key: 'PILE', does: 'Flyt mellem build-slots.' },
+      { key: 'Q / E', does: 'Skift tårntype. 1 2 3 vælger direkte.' },
+      { key: 'SPACE', does: 'Byg eller opgrader.' },
+      { key: 'X', does: 'Sælg tårn.' },
+      { key: 'N', does: 'Næste wave tidligt.' },
     ],
-    pad: 'Fem knapper: forrige/næste slot, forrige/næste type, place. Samme controller-API som de andre spil.',
+    pad: 'Fem knapper: slot ← → · type ↑ ↓ · place.',
     scenes: [
-      { id: 'path', title: 'STIEN', caption: 'Creeps går kun på den brune sti. Byg i de ledige slots ved siden af.' },
-      { id: 'towers', title: 'TRE TÅRNE', caption: 'Arrow 40g · Cannon 70g splash · Frost 55g slow.' },
-      { id: 'upgrade', title: 'UPGRADE', caption: 'Space på et tårn koster gold og hæver level. Max level? Sælg med X.' },
-      { id: 'breach', title: 'BREACH', caption: 'Slipper en creep igennem, mister du liv. Tank koster to.' },
+      { id: 'path', title: 'STI', caption: 'Creeps går kun her. Byg ved siden af.' },
+      { id: 'towers', title: 'TÅRNE', caption: 'Arrow 40g · Cannon 70g · Frost 55g' },
+      { id: 'upgrade', title: 'UPGRADE', caption: 'Space på et tårn hæver level.' },
+      { id: 'breach', title: 'BREACH', caption: 'Slipper de igennem, mister du liv.' },
     ],
     tips: [
-      { title: 'Frost først', text: 'Slow på svinget giver Arrow og Cannon mere tid til at skyde.' },
-      { title: 'Opgrader midten', text: 'Et lvl 2 Cannon midt på stien slår flere end tre lvl 1 i enderne.' },
-      { title: 'N når du er klar', text: 'Kald næste wave tidligt for tempo — men kun hvis din linje holder.' },
+      { title: 'Frost først', text: 'Slow giver de andre tårne mere tid.' },
+      { title: 'Opgrader midten', text: 'Ét lvl 2 Cannon slår flere end tre lvl 1.' },
+      { title: 'N når du er klar', text: 'Kald wave tidligt — kun hvis linjen holder.' },
     ],
   },
 ]
 
 const ORDER = GAMES.map((g) => g.id)
-const SECTIONS = [
-  { id: 'ide', label: 'IDÉ' },
-  { id: 'scener', label: 'SCENER' },
-  { id: 'flow', label: 'FLOW' },
-  { id: 'controls', label: 'STYR' },
-  { id: 'tips', label: 'TIPS' },
-] as const
 
 function isGameId(value: string | undefined): value is GameId {
   return ORDER.includes(value as GameId)
@@ -234,102 +227,50 @@ function Booklet({ gameId }: { gameId: GameId }) {
     return subscribe(onPad)
   }, [subscribe, blip, navigate])
 
-  const jump = (sectionId: string) => {
-    document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    blip('move')
-  }
-
   return (
     <article className={`manual game-${game.id}`}>
-      <nav className="man-sticky" aria-label="Spillebog">
-        <div className="man-tabs" role="tablist" aria-label="Vælg spil">
-          {GAMES.map((g) => (
-            <Link
-              key={g.id}
-              to={`/manual/${g.id}`}
-              className={`tab-${g.id} ${g.id === game.id ? 'on' : ''}`}
-              role="tab"
-              aria-selected={g.id === game.id}
-              aria-current={g.id === game.id ? 'page' : undefined}
-            >
-              <span className="tab-dot" aria-hidden="true" />
-              <span className="tab-short">{g.short}</span>
-              <span className="tab-full">{g.title}</span>
-            </Link>
-          ))}
-        </div>
-        <div className="man-jump" aria-label="Hop i bogen">
-          {SECTIONS.map((s) => (
-            <button key={s.id} type="button" onClick={() => jump(s.id)}>
-              {s.label}
-            </button>
-          ))}
-        </div>
+      <nav className="man-pick" aria-label="Vælg spil">
+        {GAMES.map((g) => (
+          <Link
+            key={g.id}
+            to={`/manual/${g.id}`}
+            className={`pick pick-${g.id} ${g.id === game.id ? 'on' : ''}`}
+            aria-current={g.id === game.id ? 'page' : undefined}
+          >
+            {g.short}
+          </Link>
+        ))}
       </nav>
 
       <header className="man-hero">
+        <img className="man-hero-img" src={game.thumb} alt="" width={1024} height={576} />
+        <div className="man-hero-veil" aria-hidden="true" />
         <div className="man-hero-copy">
-          <p className="blink-line">INSTRUCTION BOOKLET</p>
-          <h1 className="title-pixel">{game.title}</h1>
-          <p className="man-kicker">{game.kicker}</p>
-          <ul className="man-meta">
-            <li>
-              <em>SPILLERE</em>
-              <span>{game.players}</span>
-            </li>
-            <li>
-              <em>TID</em>
-              <span>{game.time}</span>
-            </li>
-            <li>
-              <em>SLOT</em>
-              <span>
-                {index + 1}/{GAMES.length}
-              </span>
-            </li>
-          </ul>
-          <div className="man-hero-actions">
-            <a className="man-play" href={game.href}>
-              SPIL NU →
-            </a>
-            <button type="button" className="man-ghost" onClick={() => jump('controls')}>
-              SE STYRING
-            </button>
-          </div>
+          <p className="man-eyebrow">INSTRUCTION BOOKLET</p>
+          <h1>{game.title}</h1>
+          <p className="man-tagline">{game.tagline}</p>
+          <p className="man-meta-line">
+            {game.players} spillere · {game.time}
+          </p>
+          <a className="man-cta" href={game.href}>
+            SPIL NU
+          </a>
         </div>
-        <figure className="man-cover">
-          <img src={game.thumb} alt={game.thumbAlt} width={1024} height={576} loading="eager" />
-          <figcaption>Fra arenaen · {game.title}</figcaption>
-        </figure>
       </header>
 
-      <section className="man-block" id="ide">
-        <div className="man-head">
-          <span>01</span>
-          <h2>Idé</h2>
-        </div>
-        <div className="man-split">
-          <HeroScene id={game.id} />
-          <div>
-            <p>{game.idea}</p>
-            <p className="man-win">
-              <strong>SÅDAN VINDER DU</strong>
-              {game.win}
-            </p>
-          </div>
-        </div>
+      <section className="man-section man-idea">
+        <p className="man-lead">{game.idea}</p>
+        <p className="man-win">{game.win}</p>
       </section>
 
-      <section className="man-block" id="scener">
-        <div className="man-head">
-          <span>02</span>
-          <h2>Scener fra spillet</h2>
-        </div>
-        <p className="man-lede">Fire snapshots — læs dem som en hurtig film, før I starter.</p>
-        <ul className="man-gallery">
+      <section className="man-section" aria-labelledby="scener-title">
+        <h2 id="scener-title">Sådan ser det ud</h2>
+        <ul className="man-film">
           {game.scenes.map((scene) => (
             <li key={scene.id}>
-              <SceneFrame game={game.id} scene={scene.id} />
+              <div className="man-frame">
+                <SceneFrame game={game.id} scene={scene.id} />
+              </div>
               <strong>{scene.title}</strong>
               <span>{scene.caption}</span>
             </li>
@@ -337,33 +278,24 @@ function Booklet({ gameId }: { gameId: GameId }) {
         </ul>
       </section>
 
-      <section className="man-block" id="flow">
-        <div className="man-head">
-          <span>03</span>
-          <h2>Flow</h2>
-        </div>
-        <ol className="man-flow">
-          {game.flow.map((step, i) => (
+      <section className="man-section" aria-labelledby="flow-title">
+        <h2 id="flow-title">Sådan kommer I i gang</h2>
+        <ol className="man-steps">
+          {game.flow.map((step) => (
             <li key={step.n}>
-              <FlowFrame id={game.id} step={step.n} />
-              <div className="flow-copy">
-                <strong>
-                  <em>{step.n}</em> {step.title}
-                </strong>
-                <span>{step.text}</span>
+              <span className="step-n">{step.n}</span>
+              <div>
+                <strong>{step.title}</strong>
+                <p>{step.text}</p>
               </div>
-              {i < game.flow.length - 1 ? <span className="flow-arrow" aria-hidden="true">→</span> : null}
             </li>
           ))}
         </ol>
       </section>
 
-      <section className="man-block" id="controls">
-        <div className="man-head">
-          <span>04</span>
-          <h2>Controls</h2>
-        </div>
-        <div className="man-controls">
+      <section className="man-section man-controls" aria-labelledby="ctrl-title">
+        <h2 id="ctrl-title">Styring</h2>
+        <div className="man-ctrl-grid">
           <ControlPad id={game.id} />
           <ul className="man-keys">
             {game.keys.map((row) => (
@@ -374,32 +306,32 @@ function Booklet({ gameId }: { gameId: GameId }) {
             ))}
           </ul>
         </div>
-        <p className="man-pad">{game.pad}</p>
+        <p className="man-pad-note">{game.pad}</p>
       </section>
 
-      <section className="man-block" id="tips">
-        <div className="man-head">
-          <span>05</span>
-          <h2>Tips</h2>
-        </div>
+      <section className="man-section" aria-labelledby="tips-title">
+        <h2 id="tips-title">Hurtige tips</h2>
         <ul className="man-tips">
-          {game.tips.map((tip) => (
+          {game.tips.map((tip, i) => (
             <li key={tip.title}>
-              <strong>{tip.title}</strong>
-              <span>{tip.text}</span>
+              <span>{String(i + 1).padStart(2, '0')}</span>
+              <div>
+                <strong>{tip.title}</strong>
+                <p>{tip.text}</p>
+              </div>
             </li>
           ))}
         </ul>
       </section>
 
-      <footer className="man-foot">
-        <Link className="man-nav-btn" to={`/manual/${prev.id}`}>
+      <footer className="man-end">
+        <Link to={`/manual/${prev.id}`} className="man-swap">
           ← {prev.short}
         </Link>
-        <a className="man-play big" href={game.href}>
+        <a className="man-cta" href={game.href}>
           SPIL {game.title}
         </a>
-        <Link className="man-nav-btn" to={`/manual/${next.id}`}>
+        <Link to={`/manual/${next.id}`} className="man-swap">
           {next.short} →
         </Link>
       </footer>
@@ -409,13 +341,6 @@ function Booklet({ gameId }: { gameId: GameId }) {
   )
 }
 
-function HeroScene({ id }: { id: GameId }) {
-  if (id === 'bomber') return <BomberScene variant="blast" />
-  if (id === 'tetris') return <TetrisScene variant="well" />
-  if (id === 'pong') return <PongScene variant="classic" />
-  return <TowerScene variant="path" />
-}
-
 function SceneFrame({ game, scene }: { game: GameId; scene: string }) {
   if (game === 'bomber') return <BomberScene variant={scene} />
   if (game === 'tetris') return <TetrisScene variant={scene} />
@@ -423,63 +348,34 @@ function SceneFrame({ game, scene }: { game: GameId; scene: string }) {
   return <TowerScene variant={scene} />
 }
 
-function FlowFrame({ id, step }: { id: GameId; step: string }) {
-  return (
-    <div className={`flow-frame frame-${id} step-${step}`} aria-hidden="true">
-      {id === 'bomber' && step === '01' ? <span className="pin-card">PIN 4821</span> : null}
-      {id === 'bomber' && step === '02' ? (
-        <span className="dot-row">
-          <i />
-          <i />
-          <i />
-          <i />
-        </span>
-      ) : null}
-      {id === 'bomber' && step === '03' ? <span className="mini-blast" /> : null}
-      {id === 'tetris' && <span className={`mini-well well-${step}`} />}
-      {id === 'pong' && (
-        <span className="mini-court">
-          <i className="mp left" />
-          <i className="mp right" />
-          <i className={`mb step-${step}`} />
-        </span>
-      )}
-      {id === 'tower' && step === '01' ? <span className="gold-chip">120 G</span> : null}
-      {id === 'tower' && step === '02' ? <span className="mini-towers" /> : null}
-      {id === 'tower' && step === '03' ? <span className="wave-chip">12 / 12</span> : null}
-    </div>
-  )
-}
-
 function ControlPad({ id }: { id: GameId }) {
-  const map: Record<GameId, { dpad: string; a: string; b: string; note: string }> = {
-    bomber: { dpad: 'GÅ', a: 'BOMB', b: '—', note: 'D-pad / WASD + Space' },
-    tetris: { dpad: 'FLYT', a: 'ROTÉR', b: 'HOLD', note: 'Pile + X / C / Space' },
-    pong: { dpad: 'OP/NED', a: 'SMASH', b: 'WIDE', note: 'W/S eller pile · Arcade 1/3/4' },
-    tower: { dpad: 'SLOT', a: 'BYG', b: 'SÆLG', note: 'Pile + Space / X / Q·E' },
+  const map: Record<GameId, { dpad: string; a: string; b: string }> = {
+    bomber: { dpad: 'GÅ', a: 'BOMB', b: '—' },
+    tetris: { dpad: 'FLYT', a: 'ROTÉR', b: 'HOLD' },
+    pong: { dpad: 'OP/NED', a: 'SMASH', b: 'WIDE' },
+    tower: { dpad: 'SLOT', a: 'BYG', b: 'SÆLG' },
   }
   const m = map[id]
   return (
-    <div className={`ctrl-pad accent-${id}`} aria-hidden="true">
+    <div className="ctrl-pad" aria-hidden="true">
       <div className="ctrl-dpad">
         <i className="u" />
         <i className="l" />
         <i className="c" />
         <i className="r" />
         <i className="d" />
-        <span>{m.dpad}</span>
       </div>
+      <p className="ctrl-label">{m.dpad}</p>
       <div className="ctrl-face">
-        <span className="face-b">
-          <em>B</em>
+        <span>
+          <em className="b">B</em>
           {m.b}
         </span>
-        <span className="face-a">
-          <em>A</em>
+        <span>
+          <em className="a">A</em>
           {m.a}
         </span>
       </div>
-      <p>{m.note}</p>
     </div>
   )
 }
@@ -528,7 +424,7 @@ const BOMBER_MAPS: Record<string, BomberCell[][]> = {
 function BomberScene({ variant }: { variant: string }) {
   const grid = BOMBER_MAPS[variant] ?? BOMBER_MAPS.blast
   return (
-    <div className="pic-maze" aria-hidden="true">
+    <div className="pic-maze">
       {grid.flat().map((cell, i) => (
         <i key={i} className={`pic-cell is-${cell}`} />
       ))}
@@ -553,7 +449,6 @@ function tetrisRows(variant: string): (string | null)[][] {
   if (variant === 'clear') {
     return [
       [e, e, e, e, e, e, e, e, e, e],
-      [e, e, e, e, e, e, e, e, e, e],
       [e, e, e, T, T, T, e, e, e, e],
       [e, e, e, e, T, e, e, e, e, e],
       [J, J, J, S, S, e, L, L, L, O],
@@ -564,7 +459,6 @@ function tetrisRows(variant: string): (string | null)[][] {
   }
   if (variant === 'garbage') {
     return [
-      [e, e, e, e, e, e, e, e, e, e],
       [e, e, e, e, e, e, e, e, e, e],
       [e, e, e, e, I, e, e, e, e, e],
       [e, e, e, e, I, e, e, e, e, e],
@@ -581,17 +475,14 @@ function tetrisRows(variant: string): (string | null)[][] {
       [J, J, J, S, S, e, O, O, I, e],
       [J, e, e, e, S, S, O, O, I, e],
       [Z, Z, e, L, L, L, J, J, I, e],
-      [e, Z, Z, L, e, e, e, J, I, e],
       [G, G, G, e, G, G, G, G, G, G],
       [G, G, e, G, G, G, G, G, G, G],
     ]
   }
   return [
     [e, e, e, e, e, e, e, e, e, e],
-    [e, e, e, e, e, e, e, e, e, e],
     [e, e, e, T, T, T, e, e, e, e],
     [e, e, e, e, T, e, e, e, e, e],
-    [e, e, e, e, e, e, e, e, e, e],
     [e, e, e, e, e, e, e, e, e, e],
     [J, J, J, e, S, S, e, L, L, L],
     [J, e, e, e, e, S, S, L, e, e],
@@ -602,7 +493,7 @@ function tetrisRows(variant: string): (string | null)[][] {
 function TetrisScene({ variant }: { variant: string }) {
   const rows = tetrisRows(variant)
   return (
-    <div className={`tet-layout scene-${variant}`} aria-hidden="true">
+    <div className={`tet-layout scene-${variant}`}>
       <div className="side-box">
         <em>HOLD</em>
         <i className="hold-i" />
@@ -620,8 +511,8 @@ function TetrisScene({ variant }: { variant: string }) {
         <em>NEXT</em>
         <i className="next-l" />
       </div>
-      {variant === 'topout' ? <span className="stamp">GAME OVER</span> : null}
-      {variant === 'clear' ? <span className="stamp ok">CLEAR!</span> : null}
+      {variant === 'topout' ? <span className="stamp">OUT</span> : null}
+      {variant === 'clear' ? <span className="stamp ok">CLEAR</span> : null}
     </div>
   )
 }
@@ -631,13 +522,8 @@ function PongScene({ variant }: { variant: string }) {
   const nudge = variant === 'nudge'
   const smash = variant === 'smash'
   return (
-    <div
-      className={`pic-court ${variant === 'classic' ? 'is-classic' : 'is-arcade'} scene-${variant}`}
-      aria-hidden="true"
-    >
-      <em>{variant === 'classic' ? 'CLASSIC' : variant.toUpperCase()}</em>
-      <b>{variant === 'classic' ? '03' : '05'}</b>
-      <b className="is-right">{variant === 'classic' ? '07' : '05'}</b>
+    <div className={`pic-court scene-${variant}`}>
+      <em>{variant.toUpperCase()}</em>
       <i className="pic-net" />
       <i className={`pic-paddle is-left ${wide ? 'is-wide' : ''} ${nudge ? 'is-nudge' : ''}`} />
       <i className={`pic-paddle is-right ${smash ? 'is-smash' : ''}`} />
@@ -648,12 +534,7 @@ function PongScene({ variant }: { variant: string }) {
 
 function TowerScene({ variant }: { variant: string }) {
   return (
-    <div className={`pic-fort scene-${variant}`} aria-hidden="true">
-      <div className="pic-hud">
-        <span>GOLD {variant === 'upgrade' ? '35' : '80'}</span>
-        <span>LIVES {variant === 'breach' ? '16' : '18'}</span>
-        <span>WAVE {variant === 'breach' ? '9/12' : '4/12'}</span>
-      </div>
+    <div className={`pic-fort scene-${variant}`}>
       <div className="pic-yard">
         <i className="pic-path" />
         <i className="pic-tower is-arrow" />
@@ -663,7 +544,6 @@ function TowerScene({ variant }: { variant: string }) {
         {variant === 'breach' ? <i className="pic-creep is-tank" /> : null}
         <i className={`pic-cursor ${variant === 'upgrade' ? 'on-tower' : ''}`} />
         <i className={`pic-keep ${variant === 'breach' ? 'is-hurt' : ''}`} />
-        {variant === 'upgrade' ? <span className="lvl-chip">LVL 2</span> : null}
       </div>
     </div>
   )
