@@ -3,7 +3,7 @@ services:
     build:
       context: .
       args:
-        CACHEBUST: ${CACHEBUST:-20261007-manual-v3}
+        CACHEBUST: ${CACHEBUST:-20261007-manual-v4}
     restart: unless-stopped
     networks:
       - dokploy-network

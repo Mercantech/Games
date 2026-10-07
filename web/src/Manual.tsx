@@ -7,7 +7,8 @@ type GameId = 'bomber' | 'tetris' | 'pong' | 'tower'
 
 type Step = { n: string; title: string; text: string }
 type KeyRow = { key: string; does: string }
-type Scene = { id: string; title: string; caption: string }
+type Legend = { label: string; swatch: string }
+type Scene = { id: string; title: string; lead: string; body: string; legend: Legend[] }
 type Tip = { title: string; text: string }
 
 type GameManual = {
@@ -53,10 +54,50 @@ const GAMES: GameManual[] = [
     ],
     pad: 'Oplà: move + retning, eller bomb. Valgfrit MQTT kun her.',
     scenes: [
-      { id: 'maze', title: 'MAZEN', caption: 'Brun = blød mur. Mørk = fast søjle.' },
-      { id: 'blast', title: 'BLAST', caption: 'Kors-eksplosion. Skjul dig bag søjler.' },
-      { id: 'loot', title: 'LOOT', caption: 'B flere bomber · F længere flamme · S fart' },
-      { id: 'duel', title: 'DUEL', caption: 'Pres modstanderen ind i et hjørne.' },
+      {
+        id: 'maze',
+        title: 'MAZEN',
+        lead: 'Én bane. Alle er på den samtidigt.',
+        body: 'Brune mursten kan sprænges og skjuler ofte loot. Mørke søjler er faste — flammen stopper her, så brug dem som skjul.',
+        legend: [
+          { label: 'Dig', swatch: '#f0e8d0' },
+          { label: 'Blød mur', swatch: '#a06830' },
+          { label: 'Fast søjle', swatch: '#2a2a32' },
+        ],
+      },
+      {
+        id: 'blast',
+        title: 'BLAST',
+        lead: 'Bomben tæller ned og eksploderer i et kors.',
+        body: 'Flammen går op, ned, venstre og højre indtil den rammer en søjle. Din egen flamme rammer også dig — læg og løb.',
+        legend: [
+          { label: 'Bombe', swatch: '#222' },
+          { label: 'Flamme', swatch: '#ff9a1a' },
+          { label: 'Stopper ved søjle', swatch: '#2a2a32' },
+        ],
+      },
+      {
+        id: 'loot',
+        title: 'LOOT',
+        lead: 'Sprængte mursten dropper power-ups.',
+        body: 'B = flere bomber på banen. F = længere flamme. S = højere fart. Prioritér F tidligt — så åbner midten hurtigere.',
+        legend: [
+          { label: 'B bomber', swatch: '#2f9e44' },
+          { label: 'F flamme', swatch: '#e85d5d' },
+          { label: 'S fart', swatch: '#3b6ef5' },
+        ],
+      },
+      {
+        id: 'duel',
+        title: 'DUEL',
+        lead: 'Pres modstanderen ind i et hjørne.',
+        body: 'Læg bomber så flammen lukker flugtveje. En søjle bag dig er sikkerhed — en mursten foran dig er en chance for loot.',
+        legend: [
+          { label: 'Dig', swatch: '#f0e8d0' },
+          { label: 'Rival', swatch: '#e85d5d' },
+          { label: 'Fælde', swatch: '#ff9a1a' },
+        ],
+      },
     ],
     tips: [
       { title: 'Læg og løb', text: 'Din egen flamme er lige så farlig.' },
@@ -90,10 +131,48 @@ const GAMES: GameManual[] = [
     ],
     pad: 'Oplà: move LEFT/RIGHT/DOWN, rotate, hardDrop, hold.',
     scenes: [
-      { id: 'well', title: 'BRØND', caption: 'Hold · aktiv brik · next' },
-      { id: 'clear', title: 'CLEAR', caption: 'En fuld række forsvinder.' },
-      { id: 'garbage', title: 'GARBAGE', caption: 'Grå række med ét hul lander hos andre.' },
-      { id: 'topout', title: 'TOP OUT', caption: 'Fuld brønd = ude.' },
+      {
+        id: 'well',
+        title: 'BRØND',
+        lead: 'Din egen 10×20 brønd — Hold, aktiv brik og Next.',
+        body: 'Hold (C) gemmer en brik til senere. Next viser den kommende. Alle trækker fra samme 7-bag, så timing er fair.',
+        legend: [
+          { label: 'Hold', swatch: '#00f0f0' },
+          { label: 'Aktiv', swatch: '#a000f0' },
+          { label: 'Next', swatch: '#f0a000' },
+        ],
+      },
+      {
+        id: 'clear',
+        title: 'CLEAR',
+        lead: 'Fyld en hel række — den forsvinder.',
+        body: 'Én linje er okay. To linjer sender 1 skrald. En Tetris (fire) sender 4 rækker — det er det, der vælter brønde.',
+        legend: [
+          { label: 'Fuld række', swatch: '#00f0f0' },
+          { label: 'Forsvinder', swatch: '#2f9e44' },
+        ],
+      },
+      {
+        id: 'garbage',
+        title: 'GARBAGE',
+        lead: 'Skrald lander hos en tilfældig modstander.',
+        body: 'Grå rækker har altid ét hul. Grav dig ud dér — eller send mere tilbage, før hullet lukker.',
+        legend: [
+          { label: 'Garbage', swatch: '#888888' },
+          { label: 'Hul', swatch: '#0c1428' },
+          { label: 'I-piece', swatch: '#00f0f0' },
+        ],
+      },
+      {
+        id: 'topout',
+        title: 'TOP OUT',
+        lead: 'Når en ny brik ikke kan lande, er du ude.',
+        body: 'Hold toppen fri. En høj stack + garbage-burst er den klassiske knockout. Sidste brønd stående vinder.',
+        legend: [
+          { label: 'Farezone', swatch: '#e85d5d' },
+          { label: 'Ude', swatch: '#e85d5d' },
+        ],
+      },
     ],
     tips: [
       { title: 'Spar I', text: 'Hold I til en Tetris — fire skrald gør ondt.' },
@@ -127,10 +206,46 @@ const GAMES: GameManual[] = [
     ],
     pad: 'TOUCH0 op · TOUCH2 ned · Arcade: 1 WIDE · 3 NUDGE · 4 SMASH.',
     scenes: [
-      { id: 'classic', title: 'CLASSIC', caption: 'Hvide paddles. Ren timing.' },
-      { id: 'wide', title: 'WIDE', caption: 'Blå, højere paddle et øjeblik.' },
-      { id: 'nudge', title: 'NUDGE', caption: 'Paddle snapper mod bolden.' },
-      { id: 'smash', title: 'SMASH', caption: 'Orange bold. Hurtig retur.' },
+      {
+        id: 'classic',
+        title: 'CLASSIC',
+        lead: 'To paddles, én bold — ren timing.',
+        body: 'Bolden bliver hurtigere for hvert hit. Ram midten for en flad retur, kanten for en skarp vinkel. Første til 11.',
+        legend: [
+          { label: 'Paddle', swatch: '#f0ebe0' },
+          { label: 'Bold', swatch: '#fff' },
+        ],
+      },
+      {
+        id: 'wide',
+        title: 'WIDE',
+        lead: 'Arcade: din paddle bliver midlertidigt højere.',
+        body: 'Tryk 1 / Q. Brug det når bolden er langt væk, eller når du er ude af position — ikke som spam.',
+        legend: [
+          { label: 'Normal', swatch: '#f0ebe0' },
+          { label: 'Wide', swatch: '#5b9fff' },
+        ],
+      },
+      {
+        id: 'nudge',
+        title: 'NUDGE',
+        lead: 'Arcade: paddle snapper et stykke mod bolden.',
+        body: 'Tryk 3 / E. God til at redde en bold, der er lige uden for rækkevidde — dårlig hvis du allerede er i position.',
+        legend: [
+          { label: 'Snap', swatch: '#c9a227' },
+          { label: 'Bold nær', swatch: '#fff' },
+        ],
+      },
+      {
+        id: 'smash',
+        title: 'SMASH',
+        lead: 'Arcade: næste hit bliver orange og hurtigt.',
+        body: 'Tryk 4 / Space lige før du rammer. Vent til bolden er tæt på dig — ellers spilder du kraften.',
+        legend: [
+          { label: 'Smash', swatch: '#ff6a1a' },
+          { label: 'Hurtig bold', swatch: '#ff8a3a' },
+        ],
+      },
     ],
     tips: [
       { title: 'Ram med kanten', text: 'Kant giver skarpere vinkel end midten.' },
@@ -164,10 +279,49 @@ const GAMES: GameManual[] = [
     ],
     pad: 'Fem knapper: slot ← → · type ↑ ↓ · place.',
     scenes: [
-      { id: 'path', title: 'STI', caption: 'Creeps går kun her. Byg ved siden af.' },
-      { id: 'towers', title: 'TÅRNE', caption: 'Arrow 40g · Cannon 70g · Frost 55g' },
-      { id: 'upgrade', title: 'UPGRADE', caption: 'Space på et tårn hæver level.' },
-      { id: 'breach', title: 'BREACH', caption: 'Slipper de igennem, mister du liv.' },
+      {
+        id: 'path',
+        title: 'STI',
+        lead: 'Creeps følger kun stien — du bygger ved siden af.',
+        body: 'Cursoren flytter mellem build-slots. Placer tårne hvor stien svinger, så de skyder længst tid.',
+        legend: [
+          { label: 'Sti', swatch: '#6b5a3a' },
+          { label: 'Creep', swatch: '#e85d5d' },
+          { label: 'Fæstning', swatch: '#4a3a28' },
+        ],
+      },
+      {
+        id: 'towers',
+        title: 'TÅRNE',
+        lead: 'Tre typer — vælg med Q/E eller 1 2 3.',
+        body: 'Arrow (40g) skyder hurtigt. Cannon (70g) splash. Frost (55g) sinker. Mix dem: Frost holder, Cannon afslutter.',
+        legend: [
+          { label: 'Arrow', swatch: '#c9a227' },
+          { label: 'Cannon', swatch: '#8b5a2b' },
+          { label: 'Frost', swatch: '#5b9fff' },
+        ],
+      },
+      {
+        id: 'upgrade',
+        title: 'UPGRADE',
+        lead: 'Space på et eksisterende tårn hæver level.',
+        body: 'Ét lvl 2 Cannon slår ofte flere end tre lvl 1. X sælger for ca. 60 % gold tilbage.',
+        legend: [
+          { label: 'Cursor', swatch: '#f0ebe0' },
+          { label: 'Lvl up', swatch: '#c9a227' },
+        ],
+      },
+      {
+        id: 'breach',
+        title: 'BREACH',
+        lead: 'Slipper de til fæstningen, mister du liv.',
+        body: 'Normal creep = 1 liv. Tank = 2 liv. Du starter med 20. Overlev wave 12 — N kalder næste wave tidligt.',
+        legend: [
+          { label: 'Creep', swatch: '#e85d5d' },
+          { label: 'Tank', swatch: '#7a3030' },
+          { label: 'Liv tabt', swatch: '#e85d5d' },
+        ],
+      },
     ],
     tips: [
       { title: 'Frost først', text: 'Slow giver de andre tårne mere tid.' },
@@ -263,16 +417,31 @@ function Booklet({ gameId }: { gameId: GameId }) {
         <p className="man-win">{game.win}</p>
       </section>
 
-      <section className="man-section" aria-labelledby="scener-title">
+      <section className="man-section man-look" aria-labelledby="scener-title">
         <h2 id="scener-title">Sådan ser det ud</h2>
+        <p className="man-look-intro">
+          Fire scener der viser kernegrebene. Hver panel animerer det, du skal huske — før du går ind i arenaen.
+        </p>
         <ul className="man-film">
-          {game.scenes.map((scene) => (
-            <li key={scene.id}>
-              <div className="man-frame">
+          {game.scenes.map((scene, i) => (
+            <li key={scene.id} className={`film-card delay-${i}`}>
+              <div className={`man-frame scene-${game.id}-${scene.id}`}>
                 <SceneFrame game={game.id} scene={scene.id} />
+                <span className="frame-tag">{String(i + 1).padStart(2, '0')}</span>
               </div>
-              <strong>{scene.title}</strong>
-              <span>{scene.caption}</span>
+              <div className="film-copy">
+                <strong>{scene.title}</strong>
+                <p className="film-lead">{scene.lead}</p>
+                <p className="film-body">{scene.body}</p>
+                <ul className="film-legend" aria-label="Forklaring">
+                  {scene.legend.map((item) => (
+                    <li key={item.label}>
+                      <i style={{ background: item.swatch }} aria-hidden="true" />
+                      {item.label}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </li>
           ))}
         </ul>
@@ -424,10 +593,14 @@ const BOMBER_MAPS: Record<string, BomberCell[][]> = {
 function BomberScene({ variant }: { variant: string }) {
   const grid = BOMBER_MAPS[variant] ?? BOMBER_MAPS.blast
   return (
-    <div className="pic-maze">
+    <div className={`pic-maze variant-${variant}`} data-variant={variant}>
       {grid.flat().map((cell, i) => (
-        <i key={i} className={`pic-cell is-${cell}`} />
+        <i key={i} className={`pic-cell is-${cell}`} data-cell={cell} />
       ))}
+      {variant === 'blast' ? <span className="callout blast-call">KORS</span> : null}
+      {variant === 'loot' ? <span className="callout loot-call">PICK UP</span> : null}
+      {variant === 'duel' ? <span className="callout duel-call">TRAP</span> : null}
+      {variant === 'maze' ? <span className="callout maze-call">SKJUL</span> : null}
     </div>
   )
 }
@@ -451,10 +624,10 @@ function tetrisRows(variant: string): (string | null)[][] {
       [e, e, e, e, e, e, e, e, e, e],
       [e, e, e, T, T, T, e, e, e, e],
       [e, e, e, e, T, e, e, e, e, e],
-      [J, J, J, S, S, e, L, L, L, O],
+      [J, J, J, S, S, I, L, L, L, O],
       [J, e, e, e, S, S, L, e, e, O],
-      [Z, Z, e, I, I, I, I, e, O, O],
-      [e, Z, Z, J, J, J, J, e, O, O],
+      [Z, Z, e, e, e, e, e, e, O, O],
+      [e, Z, Z, e, e, e, e, e, O, O],
     ]
   }
   if (variant === 'garbage') {
@@ -492,6 +665,7 @@ function tetrisRows(variant: string): (string | null)[][] {
 
 function TetrisScene({ variant }: { variant: string }) {
   const rows = tetrisRows(variant)
+  const cols = 10
   return (
     <div className={`tet-layout scene-${variant}`}>
       <div className="side-box">
@@ -499,13 +673,32 @@ function TetrisScene({ variant }: { variant: string }) {
         <i className="hold-i" />
       </div>
       <div className="pic-well">
-        {rows.flat().map((color, i) => (
-          <i
-            key={i}
-            className={color ? 'pic-block' : 'pic-empty'}
-            style={color ? { background: color } : undefined}
-          />
-        ))}
+        {rows.flat().map((color, i) => {
+          const row = Math.floor(i / cols)
+          const isClearRow = variant === 'clear' && row === 3 && color !== null
+          const isHole =
+            variant === 'garbage' &&
+            color === null &&
+            ((row === 5 && i % cols === 3) || (row === 6 && i % cols === 2))
+          const isDanger = variant === 'topout' && row < 2
+          const isFalling =
+            variant === 'well' && color === TETRIS_COLORS.T && (row === 1 || row === 2)
+          return (
+            <i
+              key={i}
+              className={[
+                color ? 'pic-block' : 'pic-empty',
+                isClearRow ? 'is-clearing' : '',
+                isHole ? 'is-hole' : '',
+                isDanger ? 'is-danger' : '',
+                isFalling ? 'is-falling' : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              style={color ? { background: color } : undefined}
+            />
+          )
+        })}
       </div>
       <div className="side-box">
         <em>NEXT</em>
@@ -513,6 +706,8 @@ function TetrisScene({ variant }: { variant: string }) {
       </div>
       {variant === 'topout' ? <span className="stamp">OUT</span> : null}
       {variant === 'clear' ? <span className="stamp ok">CLEAR</span> : null}
+      {variant === 'garbage' ? <span className="stamp warn">+GARBAGE</span> : null}
+      {variant === 'well' ? <span className="callout well-call">FALL</span> : null}
     </div>
   )
 }
@@ -524,10 +719,18 @@ function PongScene({ variant }: { variant: string }) {
   return (
     <div className={`pic-court scene-${variant}`}>
       <em>{variant.toUpperCase()}</em>
+      <div className="score-row" aria-hidden="true">
+        <span>07</span>
+        <span>06</span>
+      </div>
       <i className="pic-net" />
       <i className={`pic-paddle is-left ${wide ? 'is-wide' : ''} ${nudge ? 'is-nudge' : ''}`} />
       <i className={`pic-paddle is-right ${smash ? 'is-smash' : ''}`} />
       <i className={`pic-ball ${smash ? 'is-hot' : ''} ${nudge ? 'is-near' : ''}`} />
+      {smash ? <i className="pic-trail" aria-hidden="true" /> : null}
+      {wide ? <span className="callout wide-call">+HØJDE</span> : null}
+      {nudge ? <span className="callout nudge-call">SNAP</span> : null}
+      {smash ? <span className="callout smash-call">SMASH</span> : null}
     </div>
   )
 }
@@ -537,13 +740,34 @@ function TowerScene({ variant }: { variant: string }) {
     <div className={`pic-fort scene-${variant}`}>
       <div className="pic-yard">
         <i className="pic-path" />
-        <i className="pic-tower is-arrow" />
-        <i className="pic-tower is-cannon" />
-        <i className="pic-tower is-frost" />
-        <i className={`pic-creep ${variant === 'breach' ? 'is-close' : ''}`} />
+        {(variant === 'path' || variant === 'towers' || variant === 'upgrade' || variant === 'breach') && (
+          <>
+            <i className={`pic-tower is-arrow ${variant === 'towers' ? 'is-firing' : ''}`} />
+            <i className={`pic-tower is-cannon ${variant === 'upgrade' ? 'is-lvl2' : ''} ${variant === 'towers' ? 'is-firing' : ''}`} />
+            <i className={`pic-tower is-frost ${variant === 'towers' ? 'is-firing' : ''}`} />
+          </>
+        )}
+        {variant === 'towers' ? (
+          <>
+            <i className="pic-shot is-arrow-shot" />
+            <i className="pic-shot is-cannon-shot" />
+            <i className="pic-shot is-frost-shot" />
+            <span className="tower-label l-arrow">40g</span>
+            <span className="tower-label l-cannon">70g</span>
+            <span className="tower-label l-frost">55g</span>
+          </>
+        ) : null}
+        <i
+          className={`pic-creep ${variant === 'breach' ? 'is-close' : ''} ${variant === 'towers' ? 'is-slow' : ''}`}
+        />
         {variant === 'breach' ? <i className="pic-creep is-tank" /> : null}
-        <i className={`pic-cursor ${variant === 'upgrade' ? 'on-tower' : ''}`} />
+        {variant === 'upgrade' || variant === 'path' ? (
+          <i className={`pic-cursor ${variant === 'upgrade' ? 'on-tower' : ''}`} />
+        ) : null}
+        {variant === 'upgrade' ? <span className="lvl-badge">LVL 2</span> : null}
         <i className={`pic-keep ${variant === 'breach' ? 'is-hurt' : ''}`} />
+        {variant === 'breach' ? <span className="heart-loss">−2</span> : null}
+        {variant === 'path' ? <span className="callout path-call">KUN STI</span> : null}
       </div>
     </div>
   )
