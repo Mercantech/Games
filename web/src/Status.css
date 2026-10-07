@@ -81,18 +81,22 @@
 }
 
 .pong-ball.lane-0 {
-  top: 28%;
+  top: 22%;
 }
 
 .pong-ball.lane-1 {
-  top: 48%;
+  top: 36%;
 }
 
 .pong-ball.lane-2 {
-  top: 58%;
+  top: 50%;
 }
 
 .pong-ball.lane-3 {
+  top: 64%;
+}
+
+.pong-ball.lane-4 {
   top: 78%;
 }
 
@@ -414,11 +418,19 @@
   .status-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .status-grid li:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (min-width: 560px) and (max-width: 719px) {
   .status-grid {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .status-grid li:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
   }
 }
 
@@ -491,6 +503,12 @@
 .status-card.accent-orange {
   background:
     linear-gradient(160deg, rgba(255, 107, 53, 0.18), transparent 50%),
+    rgba(0, 0, 0, 0.55);
+}
+
+.status-card.accent-green {
+  background:
+    linear-gradient(160deg, rgba(47, 93, 58, 0.42), transparent 55%),
     rgba(0, 0, 0, 0.55);
 }
 
@@ -746,7 +764,436 @@
 }
 
 .status-card.accent-green .status-open {
-  background: #8fbc8f;
+  background: #b7e4c7;
+}
+
+.game-scene {
+  position: relative;
+  height: 78px;
+  margin: 0 0 0.65rem;
+  border: 2px solid #000;
+  overflow: hidden;
+  background: #061806;
+}
+
+.scene-tag {
+  position: absolute;
+  top: 4px;
+  right: 5px;
+  z-index: 5;
+  font-family: var(--font-pixel);
+  font-size: 0.28rem;
+  letter-spacing: 0.08em;
+  color: #e8f8c0;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.scene-bomberman {
+  background: #141414;
+}
+
+.brick {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: #e71e28;
+  box-shadow:
+    inset 2px 2px 0 #ff8a80,
+    inset -2px -2px 0 #9b1218;
+}
+
+.br1 { left: 6%; top: 16%; }
+.br2 { left: 6%; bottom: 14%; }
+.br3 { left: 38%; top: 8%; }
+.br4 { right: 22%; top: 18%; }
+.br5 { right: 6%; bottom: 16%; }
+
+.bomber {
+  position: absolute;
+  left: 18%;
+  bottom: 14px;
+  z-index: 2;
+  width: 16px;
+  height: 18px;
+  background:
+    linear-gradient(#fff, #fff) 3px 0 / 10px 6px no-repeat,
+    linear-gradient(#111, #111) 4px 2px / 2px 2px no-repeat,
+    linear-gradient(#111, #111) 10px 2px / 2px 2px no-repeat,
+    linear-gradient(#209cee, #209cee) 0 6px / 16px 7px no-repeat,
+    linear-gradient(#f4e4c4, #f4e4c4) 4px 7px / 8px 3px no-repeat,
+    linear-gradient(#e71e28, #e71e28) 1px 13px / 5px 5px no-repeat,
+    linear-gradient(#e71e28, #e71e28) 10px 13px / 5px 5px no-repeat;
+}
+
+.scene-bomberman.state-ok .bomber,
+.scene-bomberman.state-checking .bomber {
+  animation: bomber-walk 0.7s steps(2, end) infinite;
+}
+
+.bomb {
+  position: absolute;
+  left: 46%;
+  bottom: 16px;
+  z-index: 2;
+  width: 12px;
+  height: 12px;
+  background: #111;
+  border: 2px solid #9a9a9a;
+  border-radius: 50%;
+}
+
+.fuse {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: calc(22px - var(--threat) * 0.18px);
+  height: 3px;
+  background: #ffe066;
+}
+
+.fuse::after {
+  content: '';
+  position: absolute;
+  right: -3px;
+  top: -2px;
+  width: 5px;
+  height: 5px;
+  background: #ff6b35;
+  border-radius: 50%;
+  box-shadow: 0 0 6px #ff6b35;
+  animation: spark 0.28s steps(2, end) infinite;
+}
+
+.boom {
+  position: absolute;
+  left: 40%;
+  bottom: 8px;
+  z-index: 3;
+  width: 26px;
+  height: 26px;
+  background: #ffe066;
+  border-radius: 50%;
+  opacity: 0;
+  box-shadow:
+    0 0 0 6px #ff6b35,
+    0 0 0 11px #e71e28;
+}
+
+.scene-bomberman.state-down .bomber,
+.scene-bomberman.state-down .bomb {
+  opacity: 0;
+}
+
+.scene-bomberman.state-down .boom {
+  opacity: 1;
+  animation: boom-pop 0.5s steps(3, end) infinite;
+}
+
+.scene-wizard {
+  background: linear-gradient(#0b1c33, #163a66 82%);
+}
+
+.wiz {
+  position: absolute;
+  bottom: 12px;
+  z-index: 2;
+  width: 16px;
+  height: 24px;
+}
+
+.wiz.player {
+  left: 12%;
+  background:
+    linear-gradient(#7ec8f8, #7ec8f8) 2px 0 / 12px 4px no-repeat,
+    linear-gradient(#209cee, #209cee) 5px 4px / 6px 6px no-repeat,
+    linear-gradient(#f4e4c4, #f4e4c4) 4px 10px / 8px 4px no-repeat,
+    linear-gradient(#1a4a9a, #1a4a9a) 1px 14px / 14px 10px no-repeat;
+}
+
+.wiz.foe {
+  right: 12%;
+  background:
+    linear-gradient(#ffb4b4, #ffb4b4) 2px 0 / 12px 4px no-repeat,
+    linear-gradient(#e71e28, #e71e28) 5px 4px / 6px 6px no-repeat,
+    linear-gradient(#f4e4c4, #f4e4c4) 4px 10px / 8px 4px no-repeat,
+    linear-gradient(#9b1218, #9b1218) 1px 14px / 14px 10px no-repeat;
+  transform: scaleX(-1);
+}
+
+.scene-wizard.state-down .wiz.player {
+  bottom: 4px;
+  transform: rotate(78deg);
+  transform-origin: 40% 100%;
+}
+
+.spell {
+  position: absolute;
+  top: 36%;
+  z-index: 2;
+  width: 8px;
+  height: 8px;
+  background: radial-gradient(circle, #fff 0 2px, #ffe066 3px, #ff6b35 8px);
+  border-radius: 50%;
+  animation: spell-fly calc(0.4s + var(--threat) * 0.014s) linear infinite;
+}
+
+.scene-wizard.state-down .spell,
+.scene-wizard.state-idle .spell {
+  opacity: 0;
+  animation: none;
+}
+
+.ko-stamp {
+  position: absolute;
+  top: 26%;
+  left: 50%;
+  z-index: 4;
+  transform: translateX(-50%);
+  font-family: var(--font-pixel);
+  font-size: 0.55rem;
+  color: #ff8a80;
+  text-shadow: 2px 2px 0 #000;
+  opacity: 0;
+}
+
+.scene-wizard.state-down .ko-stamp {
+  opacity: 1;
+}
+
+.mana {
+  position: absolute;
+  right: 8px;
+  bottom: 4px;
+  left: 8px;
+  height: 5px;
+  background: #061018;
+  border: 1px solid #000;
+}
+
+.mana-fill {
+  display: block;
+  width: calc((100 - var(--threat)) * 1%);
+  height: 100%;
+  background: #7ec8f8;
+  box-shadow: 0 0 6px rgba(126, 200, 248, 0.7);
+}
+
+.well {
+  position: absolute;
+  inset: 8px 8px 8px 8px;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 2px;
+  padding: 3px;
+  background: #12081c;
+  border: 2px solid #3b0764;
+}
+
+.tet {
+  background: #1e1030;
+}
+
+.tet.filled {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+}
+
+.falling-piece {
+  position: absolute;
+  top: 6px;
+  left: 42%;
+  z-index: 2;
+  width: 22px;
+  height: 10px;
+  background:
+    linear-gradient(#22d3ee, #22d3ee) 0 0 / 10px 10px no-repeat,
+    linear-gradient(#22d3ee, #22d3ee) 12px 0 / 10px 10px no-repeat;
+  animation: piece-drop 0.9s steps(4, end) infinite;
+}
+
+.over-stamp {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  background: rgba(155, 18, 24, 0.78);
+  color: #fff;
+  font-family: var(--font-pixel);
+  font-size: 0.42rem;
+  letter-spacing: 0.08em;
+}
+
+.scene-pong {
+  background: #0a1a0a;
+}
+
+.mini-net {
+  position: absolute;
+  top: 14%;
+  bottom: 14%;
+  left: 50%;
+  border-left: 2px dashed rgba(155, 188, 15, 0.6);
+}
+
+.mini-pad {
+  position: absolute;
+  top: 36%;
+  width: 5px;
+  height: 28%;
+  background: #e8f8c0;
+  box-shadow: 0 0 6px rgba(155, 188, 15, 0.45);
+}
+
+.mini-pad.left {
+  left: 8%;
+}
+
+.mini-pad.right {
+  right: 8%;
+}
+
+.scene-pong.state-checking .mini-pad.left,
+.scene-pong.state-ok .mini-pad.right {
+  animation: paddle-bounce 0.35s steps(2, end) infinite;
+}
+
+.mini-ball {
+  position: absolute;
+  top: 44%;
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  box-shadow: 0 0 6px #9bbc0f;
+  animation-name: mini-rally;
+  animation-duration: var(--rally, 0.9s);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+.scene-pong.state-idle .mini-ball {
+  left: 46%;
+  opacity: 0.35;
+  animation: none;
+}
+
+.scene-pong.state-down .mini-ball {
+  animation-name: mini-out;
+  animation-duration: 0.7s;
+  animation-direction: normal;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+}
+
+.scene-tower {
+  background: linear-gradient(#1a3d28, #102616 70%);
+}
+
+.td-path {
+  position: absolute;
+  right: 0;
+  bottom: 16px;
+  left: 0;
+  height: 12px;
+  background: #c4a574;
+  box-shadow: inset 0 2px 0 #8a7048;
+}
+
+.td-tower {
+  position: absolute;
+  bottom: 28px;
+  left: 18%;
+  z-index: 2;
+  width: 14px;
+  height: 18px;
+  background: #3d3429;
+}
+
+.td-tower::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: -3px;
+  width: 20px;
+  height: 6px;
+  background: #2f5d3a;
+}
+
+.td-tower::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 4px;
+  height: 4px;
+  background: #e85d04;
+}
+
+.td-fort {
+  position: absolute;
+  right: 8px;
+  bottom: 28px;
+  z-index: 2;
+  width: 16px;
+  height: 26px;
+  background: #d7c4a3;
+  box-shadow: inset -3px 0 0 #8d6e4a;
+}
+
+.td-fort::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: -2px;
+  width: 20px;
+  height: 6px;
+  background: #8d6e4a;
+}
+
+.scene-tower.state-down .td-fort {
+  background: #e85d04;
+  animation: burn 0.4s steps(2, end) infinite;
+}
+
+.td-creep {
+  position: absolute;
+  bottom: 18px;
+  z-index: 3;
+  width: 12px;
+  height: 12px;
+  background: #c1121f;
+  border-radius: 2px;
+  left: calc(4% + var(--threat) * 0.78%);
+  box-shadow: inset 2px 2px 0 #ff8a80;
+  animation: creep-bob 0.45s steps(2, end) infinite;
+}
+
+.scene-tower.state-down .td-creep {
+  left: 84%;
+}
+
+.scene-tower.state-idle .td-creep {
+  left: 10%;
+  animation: none;
+}
+
+.td-bolt {
+  position: absolute;
+  bottom: 40px;
+  left: 26%;
+  z-index: 3;
+  width: 12px;
+  height: 3px;
+  background: #ffe066;
+  opacity: 0;
+  box-shadow: 0 0 6px #ffe066;
+}
+
+.scene-tower.state-ok .td-bolt,
+.scene-tower.state-checking .td-bolt {
+  opacity: 1;
+  animation: bolt-fly 0.85s linear infinite;
 }
 
 .pong-footer {
@@ -911,6 +1358,90 @@
   }
 }
 
+@keyframes bomber-walk {
+  50% {
+    transform: translateX(14px);
+  }
+}
+
+@keyframes spark {
+  50% {
+    background: #fff;
+  }
+}
+
+@keyframes boom-pop {
+  0% {
+    transform: scale(0.45);
+  }
+  100% {
+    transform: scale(1.12);
+  }
+}
+
+@keyframes spell-fly {
+  from {
+    left: 22%;
+  }
+  to {
+    left: 74%;
+  }
+}
+
+@keyframes piece-drop {
+  from {
+    top: 4px;
+  }
+  to {
+    top: 40px;
+  }
+}
+
+@keyframes mini-rally {
+  from {
+    left: 14%;
+  }
+  to {
+    left: 82%;
+  }
+}
+
+@keyframes mini-out {
+  from {
+    left: 48%;
+    top: 44%;
+    opacity: 1;
+  }
+  to {
+    left: 94%;
+    top: 78%;
+    opacity: 0;
+  }
+}
+
+@keyframes creep-bob {
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes bolt-fly {
+  from {
+    left: 28%;
+    opacity: 1;
+  }
+  to {
+    left: calc(6% + var(--threat) * 0.72%);
+    opacity: 0.15;
+  }
+}
+
+@keyframes burn {
+  50% {
+    filter: brightness(1.45);
+  }
+}
+
 @keyframes title-glitch {
   0%,
   92%,
@@ -948,7 +1479,17 @@
   .pong-ball,
   .pong-paddle,
   .pong-flash,
-  .hit-popup {
+  .hit-popup,
+  .bomber,
+  .fuse::after,
+  .boom,
+  .spell,
+  .falling-piece,
+  .mini-ball,
+  .mini-pad,
+  .td-creep,
+  .td-bolt,
+  .td-fort {
     animation: none;
   }
 

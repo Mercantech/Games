@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { usePad } from './PadContext'
 import './Status.css'
 
@@ -33,7 +33,7 @@ const SERVICES: ServiceDef[] = [
     path: '/Bomberman/api/health',
     href: '/Bomberman/',
     accent: 'red',
-    lane: 'LANE 1',
+    lane: 'SLOT A',
     points: 1,
   },
   {
@@ -42,7 +42,7 @@ const SERVICES: ServiceDef[] = [
     path: '/Wizard/api/health',
     href: '/Wizard/',
     accent: 'blue',
-    lane: 'LANE 2',
+    lane: 'SLOT B',
     points: 1,
   },
   {
@@ -51,7 +51,7 @@ const SERVICES: ServiceDef[] = [
     path: '/Tetris/api/health',
     href: '/Tetris/',
     accent: 'purple',
-    lane: 'LANE 3',
+    lane: 'SLOT C',
     points: 1,
   },
   {
@@ -60,7 +60,7 @@ const SERVICES: ServiceDef[] = [
     path: '/Pong/api/health',
     href: '/Pong/',
     accent: 'orange',
-    lane: 'LANE 4',
+    lane: 'SLOT D',
     points: 1,
   },
   {
@@ -69,17 +69,26 @@ const SERVICES: ServiceDef[] = [
     path: '/TowerDefense/api/health',
     href: '/TowerDefense/',
     accent: 'green',
-    lane: 'LANE 5',
+    lane: 'SLOT E',
     points: 1,
   },
 ]
 
 const FUN_LINES = [
-  'Ping går ud. Pong kommer hjem. Zero lag = clean rally.',
-  'Hver health-check er et slag over nettet.',
-  'Miss = bolden går ud. HIT = point til dig.',
-  'Fire lanes. Ét court. Hold bolden i spil.',
+  'Fem cartridges i maskinen. Grøn skærm = klar til play.',
+  'Hurtig ping = lang lunte, fuld mana og en tom brønd.',
+  'Langsom server presser creepet tættere på fæstningen.',
+  'Rød LED på en slot = det spil er game over.',
+  'Attract mode scanner alle fem — hver 15. sekund en ny runde.',
 ]
+
+const SCENE_TAG: Record<string, Record<CheckState, string>> = {
+  bomberman: { idle: 'WAIT', checking: 'PLANT…', ok: 'FUSE', down: 'BOOM' },
+  wizard: { idle: 'WAIT', checking: 'CAST…', ok: 'DUEL', down: 'KO' },
+  tetris: { idle: 'WAIT', checking: 'DROP…', ok: 'STACK', down: 'TOP OUT' },
+  pong: { idle: 'WAIT', checking: 'SERVE…', ok: 'RALLY', down: 'OUT' },
+  tower: { idle: 'WAIT', checking: 'WAVE…', ok: 'HOLD', down: 'BREACH' },
+}
 
 function formatTime(d: Date | null): string {
   if (!d) return '—'
@@ -151,25 +160,142 @@ function overallFrom(results: ServiceResult[], checking: boolean): Overall {
 
 const BANNER: Record<Overall, { label: string; sub: string; className: string }> = {
   go: {
-    label: 'RALLY ON',
-    sub: 'Alle lanes returnerer bolden',
+    label: 'INSERT COIN',
+    sub: 'Alle cartridges svarer — vælg et spil',
     className: 'banner-go',
   },
   degraded: {
-    label: 'EDGE BALL',
-    sub: 'En lane missede — hold fokus',
+    label: 'CONTINUE?',
+    sub: 'En cartridge er nede — de andre kører',
     className: 'banner-degraded',
   },
   down: {
-    label: 'OUT OF BOUNDS',
-    sub: 'Ingen pong — bolden er ude',
+    label: 'GAME OVER',
+    sub: 'Ingen spil svarer — maskinen er stille',
     className: 'banner-down',
   },
   boot: {
-    label: 'SERVE…',
-    sub: 'Ping på vej over banen',
+    label: 'BOOT…',
+    sub: 'Attract mode starter — scanning af slots',
     className: 'banner-boot',
   },
+}
+
+function threatOf(state: CheckState, ms: number | null): number {
+  if (state === 'down') return 100
+  if (state === 'idle') return 8
+  if (state === 'checking') return 46
+  return latencyPct(ms)
+}
+
+function GameScene({
+  id,
+  state,
+  latencyMs,
+}: {
+  id: string
+  state: CheckState
+  latencyMs: number | null
+}) {
+  const threat = threatOf(state, latencyMs)
+  const rally = `${(0.42 + (threat / 100) * 1.15).toFixed(2)}s`
+  const style = { '--threat': threat, '--rally': rally } as CSSProperties
+
+  return (
+    <div className={`game-scene scene-${id} state-${state}`} style={style} aria-hidden="true">
+      <span className="scene-tag">{SCENE_TAG[id]?.[state] ?? '—'}</span>
+      {id === 'bomberman' ? <BomberScene /> : null}
+      {id === 'wizard' ? <WizardScene /> : null}
+      {id === 'tetris' ? <TetrisScene threat={threat} state={state} /> : null}
+      {id === 'pong' ? <PongScene /> : null}
+      {id === 'tower' ? <TowerScene /> : null}
+    </div>
+  )
+}
+
+function BomberScene() {
+  return (
+    <>
+      <i className="brick br1" />
+      <i className="brick br2" />
+      <i className="brick br3" />
+      <i className="brick br4" />
+      <i className="brick br5" />
+      <i className="bomber" />
+      <i className="bomb">
+        <i className="fuse" />
+      </i>
+      <i className="boom" />
+    </>
+  )
+}
+
+function WizardScene() {
+  return (
+    <>
+      <i className="wiz player" />
+      <i className="spell" />
+      <i className="wiz foe" />
+      <span className="ko-stamp">KO</span>
+      <i className="mana">
+        <i className="mana-fill" />
+      </i>
+    </>
+  )
+}
+
+function TetrisScene({ threat, state }: { threat: number; state: CheckState }) {
+  const cols = 8
+  const rows = 4
+  const fillRows =
+    state === 'down' ? rows : state === 'idle' ? 0 : Math.max(1, Math.round((threat / 100) * rows))
+  const colors = ['#a855f7', '#22d3ee', '#facc15', '#fb7185', '#34d399']
+  const cells = []
+  for (let r = 0; r < rows; r++) {
+    const fromBottom = rows - 1 - r
+    const filled = fromBottom < fillRows
+    for (let c = 0; c < cols; c++) {
+      const gap = filled && (r + c) % 5 === 0
+      const on = filled && !gap
+      cells.push(
+        <i
+          key={`${r}-${c}`}
+          className={on ? 'tet filled' : 'tet'}
+          style={on ? { background: colors[(r * 3 + c) % colors.length] } : undefined}
+        />,
+      )
+    }
+  }
+  return (
+    <>
+      <div className="well">{cells}</div>
+      {state === 'checking' ? <i className="falling-piece" /> : null}
+      {state === 'down' ? <span className="over-stamp">GAME OVER</span> : null}
+    </>
+  )
+}
+
+function PongScene() {
+  return (
+    <>
+      <i className="mini-net" />
+      <i className="mini-pad left" />
+      <i className="mini-pad right" />
+      <i className="mini-ball" />
+    </>
+  )
+}
+
+function TowerScene() {
+  return (
+    <>
+      <i className="td-path" />
+      <i className="td-tower" />
+      <i className="td-bolt" />
+      <i className="td-fort" />
+      <i className="td-creep" />
+    </>
+  )
 }
 
 export default function Status() {
@@ -354,8 +480,8 @@ export default function Status() {
       </div>
 
       <header className="pong-header">
-        <p className="blink-line status-blink">TABLE TENNIS HEALTH</p>
-        <h1 className="title-pixel status-title">STATUS PONG</h1>
+        <p className="blink-line status-blink">ATTRACT MODE</p>
+        <h1 className="title-pixel status-title">ARCADE STATUS</h1>
         <p className="status-lede">{FUN_LINES[funIx]}</p>
       </header>
 
@@ -388,7 +514,7 @@ export default function Status() {
             <em>{downCount}</em> MISS
           </span>
           <span>
-            <em>{SERVICES.length}</em> LANES
+            <em>{SERVICES.length}</em> SLOTS
           </span>
         </div>
       </div>
@@ -400,14 +526,14 @@ export default function Status() {
           onClick={() => void runChecks()}
           disabled={checking}
         >
-          {checking ? 'RALLY…' : 'SERVE / PING'}
+          {checking ? 'SCAN…' : 'SCAN SLOTS'}
         </button>
         <div className="status-countdown" aria-label={`Næste tjek om ${nextInSec} sekunder`}>
           <div className="countdown-track">
             <div className="countdown-fill" style={{ width: `${countdownPct}%` }} />
           </div>
           <span className="status-auto">
-            {checking ? 'Bolden er i spil…' : `Auto-serve ${nextInSec}s`}
+            {checking ? 'Attract mode…' : `Næste scan ${nextInSec}s`}
           </span>
         </div>
       </div>
@@ -415,14 +541,7 @@ export default function Status() {
       <ul className="status-grid">
         {SERVICES.map((svc, i) => {
           const r = results[svc.id]
-          const stateLabel =
-            r.state === 'checking'
-              ? 'PING…'
-              : r.state === 'ok'
-                ? 'PONG'
-                : r.state === 'down'
-                  ? 'MISS'
-                  : '—'
+          const stateLabel = SCENE_TAG[svc.id]?.[r.state] ?? '—'
           const rowClass =
             r.state === 'ok'
               ? 'row-ok'
@@ -460,6 +579,8 @@ export default function Status() {
                 </div>
                 <span className={`status-pill pill-${r.state}`}>{stateLabel}</span>
               </div>
+
+              <GameScene id={svc.id} state={r.state} latencyMs={r.latencyMs} />
 
               <div className="latency-block">
                 <div className="latency-top">
@@ -509,7 +630,9 @@ export default function Status() {
         })}
       </ul>
 
-      <p className="pong-footer hint-pixel">SERVE = SCAN · PING → PONG · HURTIG RTT = BONUS POINT</p>
+      <p className="pong-footer hint-pixel">
+        SCAN = ATTRACT · HURTIG RTT = LANG LUNTE · RØD LED = GAME OVER
+      </p>
     </div>
   )
 }
