@@ -13,9 +13,12 @@ const CARRIER_DOC =
   'https://docs.arduino.cc/tutorials/mkr-iot-carrier/mkr-iot-carrier-01-technical-reference/'
 const CARRIER_IMG = '/mkr-iot-carrier-pads.png'
 
-const SETUP_SNIPPET = `// Games-repo: arduino/MercantecGamesController/config.h
-#define WIFI_SSID      "DIT_WIFI"
-#define WIFI_PASS      "DIT_PASSWORD"
+const SETUP_SNIPPET = `// Games-repo: arduino/GameController/
+// secrets.h (gitignored) — kopiér secrets.h.example
+#define SECRET_SSID       "DIT_WIFI"
+#define SECRET_PASS       "DIT_PASSWORD"
+
+// config.h — spilvalg (WiFi kommer fra secrets.h)
 #define SERVER_HOST    "games.mercantec.tech"
 #define PLAYER_NAME    "Arduino"
 #define GAME_PIN       "1234"   // Bomberman/Tetris/Pong. Wizard: ""
@@ -28,8 +31,8 @@ const SETUP_SNIPPET = `// Games-repo: arduino/MercantecGamesController/config.h
 // Skift til GAME_MODE_WIZARD, GAME_MODE_TETRIS eller GAME_MODE_PONG.
 
 #define USE_HTTPS      1
-// MercantecGamesController.ino inkluderer config.h
-// og sætter GAME_BASE_PATH + SERVER_PORT automatisk.`
+// PlatformIO: pio run -t upload
+// GAME_BASE_PATH + SERVER_PORT sættes automatisk.`
 
 const JOIN_SNIPPET = `bool doJoin() {
   String path = apiPath("/api/controller/join");
@@ -108,20 +111,20 @@ const QUICK_STAGES: Stage[] = [
 ]
 
 const CHECK_ITEMS = [
-  'WIFI_SSID / WIFI_PASS sat i config.h',
+  'secrets.h udfyldt (kopi af secrets.h.example) — ikke i git',
   'SERVER_HOST = games.mercantec.tech, USE_HTTPS = 1',
   'GAME_MODE matcher spillet (Bomberman / Wizard / Tetris / Pong)',
   'Bomberman / Tetris / Pong: gyldig GAME_PIN fra lobby',
   'Root-cert uploadet til MKR WiFi 1010',
-  'Biblioteker: Carrier, WiFiNINA, HttpClient',
+  'PlatformIO lib_deps: Carrier, WiFiNINA, HttpClient',
   'Bomberman pad: HTTP eller MQTT (PAD_TRANSPORT) — øvrige spil kun HTTP',
   'Serial Monitor 115200 — join OK + playerId',
 ]
 
 const QUICK_CHECKS = [
-  'MercantecGamesController + config.h klar',
+  'GameController + secrets.h + config.h klar',
   'WiFi + GAME_MODE sat',
-  'Sketch uploaded + Serial join OK',
+  'pio upload + Serial join OK',
   'Arena åbnet i browser',
 ]
 
@@ -351,7 +354,7 @@ export default function Guide() {
                     <h3>BOMBERMAN</h3>
                   </div>
                   <ol>
-                    <li>Admin opretter lobby (PIN)</li>
+                    <li>Admin opretter lobby (PIN, max 4)</li>
                     <li>Arduino joiner med samme PIN</li>
                     <li>Start spil i browseren</li>
                     <li>Bomber — sidste overlevende vinder</li>
@@ -375,7 +378,7 @@ export default function Guide() {
                     <h3>TETRIS</h3>
                   </div>
                   <ol>
-                    <li>Lobby med PIN (<code>GAME_BASE_PATH=/Tetris</code>)</li>
+                    <li>Lobby med PIN (max 4, <code>GAME_BASE_PATH=/Tetris</code>)</li>
                     <li>Arduino joiner med samme PIN</li>
                     <li>Battle — send garbage lines til modstandere</li>
                     <li>Pads: venstre/højre/ned, rotate, hard drop</li>
@@ -449,16 +452,15 @@ export default function Guide() {
             <h2>Sketch-setup</h2>
           </div>
           <p>
-            Klon eller download{' '}
-            <code>arduino/MercantecGamesController/</code> fra Mercantec Games-repoet. Rediger kun{' '}
-            <code>config.h</code> — skift <code>GAME_MODE</code>
+            Åbn{' '}
+            <code>arduino/GameController/</code> (PlatformIO) fra Mercantec Games-repoet. Udfyld{' '}
+            <code>secrets.h</code> (WiFi), rediger <code>config.h</code> — skift <code>GAME_MODE</code>
             {track === 'full'
               ? ', Bomberman/Tetris/Pong-PIN og GAME_MODE_PONG.'
               : '.'}{' '}
-            Upload{' '}
-            <code>MercantecGamesController.ino</code>.
+            Upload med <code>pio run -t upload</code>.
           </p>
-          <InoCode code={SETUP_SNIPPET} filename="config.h" />
+          <InoCode code={SETUP_SNIPPET} filename="secrets.h + config.h" />
         </section>
 
         {track === 'full' && (
@@ -871,8 +873,8 @@ export default function Guide() {
           {track === 'full' && (
             <p className="guide-outro">
               Fælles starter-kit: Games-repo{' '}
-              <code>arduino/MercantecGamesController/</code> (config.h + GAME_MODE). Ældre{' '}
-              <code>iot/</code> og <code>ArduinoKode/</code> er legacy.
+              <code>arduino/GameController/</code> (PlatformIO: secrets.h + config.h / GAME_MODE).
+              Ældre <code>iot/</code> og <code>ArduinoKode/</code> er legacy.
             </p>
           )}
           <div className="guide-end">

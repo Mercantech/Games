@@ -34,7 +34,7 @@ const CARTS: CartDef[] = [
       loading: 'eager',
     },
     blurb: 'Læg bomber, saml power-ups og spræng vennerne af banen i klassisk multiplayer.',
-    details: ['PIN-lobby', 'Op til flere spillere', 'Arduino-pad: WASD + bomb'],
+    details: ['PIN-lobby', 'Op til 4 spillere', 'Arduino-pad: WASD + bomb'],
   },
   {
     id: 'wizard',

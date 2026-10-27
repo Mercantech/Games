@@ -39,13 +39,13 @@ const GAMES: GameManual[] = [
     href: '/Bomberman/',
     thumb: '/bomberman-nes.jpg',
     thumbAlt: 'Bomberman — maze med mursten og bomber',
-    players: '2–8',
+    players: '2–4',
     time: '3–8 min',
     idea: 'I deler én maze. Bløde mursten kan sprænges. Faste søjler kan ikke. En bombe eksploderer i et kors — og den rammer også dig.',
     win: 'Sidste spiller i live vinder. Dør alle i samme blast, er der ingen vinder.',
     flow: [
       { n: '01', title: 'PIN', text: 'Admin opretter lobby og bane. Del PIN med holdet.' },
-      { n: '02', title: 'JOIN', text: 'Alle joiner. Når I er klar: Start spil.' },
+      { n: '02', title: 'JOIN', text: 'Op til 4 spillere joiner. Når I er klar: Start spil.' },
       { n: '03', title: 'BLAST', text: 'Læg bomber, hent power-ups, vær den sidste tilbage.' },
     ],
     keys: [
