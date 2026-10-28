@@ -358,6 +358,11 @@
   color: #fff;
 }
 
+.heat header strong .heat-size {
+  font-style: normal;
+  color: var(--nes-lcd-dim);
+}
+
 .heat header span {
   font-size: 1rem;
   color: var(--nes-lcd-dim);

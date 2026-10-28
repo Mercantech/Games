@@ -3,7 +3,7 @@ services:
     build:
       context: .
       args:
-        CACHEBUST: ${CACHEBUST:-20261028-bracket}
+        CACHEBUST: ${CACHEBUST:-20261028-bracket-3-4}
     restart: unless-stopped
     networks:
       - dokploy-network

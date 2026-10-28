@@ -122,7 +122,7 @@ export default function Bracket() {
           <p className="bracket-kicker">TURNERING · BOMBERMAN</p>
           <h1>BRACKET</h1>
           <p className="bracket-lede">
-            Indtast elevnavne, vælg om 1 eller 2 går videre pr. heat (4 spillere), og kør manuelt frem til en finale med 4.
+            Indtast elevnavne, vælg 1 eller 2 vindere pr. heat. Ulige hold fordeles i heats à 3 og 4, så alle er med — også i næste runde. Finale med op til 4.
           </p>
         </header>
 
@@ -221,7 +221,9 @@ export default function Bracket() {
         <aside className="bracket-side">
           <section className="bracket-card">
             <h2>Pool ({t.pool.length})</h2>
-            <p className="bracket-hint">Klik navn, derefter et tomt slot — eller giv bye.</p>
+            <p className="bracket-hint">
+              Normalt tom (alle i heats). Højreklik en spiller for at flytte hertil — klik så et tomt slot.
+            </p>
             {t.pool.length === 0 ? (
               <p className="bracket-empty">Tom</p>
             ) : (
@@ -328,7 +330,10 @@ export default function Bracket() {
                         className={`heat ${m.status} ${m.isFinal ? 'final' : ''}`}
                       >
                         <header>
-                          <strong>{m.label}</strong>
+                          <strong>
+                            {m.label}
+                            <em className="heat-size"> · {m.playerIds.length}p</em>
+                          </strong>
                           <span>
                             {m.status === 'done'
                               ? 'FÆRDIG'
@@ -411,7 +416,7 @@ export default function Bracket() {
       </div>
 
       <footer className="bracket-foot">
-        Gemmes lokalt i browseren · 4 pr. heat · finale med op til 4 · åbn Bomberman i anden fane med PIN
+        Gemmes lokalt · heats à 3–4 (alle med) · finale op til 4 · åbn Bomberman i anden fane med PIN
       </footer>
     </div>
   )

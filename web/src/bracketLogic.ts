@@ -28,12 +28,68 @@ export type Tournament = {
 }
 
 export const STORAGE_KEY = 'mercantec-games-bracket-v1'
-export const PLAYERS_PER_MATCH = 4
+export const MAX_PER_HEAT = 4
+export const MIN_PER_HEAT = 3
+/** @deprecated brug MAX_PER_HEAT — beholdt for evt. gammel kode */
+export const PLAYERS_PER_MATCH = MAX_PER_HEAT
 
 let idSeq = 0
 export function uid(prefix = 'id'): string {
   idSeq += 1
   return `${prefix}_${Date.now().toString(36)}_${idSeq}`
+}
+
+/**
+ * Fordel n spillere i heats à 3 eller 4 (helst flest 4'ere).
+ * Små n: ét heat med 2–4. Kun ved n=5: 3+2.
+ * Eks. 21 → [4,4,4,3,3,3]
+ */
+export function heatSizes(n: number): number[] {
+  if (n <= 0) return []
+  if (n <= MAX_PER_HEAT) return [n]
+
+  let fours = Math.floor(n / MAX_PER_HEAT)
+  const rem = n % MAX_PER_HEAT
+
+  if (rem === 0) return Array.from({ length: fours }, () => 4)
+  if (rem === 3) return [...Array.from({ length: fours }, () => 4), 3]
+  if (rem === 2) {
+    // 4a+2 → (a-1)×4 + 3+3
+    if (fours >= 1) return [...Array.from({ length: fours - 1 }, () => 4), 3, 3]
+    return [2] // n=2 allerede fanget
+  }
+  // rem === 1: 4a+1 → (a-2)×4 + 3+3+3  (kræver a≥2), ellers n=5 → 3+2
+  if (fours >= 2) return [...Array.from({ length: fours - 2 }, () => 4), 3, 3, 3]
+  if (fours === 1) return [3, 2] // n=5
+  return [1]
+}
+
+/** Chunk spillere efter heatSizes — alle kommer med, pool tom. */
+export function chunkIntoHeats(playerIds: string[]): string[][] {
+  const sizes = heatSizes(playerIds.length)
+  const groups: string[][] = []
+  let i = 0
+  for (const size of sizes) {
+    groups.push(playerIds.slice(i, i + size))
+    i += size
+  }
+  return groups
+}
+
+function makeHeats(
+  playerIds: string[],
+  round: number,
+  labelPrefix: string,
+): Match[] {
+  return chunkIntoHeats(playerIds).map((group, idx) => ({
+    id: uid('m'),
+    round,
+    label: `${labelPrefix}${idx + 1}`,
+    playerIds: [...group],
+    winnerIds: [],
+    status: 'open' as const,
+    isFinal: false,
+  }))
 }
 
 export function parseNames(raw: string): string[] {
@@ -101,7 +157,7 @@ export function nameOf(t: Tournament, id: string | null | undefined): string {
   return t.players.find((p) => p.id === id)?.name ?? '?'
 }
 
-/** Opret turnering fra navneliste. Leftovers (ikke deleligt med 4) går i pool. */
+/** Opret turnering — alle i heats à 3–4 (ingen leftover-pool). */
 export function startTournament(
   names: string[],
   winnersPerHeat: 1 | 2,
@@ -109,38 +165,25 @@ export function startTournament(
 ): Tournament {
   const players: Player[] = names.map((name) => ({ id: uid('p'), name }))
   const shuffled = shuffle(players.map((p) => p.id))
-  const matches: Match[] = []
-  let i = 0
-  let heat = 1
-  while (i + PLAYERS_PER_MATCH <= shuffled.length) {
-    const slice = shuffled.slice(i, i + PLAYERS_PER_MATCH)
-    matches.push({
-      id: uid('m'),
-      round: 1,
-      label: `Heat ${heat}`,
-      playerIds: [...slice],
-      winnerIds: [],
-      status: 'open',
-      isFinal: false,
-    })
-    heat += 1
-    i += PLAYERS_PER_MATCH
-  }
-  const pool = shuffled.slice(i)
+  const matches = makeHeats(shuffled, 1, 'Heat ')
   return emptyTournament({
     title,
     players,
     winnersPerHeat,
     matches,
-    pool,
+    pool: [],
     advancing: [],
     phase: 'running',
     championId: null,
   })
 }
 
+/** Antal vindere for heat: max 1 i finale; ellers min(mode, filled-1) så mindst én ryger ud. */
 export function requiredWinners(match: Match, winnersPerHeat: 1 | 2): number {
-  return match.isFinal ? 1 : winnersPerHeat
+  if (match.isFinal) return 1
+  const filled = match.playerIds.filter(Boolean).length
+  if (filled < 2) return 1
+  return Math.min(winnersPerHeat, filled - 1)
 }
 
 export function toggleWinner(match: Match, playerId: string, maxWinners: number): Match {
@@ -187,7 +230,7 @@ export function confirmMatch(t: Tournament, matchId: string): Tournament {
 export function seatPlayer(t: Tournament, matchId: string, slot: number, playerId: string): Tournament {
   if (!t.pool.includes(playerId)) return t
   const match = t.matches.find((m) => m.id === matchId)
-  if (!match || match.status === 'done' || slot < 0 || slot > 3) return t
+  if (!match || match.status === 'done' || slot < 0 || slot >= match.playerIds.length) return t
   if (match.playerIds[slot]) return t
 
   const playerIds = [...match.playerIds] as (string | null)[]
@@ -218,14 +261,15 @@ export function unseatPlayer(t: Tournament, matchId: string, slot: number): Tour
   }
 }
 
-export function addEmptyHeat(t: Tournament, round: number): Tournament {
+export function addEmptyHeat(t: Tournament, round: number, seats = MAX_PER_HEAT): Tournament {
   const openInRound = t.matches.filter((m) => m.round === round && !m.isFinal)
   const n = openInRound.length + 1
+  const size = Math.min(MAX_PER_HEAT, Math.max(MIN_PER_HEAT, seats))
   const match: Match = {
     id: uid('m'),
     round,
     label: `Heat ${n}`,
-    playerIds: [null, null, null, null],
+    playerIds: Array.from({ length: size }, () => null),
     winnerIds: [],
     status: 'open',
     isFinal: false,
@@ -239,7 +283,7 @@ export function autofillRound(t: Tournament, round: number): Tournament {
   const matches = t.matches.map((m) => {
     if (m.round !== round || m.status === 'done' || m.isFinal) return m
     const playerIds = [...m.playerIds] as (string | null)[]
-    for (let s = 0; s < 4; s += 1) {
+    for (let s = 0; s < playerIds.length; s += 1) {
       if (!playerIds[s] && pool.length) {
         playerIds[s] = pool.shift()!
       }
@@ -275,19 +319,13 @@ export function buildNextRound(t: Tournament): Tournament {
   const entrants = shuffle([...t.advancing, ...t.pool])
   const nextRound = currentRoundNumber(t) + 1
 
-  // Finale: præcis 4 (eller færre hvis turneringen er lille)
-  if (entrants.length <= PLAYERS_PER_MATCH) {
-    const playerIds: (string | null)[] = [
-      entrants[0] ?? null,
-      entrants[1] ?? null,
-      entrants[2] ?? null,
-      entrants[3] ?? null,
-    ]
+  // Finale når alle der er videre kan være i ét heat (≤4)
+  if (entrants.length <= MAX_PER_HEAT) {
     const finalMatch: Match = {
       id: uid('m'),
       round: nextRound,
       label: 'Finale',
-      playerIds,
+      playerIds: [...entrants],
       winnerIds: [],
       status: 'open',
       isFinal: true,
@@ -300,28 +338,11 @@ export function buildNextRound(t: Tournament): Tournament {
     }
   }
 
-  const matches: Match[] = []
-  let i = 0
-  let heat = 1
-  while (i + PLAYERS_PER_MATCH <= entrants.length) {
-    matches.push({
-      id: uid('m'),
-      round: nextRound,
-      label: `R${nextRound} Heat ${heat}`,
-      playerIds: entrants.slice(i, i + PLAYERS_PER_MATCH),
-      winnerIds: [],
-      status: 'open',
-      isFinal: false,
-    })
-    heat += 1
-    i += PLAYERS_PER_MATCH
-  }
-  const leftover = entrants.slice(i)
-
+  const matches = makeHeats(entrants, nextRound, `R${nextRound} Heat `)
   return {
     ...t,
     matches: [...t.matches, ...matches],
-    pool: leftover,
+    pool: [],
     advancing: [],
   }
 }
@@ -356,12 +377,21 @@ export function roundsPresent(t: Tournament): number[] {
 
 export function suggestedHeatCount(playerCount: number, winnersPerHeat: 1 | 2): string {
   if (playerCount < 2) return 'Tilføj mindst 2 navne'
-  const heats = Math.floor(playerCount / PLAYERS_PER_MATCH)
-  const rem = playerCount % PLAYERS_PER_MATCH
-  const advance = heats * winnersPerHeat + rem
-  let tip = `${heats} heat${heats === 1 ? '' : 's'} à 4`
-  if (rem) tip += ` · ${rem} venter / bye`
-  tip += ` · ca. ${advance} videre pr. runde`
-  if (advance === 4) tip += ' → direkte finale'
+  const sizes = heatSizes(playerCount)
+  const fours = sizes.filter((s) => s === 4).length
+  const threes = sizes.filter((s) => s === 3).length
+  const twos = sizes.filter((s) => s === 2).length
+  const parts: string[] = []
+  if (fours) parts.push(`${fours}×4`)
+  if (threes) parts.push(`${threes}×3`)
+  if (twos) parts.push(`${twos}×2`)
+  // Ca. videre: hvert heat giver min(winnersPerHeat, size-1)
+  const advance = sizes.reduce(
+    (sum, size) => sum + Math.min(winnersPerHeat, Math.max(1, size - 1)),
+    0,
+  )
+  let tip = `${sizes.length} heat${sizes.length === 1 ? '' : 's'} (${parts.join(' + ')}) · alle med`
+  tip += ` · ca. ${advance} videre`
+  if (advance <= MAX_PER_HEAT) tip += ' → derefter finale'
   return tip
 }
