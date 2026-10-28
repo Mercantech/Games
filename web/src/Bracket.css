@@ -1,0 +1,440 @@
+.bracket {
+  padding: 0.35rem 0.15rem 1rem;
+  text-align: left;
+  color: var(--nes-cream);
+}
+
+.bracket-hero {
+  margin-bottom: 1rem;
+}
+
+.bracket-hero.running {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+}
+
+.bracket-kicker {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-pixel);
+  font-size: 0.48rem;
+  letter-spacing: 0.14em;
+  color: var(--nes-lcd);
+}
+
+.bracket-hero h1 {
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-size: clamp(0.75rem, 2.4vw, 1.05rem);
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+  color: #fff;
+  text-shadow: 3px 3px 0 #000, -1px 0 0 var(--nes-red);
+}
+
+.bracket-lede {
+  margin: 0.55rem 0 0;
+  max-width: 52ch;
+  color: var(--nes-lcd-dim);
+  font-size: 1.15rem;
+  line-height: 1.25;
+}
+
+.bracket-champ {
+  margin: 0.55rem 0 0;
+  font-family: var(--font-pixel);
+  font-size: 0.62rem;
+  color: #ffe566;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.bracket-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.bracket-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 0.9rem;
+  background: rgba(0, 0, 0, 0.35);
+  border: 3px solid #000;
+  box-shadow: 4px 4px 0 #000;
+}
+
+.bracket-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.bracket-field span,
+.bracket-mode legend {
+  font-family: var(--font-pixel);
+  font-size: 0.45rem;
+  letter-spacing: 0.08em;
+  color: var(--nes-lcd);
+}
+
+.bracket-field input,
+.bracket-field textarea {
+  width: 100%;
+  font: inherit;
+  font-size: 1.2rem;
+  color: var(--nes-cream);
+  background: #0a1a0a;
+  border: 2px solid #000;
+  padding: 0.55rem 0.65rem;
+  box-shadow: inset 2px 2px 0 #000;
+  resize: vertical;
+}
+
+.bracket-field textarea {
+  min-height: 12rem;
+  line-height: 1.3;
+}
+
+.bracket-mode {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .bracket-mode {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.bracket-mode label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.65rem 0.7rem;
+  border: 2px solid #000;
+  background: #1a1a1a;
+  cursor: pointer;
+}
+
+.bracket-mode label.on {
+  background: rgba(155, 188, 15, 0.12);
+  outline: 2px solid var(--nes-lcd);
+}
+
+.bracket-mode input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bracket-mode strong {
+  font-family: var(--font-pixel);
+  font-size: 0.5rem;
+  color: #fff;
+}
+
+.bracket-mode em {
+  font-style: normal;
+  color: var(--nes-lcd-dim);
+  font-size: 1.05rem;
+}
+
+.bracket-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  font-size: 1.1rem;
+  color: var(--nes-lcd-dim);
+}
+
+.bracket-flash {
+  margin: 0 0 0.65rem;
+  padding: 0.45rem 0.6rem;
+  font-family: var(--font-pixel);
+  font-size: 0.45rem;
+  letter-spacing: 0.06em;
+  color: #111;
+  background: var(--nes-lcd);
+  border: 2px solid #000;
+}
+
+.bracket-actions,
+.bracket-side-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.btn-primary,
+.btn-ghost,
+.btn-danger {
+  font-family: var(--font-pixel);
+  font-size: 0.48rem;
+  letter-spacing: 0.04em;
+  padding: 0.65rem 0.8rem;
+  border: 2px solid #000;
+  cursor: pointer;
+  color: #111;
+}
+
+.btn-primary {
+  background: var(--nes-lcd);
+  box-shadow: 3px 3px 0 #000;
+}
+
+.btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-primary.wide {
+  width: 100%;
+  margin-top: 0.55rem;
+}
+
+.btn-ghost {
+  background: var(--nes-plastic);
+  color: #222;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.btn-danger {
+  background: var(--nes-red);
+  color: #fff;
+}
+
+.bracket-board {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 900px) {
+  .bracket-board {
+    grid-template-columns: minmax(220px, 280px) 1fr;
+    align-items: start;
+  }
+}
+
+.bracket-side {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.bracket-card {
+  padding: 0.7rem;
+  background: rgba(0, 0, 0, 0.35);
+  border: 3px solid #000;
+  box-shadow: 4px 4px 0 #000;
+}
+
+.bracket-card h2,
+.bracket-round > h2 {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-pixel);
+  font-size: 0.52rem;
+  letter-spacing: 0.06em;
+  color: #fff;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.bracket-round > h2 span,
+.bracket-card h2 span {
+  color: var(--nes-lcd-dim);
+  font-size: 0.45rem;
+}
+
+.bracket-hint {
+  margin: 0 0 0.55rem;
+  font-size: 1.05rem;
+  color: var(--nes-lcd-dim);
+  line-height: 1.2;
+}
+
+.bracket-empty {
+  margin: 0;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.name-chips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.name-chips li {
+  display: flex;
+  gap: 0.3rem;
+  align-items: stretch;
+}
+
+.chip,
+.chip-bye {
+  font: inherit;
+  font-size: 1.15rem;
+  border: 2px solid #000;
+  cursor: pointer;
+  padding: 0.25rem 0.45rem;
+  line-height: 1.15;
+}
+
+.chip {
+  flex: 1;
+  text-align: left;
+  background: #1f3a1f;
+  color: var(--nes-cream);
+}
+
+.chip.pick {
+  background: var(--nes-lcd);
+  color: #111;
+}
+
+.chip.static {
+  cursor: default;
+  background: #243024;
+}
+
+.chip-bye {
+  font-family: var(--font-pixel);
+  font-size: 0.38rem;
+  letter-spacing: 0.04em;
+  background: #333;
+  color: #ccc;
+}
+
+.heat-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+.heat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.65rem;
+  background: linear-gradient(180deg, #3a1212, #1a0808);
+  border: 3px solid #000;
+  box-shadow: 4px 4px 0 #000;
+}
+
+.heat.final {
+  background: linear-gradient(180deg, #3a3010, #1a1608);
+  outline: 2px solid #ffe566;
+}
+
+.heat.done {
+  opacity: 0.92;
+  filter: saturate(0.85);
+}
+
+.heat header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.4rem;
+  align-items: baseline;
+}
+
+.heat header strong {
+  font-family: var(--font-pixel);
+  font-size: 0.45rem;
+  color: #fff;
+}
+
+.heat header span {
+  font-size: 1rem;
+  color: var(--nes-lcd-dim);
+}
+
+.heat ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.seat {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  text-align: left;
+  font: inherit;
+  font-size: 1.2rem;
+  padding: 0.35rem 0.45rem;
+  border: 2px solid #000;
+  background: #0f380f;
+  color: var(--nes-cream);
+  cursor: pointer;
+}
+
+.seat em {
+  font-style: normal;
+  font-family: var(--font-pixel);
+  font-size: 0.4rem;
+  color: var(--nes-lcd-dim);
+  width: 0.9rem;
+}
+
+.seat.winner {
+  background: var(--nes-lcd);
+  color: #111;
+}
+
+.seat.winner .crown {
+  margin-left: auto;
+  color: #7a5a00;
+}
+
+.seat.out {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+
+.seat.empty {
+  background: #111;
+  color: #666;
+  border-style: dashed;
+}
+
+.seat.empty.pickable {
+  color: var(--nes-lcd);
+  border-color: var(--nes-lcd);
+}
+
+.heat-winners {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--nes-lcd);
+}
+
+.bracket-rounds {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.bracket-foot {
+  margin-top: 1.1rem;
+  font-size: 1.05rem;
+  color: #666;
+}

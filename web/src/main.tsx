@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import App from './App.tsx'
+import Bracket from './Bracket.tsx'
 import Guide from './Guide.tsx'
 import Home from './Home.tsx'
 import Manual from './Manual.tsx'
@@ -17,6 +18,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="guide" element={<Guide />} />
           <Route path="manual" element={<Manual />} />
           <Route path="manual/:game" element={<Manual />} />
+          <Route path="bracket" element={<Bracket />} />
           <Route path="status" element={<Status />} />
         </Route>
       </Routes>
