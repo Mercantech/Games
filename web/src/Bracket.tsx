@@ -416,7 +416,7 @@ export default function Bracket() {
       </div>
 
       <footer className="bracket-foot">
-        Gemmes lokalt · heats à 3–4 (alle med) · finale op til 4 · åbn Bomberman i anden fane med PIN
+        Bracket v2 · heats à 3–4 (alle med) · finale op til 4 · gemmes lokalt · Bomberman i anden fane
       </footer>
     </div>
   )

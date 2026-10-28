@@ -27,7 +27,8 @@ export type Tournament = {
   updatedAt: string
 }
 
-export const STORAGE_KEY = 'mercantec-games-bracket-v1'
+/** v2: heats à 3–4 (alle med). Gammel v1-state ignoreres. */
+export const STORAGE_KEY = 'mercantec-games-bracket-v2'
 export const MAX_PER_HEAT = 4
 export const MIN_PER_HEAT = 3
 /** @deprecated brug MAX_PER_HEAT — beholdt for evt. gammel kode */
@@ -133,6 +134,8 @@ export function emptyTournament(partial?: Partial<Tournament>): Tournament {
 
 export function loadTournament(): Tournament | null {
   try {
+    // Drop forældet v1 (leftover-pool / kun-4-heats)
+    localStorage.removeItem('mercantec-games-bracket-v1')
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return null
     const data = JSON.parse(raw) as Tournament
